@@ -20,4 +20,58 @@
   .button-hover {
     @apply transition-all duration-200 hover:translate-y-[-2px];
   }
+
+  .radio-label {
+    @apply transition-colors duration-200;
+  }
+
+  .radio-group-item {
+    @apply transition-all duration-200 data-[state=checked]:scale-105;
+  }
+
+  .progress-bar {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  .card-answer {
+    @apply transition-all duration-300 hover:bg-muted/50;
+  }
+
+  .quiz-card {
+    @apply transition-all duration-300 hover:translate-y-[-1px];
+  }
+
+  .explanation-panel {
+    @apply transition-all duration-300 ease-in-out;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
 }

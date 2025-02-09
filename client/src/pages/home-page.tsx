@@ -148,27 +148,36 @@ export default function HomePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress value={progress} className="mb-2" />
-            <p className="text-sm text-muted-foreground">
+            <Progress value={progress} className="mb-2 progress-bar" />
+            <p className="text-sm text-muted-foreground slide-up">
               {answeredQuestions.size} of {questions?.length || 0} questions answered
             </p>
           </CardContent>
         </Card>
 
         <div className="space-y-4 sm:space-y-6">
-          {questions?.map((question) => {
+          {questions?.map((question, index) => {
             const isAnswered = answeredQuestions.has(question.id);
             const userAnswer = answers?.find(a => a.questionId === question.id)?.answer;
             const isCorrect = userAnswer === question.correctAnswer;
 
             return (
-              <Card key={question.id} className="card">
+              <Card 
+                key={question.id} 
+                className={cn(
+                  "quiz-card",
+                  submitted ? "slide-down" : ""
+                )}
+                style={{ 
+                  animationDelay: `${index * 150}ms`,
+                }}
+              >
                 <CardHeader>
                   <CardTitle className="text-xl flex items-start gap-2">
                     {submitted && (
                       isCorrect ? 
-                        <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1" /> :
-                        <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
+                        <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1 slide-down" /> :
+                        <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1 slide-down" />
                     )}
                     <span>{question.question}</span>
                   </CardTitle>
@@ -186,12 +195,16 @@ export default function HomePage() {
                     className="space-y-3"
                   >
                     {question.options.map((option) => (
-                      <div key={option} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option} id={`${question.id}-${option}`} />
+                      <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                        <RadioGroupItem 
+                          value={option} 
+                          id={`${question.id}-${option}`}
+                          className="radio-group-item"
+                        />
                         <Label 
                           htmlFor={`${question.id}-${option}`}
                           className={cn(
-                            "transition-colors duration-200",
+                            "radio-label cursor-pointer",
                             submitted && option === question.correctAnswer && "text-green-600 font-semibold",
                             submitted && option === userAnswer && option !== question.correctAnswer && "text-red-600"
                           )}
@@ -203,7 +216,12 @@ export default function HomePage() {
                   </RadioGroup>
 
                   {submitted && (
-                    <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border/50">
+                    <div className={cn(
+                      "mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel slide-up",
+                    )}
+                    style={{ 
+                      animationDelay: `${(index * 150) + 300}ms`,
+                    }}>
                       <p className="font-semibold mb-2">
                         {isCorrect ? "Correct!" : "Incorrect"}
                       </p>
@@ -219,7 +237,10 @@ export default function HomePage() {
 
           {questions && questions.length > 0 && !submitted && (
             <Button 
-              className="w-full button-hover mt-4"
+              className={cn(
+                "w-full button-hover mt-4",
+                Object.keys(selectedAnswers).length === questions.length && "slide-up"
+              )}
               onClick={handleSubmit}
               disabled={Object.keys(selectedAnswers).length !== questions.length}
             >
@@ -229,8 +250,9 @@ export default function HomePage() {
 
           {submitted && (
             <Button 
-              className="w-full button-hover mt-4"
+              className="w-full button-hover mt-4 slide-up"
               onClick={() => setLocation("/leaderboard")}
+              style={{ animationDelay: '800ms' }}
             >
               View Leaderboard
             </Button>
