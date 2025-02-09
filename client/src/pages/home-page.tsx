@@ -250,25 +250,30 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {question.options.map((option) => (
-                      <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
-                        <RadioGroupItem 
-                          value={option} 
-                          checked={selectedAnswers[question.id] === option}
-                          disabled
-                          className="radio-group-item"
-                        />
-                        <Label 
-                          className={cn(
-                            "radio-label",
-                            option === question.correctAnswer && "text-green-600 font-semibold",
-                            option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
-                          )}
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
+                    <RadioGroup
+                      disabled
+                      value={selectedAnswers[question.id]}
+                      className="space-y-3"
+                    >
+                      {question.options.map((option) => (
+                        <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                          <RadioGroupItem 
+                            value={option} 
+                            checked={selectedAnswers[question.id] === option}
+                            className="radio-group-item"
+                          />
+                          <Label 
+                            className={cn(
+                              "radio-label",
+                              option === question.correctAnswer && "text-green-600 font-semibold",
+                              option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
+                            )}
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
                   </div>
 
                   <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel">
