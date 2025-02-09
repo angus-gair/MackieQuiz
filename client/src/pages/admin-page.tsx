@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Trash2, Plus, ArrowLeft } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Users, BarChart3, Settings } from "lucide-react";
 import { Link, Redirect } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, InsertQuestion } from "@shared/schema";
@@ -72,38 +72,6 @@ export default function AdminPage() {
     return <Redirect to="/" />;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newQuestion.options?.some(option => !option)) {
-      toast({
-        title: "Error",
-        description: "Please fill in all options",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
-      toast({
-        title: "Error",
-        description: "Correct answer must be one of the options",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    createQuestionMutation.mutate(newQuestion as InsertQuestion);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
@@ -118,8 +86,56 @@ export default function AdminPage() {
                 Back
               </Button>
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Question Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Admin Dashboard</h1>
           </div>
+        </div>
+
+        {/* Admin Navigation Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Users & Teams
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">Manage user accounts and team assignments</p>
+              <Button className="w-full" variant="outline">
+                View Users
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">View quiz performance and team statistics</p>
+              <Button className="w-full" variant="outline">
+                View Stats
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">Configure application settings</p>
+              <Button className="w-full" variant="outline">
+                Manage Settings
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="mb-8">
@@ -130,7 +146,37 @@ export default function AdminPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
+                toast({
+                  title: "Error",
+                  description: "Please fill in all fields",
+                  variant: "destructive",
+                });
+                return;
+              }
+
+              if (newQuestion.options?.some(option => !option)) {
+                toast({
+                  title: "Error",
+                  description: "Please fill in all options",
+                  variant: "destructive",
+                });
+                return;
+              }
+
+              if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
+                toast({
+                  title: "Error",
+                  description: "Correct answer must be one of the options",
+                  variant: "destructive",
+                });
+                return;
+              }
+
+              createQuestionMutation.mutate(newQuestion as InsertQuestion);
+            }} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="question">Question</Label>
                 <Textarea
