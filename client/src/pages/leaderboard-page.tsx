@@ -17,16 +17,16 @@ export default function LeaderboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center mb-8">
           <Link href="/">
-            <Button variant="ghost" className="mr-4">
+            <Button variant="ghost" className="mr-4 button-hover">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">Weekly Leaderboard</h1>
+          <h1 className="text-3xl font-bold text-primary">Weekly Leaderboard</h1>
         </div>
 
         <div className="grid gap-6">
@@ -35,7 +35,7 @@ export default function LeaderboardPage() {
             const color = BADGES[index]?.color;
 
             return (
-              <Card key={user.id}>
+              <Card key={user.id} className={`card ${index === 0 ? 'border-yellow-500/50' : ''}`}>
                 <CardHeader className="py-4">
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -48,12 +48,14 @@ export default function LeaderboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Team: {user.team}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Quizzes completed this week: {user.weeklyQuizzes}
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">
+                      Team: {user.team}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Quizzes completed this week: {user.weeklyQuizzes}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             );

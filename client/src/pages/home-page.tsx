@@ -62,28 +62,28 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Welcome, {user?.username}!</h1>
+            <h1 className="text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
             <p className="text-muted-foreground">Team: {user?.team}</p>
           </div>
           <div className="flex gap-4">
             <Link href="/leaderboard">
-              <Button variant="outline">
+              <Button variant="outline" className="button-hover">
                 <Trophy className="mr-2 h-4 w-4" />
                 Leaderboard
               </Button>
             </Link>
-            <Button variant="outline" onClick={handleLogout}>
+            <Button variant="outline" onClick={handleLogout} className="button-hover">
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
           </div>
         </div>
 
-        <Card className="mb-6">
+        <Card className="mb-6 card">
           <CardHeader>
             <CardTitle className="flex items-center">
               <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
@@ -105,7 +105,7 @@ export default function HomePage() {
             const isCorrect = userAnswer === question.correctAnswer;
 
             return (
-              <Card key={question.id}>
+              <Card key={question.id} className="card">
                 <CardHeader>
                   <CardTitle className="text-xl flex items-start gap-2">
                     {submitted && (
@@ -126,6 +126,7 @@ export default function HomePage() {
                         [question.id]: value,
                       }))
                     }
+                    className="space-y-3"
                   >
                     {question.options.map((option) => (
                       <div key={option} className="flex items-center space-x-2">
@@ -133,6 +134,7 @@ export default function HomePage() {
                         <Label 
                           htmlFor={`${question.id}-${option}`}
                           className={cn(
+                            "transition-colors duration-200",
                             submitted && option === question.correctAnswer && "text-green-600 font-semibold",
                             submitted && option === userAnswer && option !== question.correctAnswer && "text-red-600"
                           )}
@@ -144,7 +146,7 @@ export default function HomePage() {
                   </RadioGroup>
 
                   {submitted && (
-                    <div className="mt-4 p-4 bg-muted rounded-lg">
+                    <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border/50">
                       <p className="font-semibold mb-2">
                         {isCorrect ? "Correct!" : "Incorrect"}
                       </p>
@@ -160,7 +162,7 @@ export default function HomePage() {
 
           {questions && questions.length > 0 && !submitted && (
             <Button 
-              className="w-full"
+              className="w-full button-hover"
               onClick={handleSubmit}
               disabled={Object.keys(selectedAnswers).length !== questions.length}
             >
@@ -170,7 +172,7 @@ export default function HomePage() {
 
           {submitted && (
             <Button 
-              className="w-full"
+              className="w-full button-hover"
               onClick={() => setLocation("/leaderboard")}
             >
               View Leaderboard

@@ -11,3 +11,13 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+@layer components {
+  .card {
+    @apply transition-shadow hover:shadow-lg;
+  }
+
+  .button-hover {
+    @apply transition-all duration-200 hover:translate-y-[-2px];
+  }
+}
