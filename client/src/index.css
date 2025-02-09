@@ -2,16 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "@fontsource/poppins";
+@import "@fontsource/open-sans";
+
 @layer base {
   :root {
-    --primary: 15 23 42; /* #0f172a */
-    --secondary: 71 85 105; /* #475569 */
-    --accent: 37 99 235; /* #2563eb */
-    --muted: 241 245 249; /* #f1f5f9 */
+    --primary: 0 123 255; /* #007BFF */
+    --secondary: 40 167 69; /* #28A745 */
+    --accent: 255 193 7; /* #FFC107 */
+    --muted: 248 249 250; /* #F8F9FA */
     --background: 255 255 255; /* #ffffff */
-    --foreground: 15 23 42; /* #0f172a */
+    --foreground: 52 58 64; /* #343A40 */
     --card: 255 255 255; /* #ffffff */
-    --border: 226 232 240; /* #e2e8f0 */
+    --border: 222 226 230; /* #DEE2E6 */
   }
 
   * {
@@ -19,7 +22,11 @@
   }
 
   body {
-    @apply font-sans antialiased bg-muted text-foreground;
+    @apply font-body antialiased bg-muted text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold;
   }
 }
 
@@ -33,11 +40,11 @@
   }
 
   .radio-group-item {
-    @apply border-border data-[state=checked]:border-accent data-[state=checked]:bg-accent/10;
+    @apply border-border data-[state=checked]:border-primary data-[state=checked]:bg-primary/10;
   }
 
   .progress-bar {
-    @apply bg-accent/10;
+    @apply bg-primary/10;
   }
 
   .quiz-card {
