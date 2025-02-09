@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -21,6 +21,7 @@ export default function HomePage() {
   const [submitted, setSubmitted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [quizKey, setQuizKey] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const isMobile = useIsMobile();
 
   const { data: questions } = useQuery<Question[]>({
@@ -50,9 +51,9 @@ export default function HomePage() {
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
-      function randomInRange(min: number, max: number) {
+      const randomInRange = (min: number, max: number) => {
         return Math.random() * (max - min) + min;
-      }
+      };
 
       const interval: NodeJS.Timeout = setInterval(function() {
         const timeLeft = animationEnd - Date.now();
@@ -101,7 +102,7 @@ export default function HomePage() {
     setSubmitted(false);
     setShowConfetti(false);
     setQuizKey(prev => prev + 1);
-    // Use invalidateQueries to refresh the data while maintaining cache
+    setCurrentQuestionIndex(0);
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["/api/questions/daily"] }),
       queryClient.invalidateQueries({ queryKey: ["/api/answers"] })
@@ -110,7 +111,6 @@ export default function HomePage() {
 
   const today = new Date();
   const answeredQuestions = new Set(answers?.filter(a => {
-    // Only count answers from today
     const answerDate = new Date(a.answeredAt);
     return answerDate.toDateString() === today.toDateString();
   }).filter(a => {
@@ -120,7 +120,6 @@ export default function HomePage() {
       return date.toDateString() === today.toDateString();
     }) ?? [];
 
-    // Get the most recent quiz completion by finding sets of 3 answers
     const quizzes = [];
     let currentQuiz = [];
     for (const answer of todaysAnswers.sort((a, b) => 
@@ -133,25 +132,38 @@ export default function HomePage() {
       }
     }
 
-    // If we haven't submitted yet, show all answers for the current attempt
     if (!submitted) {
       return currentQuiz.some(qa => qa.id === a.id);
     }
 
-    // If there's no completed quiz, don't show any answers
     if (quizzes.length === 0) {
       return false;
     }
 
-    // Only show answers from the most recent completed quiz
     const lastQuiz = quizzes[quizzes.length - 1];
     return lastQuiz.some(qa => qa.id === a.id);
   }).map(a => a.questionId));
 
-  const progress = questions ? Math.min((answeredQuestions.size / questions.length) * 100, 100) : 0;
+  const progress = questions ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
 
   const handleLogout = () => {
     logoutMutation.mutate();
+  };
+
+  const currentQuestion = questions?.[currentQuestionIndex];
+  const canGoNext = currentQuestion && selectedAnswers[currentQuestion.id];
+  const isLastQuestion = questions && currentQuestionIndex === questions.length - 1;
+
+  const handleNext = () => {
+    if (!isLastQuestion) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
   };
 
   return (
@@ -213,114 +225,120 @@ export default function HomePage() {
           <CardContent>
             <Progress value={progress} className="mb-2 progress-bar" />
             <p className="text-sm text-muted-foreground slide-up">
-              {answeredQuestions.size} of {questions?.length || 0} questions answered
+              Question {currentQuestionIndex + 1} of {questions?.length || 0}
             </p>
           </CardContent>
         </Card>
 
-        <div key={quizKey} className="space-y-4 sm:space-y-6">
-          {questions?.map((question, index) => {
-            const isAnswered = answeredQuestions.has(question.id);
-            const userAnswer = answers?.find(a => a.questionId === question.id)?.answer;
-            const isCorrect = userAnswer === question.correctAnswer;
-
-            return (
-              <Card 
-                key={question.id} 
-                className={cn(
-                  "quiz-card",
-                  submitted ? "slide-down" : ""
-                )}
-                style={{ 
-                  animationDelay: `${index * 150}ms`,
-                }}
-              >
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-start gap-2">
-                    {submitted && (
-                      isCorrect ? 
-                        <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1 slide-down" /> :
-                        <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1 slide-down" />
-                    )}
-                    <span>{question.question}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <RadioGroup
-                    disabled={submitted}
-                    value={selectedAnswers[question.id]}
-                    onValueChange={(value) =>
-                      setSelectedAnswers(prev => ({
-                        ...prev,
-                        [question.id]: value,
-                      }))
-                    }
-                    className="space-y-3"
-                  >
-                    {question.options.map((option) => (
-                      <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
-                        <RadioGroupItem 
-                          value={option} 
-                          id={`${question.id}-${option}`}
-                          className="radio-group-item"
-                        />
-                        <Label 
-                          htmlFor={`${question.id}-${option}`}
-                          className={cn(
-                            "radio-label cursor-pointer",
-                            submitted && option === question.correctAnswer && "text-green-600 font-semibold",
-                            submitted && option === userAnswer && option !== question.correctAnswer && "text-red-600"
-                          )}
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-
-                  {submitted && (
-                    <div className={cn(
-                      "mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel slide-up",
-                    )}
-                    style={{ 
-                      animationDelay: `${(index * 150) + 300}ms`,
-                    }}>
-                      <p className="font-semibold mb-2">
-                        {isCorrect ? "Correct!" : "Incorrect"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {question.explanation}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-
-          {questions && questions.length > 0 && !submitted && (
-            <Button 
+        {currentQuestion && (
+          <div key={quizKey} className="space-y-4 sm:space-y-6">
+            <Card 
               className={cn(
-                "w-full button-hover mt-4",
-                Object.keys(selectedAnswers).length === questions.length && "slide-up"
+                "quiz-card",
+                submitted ? "slide-down" : ""
               )}
-              onClick={handleSubmit}
-              disabled={Object.keys(selectedAnswers).length !== questions.length}
             >
-              Submit Answers
-            </Button>
-          )}
+              <CardHeader>
+                <CardTitle className="text-xl flex items-start gap-2">
+                  {submitted && (
+                    answers?.find(a => a.questionId === currentQuestion.id)?.correct ? 
+                      <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1 slide-down" /> :
+                      <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1 slide-down" />
+                  )}
+                  <span>{currentQuestion.question}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup
+                  disabled={submitted}
+                  value={selectedAnswers[currentQuestion.id]}
+                  onValueChange={(value) =>
+                    setSelectedAnswers(prev => ({
+                      ...prev,
+                      [currentQuestion.id]: value,
+                    }))
+                  }
+                  className="space-y-3"
+                >
+                  {currentQuestion.options.map((option) => (
+                    <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                      <RadioGroupItem 
+                        value={option} 
+                        id={`${currentQuestion.id}-${option}`}
+                        className="radio-group-item"
+                      />
+                      <Label 
+                        htmlFor={`${currentQuestion.id}-${option}`}
+                        className={cn(
+                          "radio-label cursor-pointer",
+                          submitted && option === currentQuestion.correctAnswer && "text-green-600 font-semibold",
+                          submitted && option === selectedAnswers[currentQuestion.id] && option !== currentQuestion.correctAnswer && "text-red-600"
+                        )}
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
 
-          {submitted && (
-            <Button 
-              className="w-full button-hover mt-4 slide-up"
-              onClick={() => setLocation("/leaderboard")}
-              style={{ animationDelay: '800ms' }}
-            >
-              View Leaderboard
-            </Button>
-          )}
-        </div>
+                {submitted && (
+                  <div className={cn(
+                    "mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel slide-up",
+                  )}>
+                    <p className="font-semibold mb-2">
+                      {answers?.find(a => a.questionId === currentQuestion.id)?.correct ? "Correct!" : "Incorrect"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {currentQuestion.explanation}
+                    </p>
+                  </div>
+                )}
+
+                {!submitted && (
+                  <div className="flex justify-between mt-6">
+                    <Button
+                      variant="outline"
+                      onClick={handlePrevious}
+                      disabled={currentQuestionIndex === 0}
+                      className="button-hover"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Previous
+                    </Button>
+                    {isLastQuestion ? (
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={!canGoNext}
+                        className="button-hover"
+                      >
+                        Submit Quiz
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleNext}
+                        disabled={!canGoNext}
+                        className="button-hover"
+                      >
+                        Next
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {submitted && (
+              <Button 
+                className="w-full button-hover mt-4 slide-up"
+                onClick={() => setLocation("/leaderboard")}
+                style={{ animationDelay: '800ms' }}
+              >
+                View Leaderboard
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
