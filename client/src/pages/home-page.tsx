@@ -225,76 +225,110 @@ export default function HomePage() {
           <CardContent>
             <Progress value={progress} className="mb-2 progress-bar" />
             <p className="text-sm text-muted-foreground slide-up">
-              Question {currentQuestionIndex + 1} of {questions?.length || 0}
+              {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
             </p>
           </CardContent>
         </Card>
 
-        {currentQuestion && (
-          <div key={quizKey} className="space-y-4 sm:space-y-6">
-            <Card 
-              className={cn(
-                "quiz-card",
-                submitted ? "slide-down" : ""
-              )}
-            >
-              <CardHeader>
-                <CardTitle className="text-xl flex items-start gap-2">
-                  {submitted && (
-                    answers?.find(a => a.questionId === currentQuestion.id)?.correct ? 
-                      <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1 slide-down" /> :
-                      <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1 slide-down" />
-                  )}
-                  <span>{currentQuestion.question}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup
-                  disabled={submitted}
-                  value={selectedAnswers[currentQuestion.id]}
-                  onValueChange={(value) =>
-                    setSelectedAnswers(prev => ({
-                      ...prev,
-                      [currentQuestion.id]: value,
-                    }))
-                  }
-                  className="space-y-3"
-                >
-                  {currentQuestion.options.map((option) => (
-                    <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
-                      <RadioGroupItem 
-                        value={option} 
-                        id={`${currentQuestion.id}-${option}`}
-                        className="radio-group-item"
-                      />
-                      <Label 
-                        htmlFor={`${currentQuestion.id}-${option}`}
-                        className={cn(
-                          "radio-label cursor-pointer",
-                          submitted && option === currentQuestion.correctAnswer && "text-green-600 font-semibold",
-                          submitted && option === selectedAnswers[currentQuestion.id] && option !== currentQuestion.correctAnswer && "text-red-600"
-                        )}
-                      >
-                        {option}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+        {submitted ? (
+          // Summary view after submission
+          <div className="space-y-4 sm:space-y-6">
+            {questions?.map((question, index) => (
+              <Card 
+                key={question.id}
+                className="quiz-card slide-down"
+                style={{ animationDelay: `${index * 150}ms` }}
+              >
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-start gap-2">
+                    {answers?.find(a => a.questionId === question.id)?.correct ? 
+                      <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1" /> :
+                      <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
+                    }
+                    <span>{question.question}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {question.options.map((option) => (
+                      <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                        <RadioGroupItem 
+                          value={option} 
+                          checked={selectedAnswers[question.id] === option}
+                          disabled
+                          className="radio-group-item"
+                        />
+                        <Label 
+                          className={cn(
+                            "radio-label",
+                            option === question.correctAnswer && "text-green-600 font-semibold",
+                            option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
+                          )}
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
 
-                {submitted && (
-                  <div className={cn(
-                    "mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel slide-up",
-                  )}>
+                  <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel">
                     <p className="font-semibold mb-2">
-                      {answers?.find(a => a.questionId === currentQuestion.id)?.correct ? "Correct!" : "Incorrect"}
+                      {answers?.find(a => a.questionId === question.id)?.correct ? "Correct!" : "Incorrect"}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {currentQuestion.explanation}
+                      {question.explanation}
                     </p>
                   </div>
-                )}
+                </CardContent>
+              </Card>
+            ))}
 
-                {!submitted && (
+            <Button 
+              className="w-full button-hover mt-4 slide-up"
+              onClick={() => setLocation("/leaderboard")}
+              style={{ animationDelay: '800ms' }}
+            >
+              View Leaderboard
+            </Button>
+          </div>
+        ) : (
+          // Single question view during quiz
+          currentQuestion && (
+            <div key={quizKey} className="space-y-4 sm:space-y-6">
+              <Card className="quiz-card">
+                <CardHeader>
+                  <CardTitle className="text-xl">
+                    {currentQuestion.question}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup
+                    value={selectedAnswers[currentQuestion.id]}
+                    onValueChange={(value) =>
+                      setSelectedAnswers(prev => ({
+                        ...prev,
+                        [currentQuestion.id]: value,
+                      }))
+                    }
+                    className="space-y-3"
+                  >
+                    {currentQuestion.options.map((option) => (
+                      <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                        <RadioGroupItem 
+                          value={option} 
+                          id={`${currentQuestion.id}-${option}`}
+                          className="radio-group-item"
+                        />
+                        <Label 
+                          htmlFor={`${currentQuestion.id}-${option}`}
+                          className="radio-label cursor-pointer"
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+
                   <div className="flex justify-between mt-6">
                     <Button
                       variant="outline"
@@ -324,20 +358,10 @@ export default function HomePage() {
                       </Button>
                     )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {submitted && (
-              <Button 
-                className="w-full button-hover mt-4 slide-up"
-                onClick={() => setLocation("/leaderboard")}
-                style={{ animationDelay: '800ms' }}
-              >
-                View Leaderboard
-              </Button>
-            )}
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+          )
         )}
       </div>
     </div>
