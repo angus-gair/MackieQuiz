@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight, Plus } from "lucide-react"; // Added Plus icon import
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -201,6 +201,20 @@ export default function HomePage() {
               <RotateCcw className="mr-2 h-4 w-4" />
               Retake Quiz
             </Button>
+            {user?.isAdmin && ( // Added conditional rendering for admin link
+              <Link href="/admin" className={isMobile ? "w-full" : ""}>
+                <Button 
+                  variant="outline" 
+                  className={cn(
+                    "button-hover",
+                    isMobile ? "w-full justify-center" : ""
+                  )}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Manage Questions
+                </Button>
+              </Link>
+            )}
             <Button 
               variant="outline" 
               onClick={handleLogout} 
