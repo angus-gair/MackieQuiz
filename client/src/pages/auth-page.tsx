@@ -141,9 +141,9 @@ export default function AuthPage() {
           <h1 className="text-4xl font-bold mb-4">Welcome to Business Quiz Challenge</h1>
           <p className="text-lg mb-6">Test your business knowledge, compete with your team, and win weekly prizes!</p>
           <div className="rounded-lg shadow-xl overflow-hidden">
-            <img 
-              src="/attached_assets/wine.jpg" 
-              alt="Wine cellar" 
+            <img
+              src="/wine.jpg"
+              alt="Wine cellar"
               className="w-full h-full object-cover"
             />
           </div>
