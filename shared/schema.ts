@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -9,9 +9,6 @@ export const users = pgTable("users", {
   team: text("team").notNull(),
   weeklyScore: integer("weekly_score").notNull().default(0),
   weeklyQuizzes: integer("weekly_quizzes").notNull().default(0),
-  currentStreak: integer("current_streak").notNull().default(0),
-  lastQuizDate: timestamp("last_quiz_date"),
-  achievements: jsonb("achievements").notNull().default('[]'::jsonb),
 });
 
 export const questions = pgTable("questions", {
@@ -47,12 +44,3 @@ export type InsertAnswer = z.infer<typeof insertAnswerSchema>;
 export type User = typeof users.$inferSelect;
 export type Question = typeof questions.$inferSelect;
 export type Answer = typeof answers.$inferSelect;
-
-// Achievement types
-export interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  unlockedAt: string;
-}
