@@ -7,14 +7,29 @@
 
 @layer base {
   :root {
-    --background: 255 255 255; /* #FFFFFF */
+    /* Base colors */
+    --background: 248 249 250; /* #F8F9FA */
     --foreground: 52 58 64; /* #343A40 */
-    --muted: 248 249 250; /* #F8F9FA */
+
+    /* Theme colors */
     --primary: 0 123 255; /* #007BFF */
+    --primary-foreground: 255 255 255;
+
     --secondary: 40 167 69; /* #28A745 */
+    --secondary-foreground: 255 255 255;
+
     --accent: 255 193 7; /* #FFC107 */
-    --border: 222 226 230; /* #DEE2E6 */
+    --accent-foreground: 0 0 0;
+
+    --muted: 233 236 239; /* #E9ECEF - slightly darker than background */
+    --muted-foreground: 108 117 125; /* #6C757D */
+
     --card: 255 255 255; /* #FFFFFF */
+    --card-foreground: 52 58 64; /* #343A40 */
+
+    --border: 222 226 230; /* #DEE2E6 */
+    --input: 222 226 230;
+    --ring: 0 123 255;
   }
 
   * {
