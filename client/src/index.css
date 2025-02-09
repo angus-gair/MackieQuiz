@@ -7,29 +7,32 @@
 
 @layer base {
   :root {
-    /* Base colors */
-    --background: 248 249 250; /* #F8F9FA */
-    --foreground: 52 58 64; /* #343A40 */
+    /* Base */
+    --background: 0 0% 98%; /* #F8F9FA */
+    --foreground: 210 11% 15%; /* #0C0A09 */
 
-    /* Theme colors */
-    --primary: 0 123 255; /* #007BFF */
-    --primary-foreground: 255 255 255;
+    /* Core colors */
+    --primary: 211 100% 50%; /* #007BFF */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 167 69; /* #28A745 */
-    --secondary-foreground: 255 255 255;
+    --secondary: 142 54% 39%; /* #28A745 */
+    --secondary-foreground: 0 0% 100%;
 
-    --accent: 255 193 7; /* #FFC107 */
-    --accent-foreground: 0 0 0;
+    --accent: 45 100% 50%; /* #FFC107 */
+    --accent-foreground: 0 0% 0%;
 
-    --muted: 233 236 239; /* #E9ECEF - slightly darker than background */
-    --muted-foreground: 108 117 125; /* #6C757D */
+    /* UI Elements */
+    --muted: 210 17% 98%;
+    --muted-foreground: 215 14% 34%;
 
-    --card: 255 255 255; /* #FFFFFF */
-    --card-foreground: 52 58 64; /* #343A40 */
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 15%;
 
-    --border: 222 226 230; /* #DEE2E6 */
-    --input: 222 226 230;
-    --ring: 0 123 255;
+    --border: 210 14% 89%;
+    --input: 210 14% 89%;
+    --ring: 211 100% 50%;
+
+    --radius: 0.5rem;
   }
 
   * {
@@ -37,20 +40,26 @@
   }
 
   body {
-    @apply font-body bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Open Sans', sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-semibold;
+    @apply font-heading font-semibold text-foreground;
+    font-family: 'Poppins', sans-serif;
   }
 }
 
 @layer components {
-  .card {
-    @apply bg-white border border-border shadow-sm hover:shadow-md transition-all duration-200;
+  .button-hover {
+    @apply transition-all duration-200;
   }
 
-  .button-hover {
+  .card {
+    @apply bg-background border border-border shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  .quiz-card {
     @apply transition-all duration-200;
   }
 
@@ -60,10 +69,6 @@
 
   .progress-bar {
     @apply bg-primary/10;
-  }
-
-  .quiz-card {
-    @apply transition-all duration-200;
   }
 
   .explanation-panel {
