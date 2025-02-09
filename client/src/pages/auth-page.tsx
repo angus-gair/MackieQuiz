@@ -39,7 +39,7 @@ export default function AuthPage() {
       <div className="flex-1 flex items-center justify-center p-8">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-primary">Business Quiz Challenge</CardTitle>
+            <CardTitle>Business Quiz Challenge</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
@@ -139,10 +139,10 @@ export default function AuthPage() {
       <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-8">
         <div className="max-w-lg text-white">
           <h1 className="text-4xl font-bold mb-4">Welcome to Business Quiz Challenge</h1>
-          <p className="text-lg mb-6 opacity-90">Test your knowledge, compete with your team, and win weekly prizes!</p>
+          <p className="text-lg mb-6">Test your business knowledge, compete with your team, and win weekly prizes!</p>
           <img 
-            src="https://images.unsplash.com/photo-1507934711616-9745e12b687c"
-            alt="Vineyard with oak barrels" 
+            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c" 
+            alt="Team collaboration" 
             className="rounded-lg shadow-xl"
           />
         </div>
