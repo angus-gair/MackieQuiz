@@ -16,6 +16,7 @@ export const questions = pgTable("questions", {
   correctAnswer: text("correct_answer").notNull(),
   options: text("options").array().notNull(),
   category: text("category").notNull(),
+  explanation: text("explanation").notNull(),
 });
 
 export const answers = pgTable("answers", {

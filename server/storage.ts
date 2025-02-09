@@ -50,9 +50,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyQuestions(): Promise<Question[]> {
-    // Get all questions and randomly select 5
+    // Get all questions and randomly select 3
     const allQuestions = await this.getQuestions();
-    return this.shuffleArray(allQuestions).slice(0, 5);
+    return this.shuffleArray(allQuestions).slice(0, 3);
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
@@ -104,26 +104,40 @@ export class DatabaseStorage implements IStorage {
   async seedQuestions() {
     const sampleQuestions: InsertQuestion[] = [
       {
-        question: "What is the key principle of supply and demand?",
-        correctAnswer: "Price increases when demand exceeds supply",
+        question: "What are Dan Murphy's typical opening hours?",
+        correctAnswer: "9:00 AM – 9:00 PM (Weekdays & Saturdays), 10:00 AM – 7:00 PM (Sundays)",
         options: [
-          "Price increases when demand exceeds supply",
-          "Price always stays constant",
-          "Supply always meets demand",
-          "Demand decreases as price decreases"
+          "6:00 AM – 10:00 PM",
+          "9:00 AM – 9:00 PM (Weekdays & Saturdays), 10:00 AM – 7:00 PM (Sundays)",
+          "10:00 AM – 5:00 PM every day",
+          "24/7"
         ],
-        category: "Economics"
+        category: "Operations",
+        explanation: "Dan Murphy's opening hours vary by location, but generally, stores operate from 9:00 AM to 9:00 PM on weekdays and Saturdays and from 10:00 AM to 7:00 PM on Sundays. However, public holidays or specific store policies may affect these hours."
       },
       {
-        question: "What is ROI?",
-        correctAnswer: "Return on Investment",
+        question: "How can you find your nearest Dan Murphy's store?",
+        correctAnswer: "Use the 'Find a Store' tool on their website",
         options: [
-          "Return on Investment",
-          "Rate of Interest",
-          "Risk of Investment",
-          "Return on Income"
+          "Call customer service and ask",
+          "Use the 'Find a Store' tool on their website",
+          "Google 'Dan Murphy's near me'",
+          "Walk around and look for one"
         ],
-        category: "Finance"
+        category: "Customer Service",
+        explanation: "Dan Murphy's has a store locator tool on its website where you can enter your postcode or suburb to find the nearest store. This tool provides store addresses, trading hours, and any special services offered at each location."
+      },
+      {
+        question: "Does Dan Murphy's offer online ordering and delivery?",
+        correctAnswer: "Yes, with same-day delivery and in-store pickup options",
+        options: [
+          "No, only in-store purchases are available",
+          "Yes, but only for wine",
+          "Yes, with same-day delivery and in-store pickup options",
+          "Only for bulk orders"
+        ],
+        category: "Services",
+        explanation: "Dan Murphy's offers online ordering through their website, with options for home delivery and in-store pickup. Customers in metro areas can get same-day delivery, while 30-minute in-store pickup is available at selected locations."
       }
     ];
 

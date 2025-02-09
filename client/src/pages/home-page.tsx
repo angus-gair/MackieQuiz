@@ -5,13 +5,17 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Medal } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
   const { user } = useAuth();
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
+  const [submitted, setSubmitted] = useState(false);
 
   const { data: questions } = useQuery<Question[]>({
     queryKey: ["/api/questions/daily"],
@@ -33,6 +37,21 @@ export default function HomePage() {
       queryClient.invalidateQueries({ queryKey: ["/api/answers"] });
     }
   });
+
+  const handleSubmit = async () => {
+    if (!questions) return;
+
+    for (const question of questions) {
+      const answer = selectedAnswers[question.id];
+      if (answer) {
+        await answerMutation.mutateAsync({
+          questionId: question.id,
+          answer
+        });
+      }
+    }
+    setSubmitted(true);
+  };
 
   const answeredQuestions = new Set(answers?.map(a => a.questionId));
   const progress = questions ? (answeredQuestions.size / questions.length) * 100 : 0;
@@ -56,7 +75,7 @@ export default function HomePage() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Medal className="mr-2 h-5 w-5 text-yellow-500" />
+              <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
               Your Progress
             </CardTitle>
           </CardHeader>
@@ -69,31 +88,74 @@ export default function HomePage() {
         </Card>
 
         <div className="space-y-6">
-          {questions?.map((question) => (
-            <Card key={question.id}>
-              <CardHeader>
-                <CardTitle className="text-xl">{question.question}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup
-                  disabled={answeredQuestions.has(question.id)}
-                  onValueChange={(value) =>
-                    answerMutation.mutate({
-                      questionId: question.id,
-                      answer: value,
-                    })
-                  }
-                >
-                  {question.options.map((option) => (
-                    <div key={option} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option} id={`${question.id}-${option}`} />
-                      <Label htmlFor={`${question.id}-${option}`}>{option}</Label>
+          {questions?.map((question) => {
+            const isAnswered = answeredQuestions.has(question.id);
+            const userAnswer = answers?.find(a => a.questionId === question.id)?.answer;
+            const isCorrect = userAnswer === question.correctAnswer;
+
+            return (
+              <Card key={question.id}>
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-start gap-2">
+                    {submitted && (
+                      isCorrect ? 
+                        <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1" /> :
+                        <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
+                    )}
+                    <span>{question.question}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup
+                    disabled={submitted}
+                    value={selectedAnswers[question.id]}
+                    onValueChange={(value) =>
+                      setSelectedAnswers(prev => ({
+                        ...prev,
+                        [question.id]: value,
+                      }))
+                    }
+                  >
+                    {question.options.map((option) => (
+                      <div key={option} className="flex items-center space-x-2">
+                        <RadioGroupItem value={option} id={`${question.id}-${option}`} />
+                        <Label 
+                          htmlFor={`${question.id}-${option}`}
+                          className={cn(
+                            submitted && option === question.correctAnswer && "text-green-600 font-semibold",
+                            submitted && option === userAnswer && option !== question.correctAnswer && "text-red-600"
+                          )}
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+
+                  {submitted && (
+                    <div className="mt-4 p-4 bg-muted rounded-lg">
+                      <p className="font-semibold mb-2">
+                        {isCorrect ? "Correct!" : "Incorrect"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {question.explanation}
+                      </p>
                     </div>
-                  ))}
-                </RadioGroup>
-              </CardContent>
-            </Card>
-          ))}
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+
+          {questions && questions.length > 0 && !submitted && (
+            <Button 
+              className="w-full"
+              onClick={handleSubmit}
+              disabled={Object.keys(selectedAnswers).length !== questions.length}
+            >
+              Submit Answers
+            </Button>
+          )}
         </div>
       </div>
     </div>
