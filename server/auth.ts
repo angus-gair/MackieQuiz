@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { log } from "./vite";
 
 declare global {
   namespace Express {
@@ -52,50 +53,74 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        log(`Attempting login for user: ${username}`);
         const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
+        if (!user) {
+          log(`Login failed: User not found: ${username}`);
           return done(null, false);
         }
+        if (!(await comparePasswords(password, user.password))) {
+          log(`Login failed: Invalid password for user: ${username}`);
+          return done(null, false);
+        }
+        log(`Login successful for user: ${username}`);
         return done(null, user);
       } catch (err) {
+        log(`Login error: ${err}`);
         return done(err);
       }
     }),
   );
 
   passport.serializeUser((user, done) => {
+    log(`Serializing user: ${user.id}`);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id: number, done) => {
     try {
+      log(`Deserializing user: ${id}`);
       const user = await storage.getUser(id);
       if (!user) {
-        return done(new Error('User not found'));
+        log(`Deserialization failed: User not found: ${id}`);
+        return done(null, false);
       }
+      log(`Deserialization successful for user: ${id}`);
       done(null, user);
     } catch (err) {
+      log(`Deserialization error: ${err}`);
       done(err);
     }
   });
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const existingUser = await storage.getUserByUsername(req.body.username);
+      const { username, password, team } = req.body;
+      log(`Registration attempt for user: ${username}`);
+
+      const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
-        return res.status(400).send("Username already exists");
+        log(`Registration failed: Username already exists: ${username}`);
+        return res.status(400).json({ message: "Username already exists" });
       }
 
       const user = await storage.createUser({
-        ...req.body,
-        password: await hashPassword(req.body.password),
+        username,
+        password: await hashPassword(password),
+        team
       });
 
+      log(`Registration successful for user: ${username}`);
+
       req.login(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          log(`Login after registration failed: ${err}`);
+          return next(err);
+        }
         res.status(201).json(user);
       });
     } catch (err) {
+      log(`Registration error: ${err}`);
       next(err);
     }
   });
@@ -105,14 +130,24 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
+    const userId = req.user?.id;
+    log(`Logout attempt for user: ${userId}`);
     req.logout((err) => {
-      if (err) return next(err);
+      if (err) {
+        log(`Logout error for user ${userId}: ${err}`);
+        return next(err);
+      }
+      log(`Logout successful for user: ${userId}`);
       res.sendStatus(200);
     });
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) {
+      log('User check: Not authenticated');
+      return res.sendStatus(401);
+    }
+    log(`User check: Authenticated as ${req.user.id}`);
     res.json(req.user);
   });
 }
