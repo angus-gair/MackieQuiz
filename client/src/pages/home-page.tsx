@@ -108,12 +108,12 @@ export default function HomePage() {
     ]);
   };
 
-  const today = new Date(); // Moved outside the filter functions
+  const today = new Date();
   const answeredQuestions = new Set(answers?.filter(a => {
+    // Only count answers from today
     const answerDate = new Date(a.answeredAt);
     return answerDate.toDateString() === today.toDateString();
   }).filter(a => {
-    // Only count answers until the most recent quiz completion
     const answerTime = new Date(a.answeredAt).getTime();
     const todaysAnswers = answers?.filter(a => {
       const date = new Date(a.answeredAt);
@@ -133,15 +133,21 @@ export default function HomePage() {
       }
     }
 
-    // If there's no completed quiz or we haven't submitted yet, show all answers
-    if (quizzes.length === 0 || !submitted) {
-      return true;
+    // If we haven't submitted yet, show all answers for the current attempt
+    if (!submitted) {
+      return currentQuiz.some(qa => qa.id === a.id);
+    }
+
+    // If there's no completed quiz, don't show any answers
+    if (quizzes.length === 0) {
+      return false;
     }
 
     // Only show answers from the most recent completed quiz
     const lastQuiz = quizzes[quizzes.length - 1];
     return lastQuiz.some(qa => qa.id === a.id);
   }).map(a => a.questionId));
+
   const progress = questions ? Math.min((answeredQuestions.size / questions.length) * 100, 100) : 0;
 
   const handleLogout = () => {
