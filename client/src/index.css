@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --primary: 4 104 191; /* #0468BF */
-    --secondary: 122 133 191; /* #7A85BF */
-    --accent: 242 114 137; /* #F27289 */
-    --highlight: 145 217 217; /* #91D9D9 */
-    --background: 242 242 242; /* #F2F2F2 */
-    --text: 51 51 51; /* #333333 */
-    --foreground: 51 51 51; /* #333333 */
+    --primary: 39 47 50; /* #272F32 */
+    --secondary: 157 189 198; /* #9DBDC6 */
+    --accent: 255 53 36; /* #FF3524 */
+    --highlight: 218 234 239; /* #DAEAEF */
+    --background: 230 231 232; /* #E6E7E8 */
+    --text: 39 47 50; /* #272F32 */
+    --foreground: 39 47 50; /* #272F32 */
   }
 
   * {
