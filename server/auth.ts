@@ -105,7 +105,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, password, team } = req.body;
+      const { username, password, team, isAdmin } = req.body;
       log(`Registration attempt for user: ${username}`);
 
       const existingUser = await storage.getUserByUsername(username);
@@ -118,7 +118,8 @@ export function setupAuth(app: Express) {
       const user = await storage.createUser({
         username,
         password: hashedPassword,
-        team
+        team,
+        isAdmin: isAdmin || false
       });
 
       log(`Registration successful for user: ${username}`);

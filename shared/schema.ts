@@ -34,6 +34,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   team: true,
+}).extend({
+  isAdmin: z.boolean().optional().default(false)
 });
 
 export const insertQuestionSchema = createInsertSchema(questions);
