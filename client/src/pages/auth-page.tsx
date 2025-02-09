@@ -41,16 +41,16 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       <div className={cn(
-        "flex items-center justify-center p-4 sm:p-8",
+        "flex items-center justify-center p-8",
         isMobile ? "flex-1" : "flex-1 lg:flex-none lg:w-1/2"
       )}>
-        <Card className="w-full max-w-md shadow-lg border-secondary/20">
-          <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl text-primary">Business Quiz Challenge</CardTitle>
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-medium">Business Quiz Challenge</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
@@ -63,9 +63,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-primary">Username</FormLabel>
+                          <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input className="border-secondary/20" {...field} />
+                            <Input placeholder="Enter your username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -76,15 +76,19 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-primary">Password</FormLabel>
+                          <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" className="border-secondary/20" {...field} />
+                            <Input type="password" placeholder="Enter your password" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loginMutation.isPending}>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-accent hover:bg-accent/90 text-white" 
+                      disabled={loginMutation.isPending}
+                    >
                       Login
                     </Button>
                   </form>
@@ -99,9 +103,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-primary">Username</FormLabel>
+                          <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input className="border-secondary/20" {...field} />
+                            <Input placeholder="Choose a username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -112,9 +116,9 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-primary">Password</FormLabel>
+                          <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" className="border-secondary/20" {...field} />
+                            <Input type="password" placeholder="Choose a password" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -125,9 +129,9 @@ export default function AuthPage() {
                       name="team"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-primary">Team</FormLabel>
+                          <FormLabel>Team</FormLabel>
                           <FormControl>
-                            <Input className="border-secondary/20" {...field} />
+                            <Input placeholder="Enter your team name" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -142,16 +146,19 @@ export default function AuthPage() {
                             <Checkbox
                               checked={field.value}
                               onCheckedChange={field.onChange}
-                              className="border-secondary"
                             />
                           </FormControl>
                           <div className="space-y-1 leading-none">
-                            <FormLabel className="text-primary">Register as admin</FormLabel>
+                            <FormLabel>Register as admin</FormLabel>
                           </div>
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={registerMutation.isPending}>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-accent hover:bg-accent/90 text-white"
+                      disabled={registerMutation.isPending}
+                    >
                       Register
                     </Button>
                   </form>
@@ -163,10 +170,10 @@ export default function AuthPage() {
       </div>
 
       {!isMobile && (
-        <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-8">
+        <div className="hidden lg:flex flex-1 bg-accent items-center justify-center p-16">
           <div className="max-w-lg text-white">
-            <h1 className="text-4xl font-bold mb-4">Welcome to Business Quiz Challenge</h1>
-            <p className="text-lg mb-6 text-secondary/90">Test your business knowledge, compete with your team, and win weekly prizes!</p>
+            <h1 className="text-4xl font-medium tracking-tight mb-4">Welcome to Business Quiz Challenge</h1>
+            <p className="text-lg mb-8 text-white/80">Test your business knowledge, compete with your team, and win weekly prizes!</p>
             <div className="rounded-lg shadow-xl overflow-hidden">
               <img
                 src="/wine.jpg"

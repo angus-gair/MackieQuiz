@@ -4,13 +4,14 @@
 
 @layer base {
   :root {
-    --primary: 38 70 83; /* #264653 */
-    --secondary: 42 157 143; /* #2A9D8F */
-    --accent: 231 111 81; /* #E76F51 */
-    --highlight: 233 196 106; /* #E9C46A */
-    --background: 244 162 97; /* #F4A261 */
-    --text: 38 70 83; /* #264653 */
-    --foreground: 38 70 83; /* #264653 */
+    --primary: 15 23 42; /* #0f172a */
+    --secondary: 71 85 105; /* #475569 */
+    --accent: 37 99 235; /* #2563eb */
+    --muted: 241 245 249; /* #f1f5f9 */
+    --background: 255 255 255; /* #ffffff */
+    --foreground: 15 23 42; /* #0f172a */
+    --card: 255 255 255; /* #ffffff */
+    --border: 226 232 240; /* #e2e8f0 */
   }
 
   * {
@@ -18,48 +19,40 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background/5 text-foreground;
+    @apply font-sans antialiased bg-muted text-foreground;
   }
 }
 
 @layer components {
   .card {
-    @apply transition-shadow hover:shadow-lg bg-white border-secondary/20;
+    @apply bg-card border border-border/40 shadow-sm hover:shadow-md transition-all duration-200;
   }
 
   .button-hover {
-    @apply transition-all duration-200 hover:translate-y-[-2px];
-  }
-
-  .radio-label {
-    @apply transition-colors duration-200;
+    @apply transition-all duration-200;
   }
 
   .radio-group-item {
-    @apply transition-all duration-200 data-[state=checked]:scale-105;
+    @apply border-border data-[state=checked]:border-accent data-[state=checked]:bg-accent/10;
   }
 
   .progress-bar {
-    @apply transition-all duration-500 ease-out bg-accent;
-  }
-
-  .card-answer {
-    @apply transition-all duration-300 hover:bg-background/10;
+    @apply bg-accent/10;
   }
 
   .quiz-card {
-    @apply transition-all duration-300 hover:translate-y-[-1px] bg-white;
+    @apply transition-all duration-200;
   }
 
   .explanation-panel {
-    @apply transition-all duration-300 ease-in-out bg-muted/50;
+    @apply bg-muted rounded-md p-4;
   }
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -70,7 +63,7 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -79,9 +72,9 @@
 }
 
 .slide-down {
-  animation: slideDown 0.3s ease-out;
+  animation: slideDown 0.2s ease-out;
 }
 
 .slide-up {
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.2s ease-out;
 }
