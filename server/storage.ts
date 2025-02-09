@@ -1,6 +1,6 @@
 import { users, questions, answers, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -63,7 +63,7 @@ export class DatabaseStorage implements IStorage {
   async submitAnswer(answer: InsertAnswer): Promise<Answer> {
     const [newAnswer] = await db.insert(answers).values(answer).returning();
 
-    // Update user's weekly score if answer is correct
+    // Update user's weekly score and quizzes if answer is correct
     if (answer.correct) {
       const [user] = await db
         .select()
@@ -74,6 +74,24 @@ export class DatabaseStorage implements IStorage {
         .update(users)
         .set({
           weeklyScore: (user?.weeklyScore || 0) + 10,
+        })
+        .where(eq(users.id, answer.userId));
+    }
+
+    // Check if this is the last answer of the quiz (3 questions)
+    const userAnswers = await this.getUserAnswers(answer.userId);
+    const today = new Date();
+    const todaysAnswers = userAnswers.filter(a => {
+      const answerDate = new Date(a.answeredAt);
+      return answerDate.toDateString() === today.toDateString();
+    });
+
+    if (todaysAnswers.length % 3 === 0) {
+      // Increment weekly quizzes count
+      await db
+        .update(users)
+        .set({
+          weeklyQuizzes: sql`${users.weeklyQuizzes} + 1`,
         })
         .where(eq(users.id, answer.userId));
     }
@@ -89,7 +107,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(users)
-      .orderBy(users.weeklyScore);
+      .orderBy(desc(users.weeklyScore));
   }
 
   private shuffleArray<T>(array: T[]): T[] {

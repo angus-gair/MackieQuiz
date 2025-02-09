@@ -5,15 +5,16 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle } from "lucide-react";
-import { Link } from "wouter";
+import { Trophy, CheckCircle2, XCircle, LogOut } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -56,6 +57,10 @@ export default function HomePage() {
   const answeredQuestions = new Set(answers?.map(a => a.questionId));
   const progress = questions ? (answeredQuestions.size / questions.length) * 100 : 0;
 
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-4xl mx-auto">
@@ -64,12 +69,18 @@ export default function HomePage() {
             <h1 className="text-3xl font-bold">Welcome, {user?.username}!</h1>
             <p className="text-muted-foreground">Team: {user?.team}</p>
           </div>
-          <Link href="/leaderboard">
-            <Button variant="outline">
-              <Trophy className="mr-2 h-4 w-4" />
-              Leaderboard
+          <div className="flex gap-4">
+            <Link href="/leaderboard">
+              <Button variant="outline">
+                <Trophy className="mr-2 h-4 w-4" />
+                Leaderboard
+              </Button>
+            </Link>
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
             </Button>
-          </Link>
+          </div>
         </div>
 
         <Card className="mb-6">
@@ -154,6 +165,15 @@ export default function HomePage() {
               disabled={Object.keys(selectedAnswers).length !== questions.length}
             >
               Submit Answers
+            </Button>
+          )}
+
+          {submitted && (
+            <Button 
+              className="w-full"
+              onClick={() => setLocation("/leaderboard")}
+            >
+              View Leaderboard
             </Button>
           )}
         </div>

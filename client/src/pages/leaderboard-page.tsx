@@ -51,6 +51,9 @@ export default function LeaderboardPage() {
                   <p className="text-sm text-muted-foreground">
                     Team: {user.team}
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    Quizzes completed this week: {user.weeklyQuizzes}
+                  </p>
                 </CardContent>
               </Card>
             );

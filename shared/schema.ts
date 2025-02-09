@@ -8,6 +8,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   team: text("team").notNull(),
   weeklyScore: integer("weekly_score").notNull().default(0),
+  weeklyQuizzes: integer("weekly_quizzes").notNull().default(0),
 });
 
 export const questions = pgTable("questions", {
