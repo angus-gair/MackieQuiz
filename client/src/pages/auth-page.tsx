@@ -170,7 +170,7 @@ export default function AuthPage() {
       </div>
 
       {!isMobile && (
-        <div className="hidden lg:flex flex-1 bg-accent items-center justify-center p-16">
+        <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-16">
           <div className="max-w-lg text-white">
             <h1 className="text-4xl font-medium tracking-tight mb-4">Welcome to Business Quiz Challenge</h1>
             <p className="text-lg mb-8 text-white/80">Test your business knowledge, compete with your team, and win weekly prizes!</p>
