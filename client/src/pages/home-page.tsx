@@ -108,9 +108,9 @@ export default function HomePage() {
     ]);
   };
 
+  const today = new Date(); // Moved outside the filter functions
   const answeredQuestions = new Set(answers?.filter(a => {
     const answerDate = new Date(a.answeredAt);
-    const today = new Date();
     return answerDate.toDateString() === today.toDateString();
   }).filter(a => {
     // Only count answers until the most recent quiz completion
@@ -118,7 +118,7 @@ export default function HomePage() {
     const todaysAnswers = answers?.filter(a => {
       const date = new Date(a.answeredAt);
       return date.toDateString() === today.toDateString();
-    });
+    }) ?? [];
 
     // Get the most recent quiz completion by finding sets of 3 answers
     const quizzes = [];
