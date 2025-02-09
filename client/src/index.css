@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --primary: 206 43 55; /* #05668D */
+    --secondary: 193 44 56; /* #028090 */
+    --accent-1: 180 66 59; /* #00A896 */
+    --accent-2: 174 77 61; /* #02C39A */
+    --highlight: 59 95 74; /* #F0F3BD */
+  }
+
   * {
     @apply border-border;
   }
