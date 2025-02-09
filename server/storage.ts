@@ -1,8 +1,11 @@
 import { users, questions, answers, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -14,88 +17,74 @@ export interface IStorage {
   submitAnswer(answer: InsertAnswer): Promise<Answer>;
   getUserAnswers(userId: number): Promise<Answer[]>;
   getLeaderboard(): Promise<User[]>;
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private questions: Map<number, Question>;
-  private answers: Map<number, Answer>;
-  private currentId: number;
-  sessionStore: session.SessionStore;
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.questions = new Map();
-    this.answers = new Map();
-    this.currentId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
     });
-
-    // Seed some initial questions
-    this.seedQuestions();
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id, weeklyScore: 0 };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getQuestions(): Promise<Question[]> {
-    return Array.from(this.questions.values());
+    return await db.select().from(questions);
   }
 
   async getDailyQuestions(): Promise<Question[]> {
+    // Get all questions and randomly select 5
     const allQuestions = await this.getQuestions();
     return this.shuffleArray(allQuestions).slice(0, 5);
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
-    const id = this.currentId++;
-    const newQuestion: Question = { ...question, id };
-    this.questions.set(id, newQuestion);
+    const [newQuestion] = await db.insert(questions).values(question).returning();
     return newQuestion;
   }
 
   async submitAnswer(answer: InsertAnswer): Promise<Answer> {
-    const id = this.currentId++;
-    const newAnswer: Answer = { ...answer, id, answeredAt: new Date() };
-    this.answers.set(id, newAnswer);
+    const [newAnswer] = await db.insert(answers).values(answer).returning();
 
     // Update user's weekly score if answer is correct
-    if (newAnswer.correct) {
-      const user = await this.getUser(answer.userId);
-      if (user) {
-        user.weeklyScore += 10;
-        this.users.set(user.id, user);
-      }
+    if (answer.correct) {
+      await db
+        .update(users)
+        .set({
+          weeklyScore: users.weeklyScore + 10,
+        })
+        .where(eq(users.id, answer.userId));
     }
 
     return newAnswer;
   }
 
   async getUserAnswers(userId: number): Promise<Answer[]> {
-    return Array.from(this.answers.values()).filter(
-      (answer) => answer.userId === userId,
-    );
+    return await db.select().from(answers).where(eq(answers.userId, userId));
   }
 
   async getLeaderboard(): Promise<User[]> {
-    return Array.from(this.users.values())
-      .sort((a, b) => b.weeklyScore - a.weeklyScore);
+    return await db
+      .select()
+      .from(users)
+      .orderBy(users.weeklyScore);
   }
 
   private shuffleArray<T>(array: T[]): T[] {
@@ -107,7 +96,7 @@ export class MemStorage implements IStorage {
     return newArray;
   }
 
-  private seedQuestions() {
+  async seedQuestions() {
     const sampleQuestions: InsertQuestion[] = [
       {
         question: "What is the key principle of supply and demand?",
@@ -133,8 +122,10 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    sampleQuestions.forEach(q => this.createQuestion(q));
+    for (const question of sampleQuestions) {
+      await this.createQuestion(question);
+    }
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
