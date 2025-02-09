@@ -7,14 +7,14 @@
 
 @layer base {
   :root {
+    --background: 255 255 255; /* #FFFFFF */
+    --foreground: 52 58 64; /* #343A40 */
+    --muted: 248 249 250; /* #F8F9FA */
     --primary: 0 123 255; /* #007BFF */
     --secondary: 40 167 69; /* #28A745 */
     --accent: 255 193 7; /* #FFC107 */
-    --muted: 248 249 250; /* #F8F9FA */
-    --background: 255 255 255; /* #ffffff */
-    --foreground: 52 58 64; /* #343A40 */
-    --card: 255 255 255; /* #ffffff */
     --border: 222 226 230; /* #DEE2E6 */
+    --card: 255 255 255; /* #FFFFFF */
   }
 
   * {
@@ -22,7 +22,7 @@
   }
 
   body {
-    @apply font-body antialiased bg-muted text-foreground;
+    @apply font-body bg-background text-foreground antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -32,7 +32,7 @@
 
 @layer components {
   .card {
-    @apply bg-card border border-border/40 shadow-sm hover:shadow-md transition-all duration-200;
+    @apply bg-card border border-border shadow-sm hover:shadow-md transition-all duration-200;
   }
 
   .button-hover {
