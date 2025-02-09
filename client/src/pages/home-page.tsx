@@ -96,17 +96,24 @@ export default function HomePage() {
     setShowConfetti(true);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setSelectedAnswers({});
     setSubmitted(false);
     setShowConfetti(false);
     setQuizKey(prev => prev + 1);
-    queryClient.resetQueries({ queryKey: ["/api/questions/daily"] });
-    queryClient.resetQueries({ queryKey: ["/api/answers"] });
+    // Use invalidateQueries to refresh the data while maintaining cache
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["/api/questions/daily"] }),
+      queryClient.invalidateQueries({ queryKey: ["/api/answers"] })
+    ]);
   };
 
-  const answeredQuestions = new Set(answers?.map(a => a.questionId));
-  const progress = questions ? (answeredQuestions.size / questions.length) * 100 : 0;
+  const answeredQuestions = new Set(answers?.filter(a => {
+    const answerDate = new Date(a.answeredAt);
+    const today = new Date();
+    return answerDate.toDateString() === today.toDateString();
+  }).map(a => a.questionId));
+  const progress = questions ? Math.min((answeredQuestions.size / questions.length) * 100, 100) : 0;
 
   const handleLogout = () => {
     logoutMutation.mutate();
