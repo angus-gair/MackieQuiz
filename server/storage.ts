@@ -5,6 +5,14 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  unlockedAt: string;
+}
+
 const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
@@ -63,20 +71,13 @@ export class DatabaseStorage implements IStorage {
   async submitAnswer(answer: InsertAnswer): Promise<Answer> {
     const [newAnswer] = await db.insert(answers).values(answer).returning();
 
-    // Update user's weekly score and quizzes if answer is correct
-    if (answer.correct) {
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, answer.userId));
+    // Get user's current data
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, answer.userId));
 
-      await db
-        .update(users)
-        .set({
-          weeklyScore: (user?.weeklyScore || 0) + 10,
-        })
-        .where(eq(users.id, answer.userId));
-    }
+    if (!user) return newAnswer;
 
     // Check if this is the last answer of the quiz (3 questions)
     const userAnswers = await this.getUserAnswers(answer.userId);
@@ -87,11 +88,64 @@ export class DatabaseStorage implements IStorage {
     });
 
     if (todaysAnswers.length % 3 === 0) {
-      // Increment weekly quizzes count
+      // Update streak
+      const lastQuizDate = user.lastQuizDate ? new Date(user.lastQuizDate) : null;
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      let newStreak = user.currentStreak || 0;
+      if (!lastQuizDate || lastQuizDate.toDateString() === yesterday.toDateString()) {
+        // Maintain or increase streak
+        newStreak += 1;
+      } else if (lastQuizDate.toDateString() !== today.toDateString()) {
+        // Reset streak if not consecutive days
+        newStreak = 1;
+      }
+
+      // Calculate achievements
+      let achievements = user.achievements as Achievement[] || [];
+
+      // Check for new achievements
+      if (newStreak === 3) {
+        achievements.push({
+          id: 'streak-3',
+          name: 'Three Day Streak',
+          description: 'Completed quizzes for three consecutive days',
+          icon: '🔥',
+          unlockedAt: new Date().toISOString()
+        });
+      } else if (newStreak === 7) {
+        achievements.push({
+          id: 'streak-7',
+          name: 'Week Warrior',
+          description: 'Completed quizzes for seven consecutive days',
+          icon: '🏆',
+          unlockedAt: new Date().toISOString()
+        });
+      }
+
+      if (user.weeklyScore >= 100) {
+        const hasScoreAchievement = achievements.some(a => a.id === 'score-100');
+        if (!hasScoreAchievement) {
+          achievements.push({
+            id: 'score-100',
+            name: 'Century Scorer',
+            description: 'Reached 100 points in weekly score',
+            icon: '💯',
+            unlockedAt: new Date().toISOString()
+          });
+        }
+      }
+
+      // Update user data
       await db
         .update(users)
         .set({
+          weeklyScore: (user?.weeklyScore || 0) + (answer.correct ? 10 : 0),
           weeklyQuizzes: sql`${users.weeklyQuizzes} + 1`,
+          currentStreak: newStreak,
+          lastQuizDate: today,
+          achievements: achievements
         })
         .where(eq(users.id, answer.userId));
     }
