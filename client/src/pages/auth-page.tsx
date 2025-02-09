@@ -8,8 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Redirect } from "wouter";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export default function AuthPage() {
+  const isMobile = useIsMobile();
   const { user, loginMutation, registerMutation } = useAuth();
 
   const loginForm = useForm<InsertUser>({
@@ -35,11 +38,14 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      <div className="flex-1 flex items-center justify-center p-8">
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      <div className={cn(
+        "flex items-center justify-center p-4 sm:p-8",
+        isMobile ? "flex-1" : "flex-1 lg:flex-none lg:w-1/2"
+      )}>
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Business Quiz Challenge</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">Business Quiz Challenge</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
@@ -136,19 +142,22 @@ export default function AuthPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-8">
-        <div className="max-w-lg text-white">
-          <h1 className="text-4xl font-bold mb-4">Welcome to Business Quiz Challenge</h1>
-          <p className="text-lg mb-6">Test your business knowledge, compete with your team, and win weekly prizes!</p>
-          <div className="rounded-lg shadow-xl overflow-hidden">
-            <img
-              src="/wine.jpg"
-              alt="Wine cellar"
-              className="w-full h-full object-cover"
-            />
+
+      {!isMobile && (
+        <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-8">
+          <div className="max-w-lg text-white">
+            <h1 className="text-4xl font-bold mb-4">Welcome to Business Quiz Challenge</h1>
+            <p className="text-lg mb-6">Test your business knowledge, compete with your team, and win weekly prizes!</p>
+            <div className="rounded-lg shadow-xl overflow-hidden">
+              <img
+                src="/wine.jpg"
+                alt="Wine cellar"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

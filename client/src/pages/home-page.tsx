@@ -12,6 +12,7 @@ import type { Question, Answer } from "@shared/schema";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import confetti from 'canvas-confetti';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -19,6 +20,7 @@ export default function HomePage() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const isMobile = useIsMobile();
 
   const { data: questions } = useQuery<Question[]>({
     queryKey: ["/api/questions/daily"],
@@ -101,21 +103,37 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className={cn(
+          "mb-8",
+          isMobile ? "flex flex-col gap-4" : "flex justify-between items-center"
+        )}>
           <div>
-            <h1 className="text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
             <p className="text-muted-foreground">Team: {user?.team}</p>
           </div>
-          <div className="flex gap-4">
-            <Link href="/leaderboard">
-              <Button variant="outline" className="button-hover">
+          <div className={cn(
+            "flex gap-4",
+            isMobile ? "flex-col w-full" : ""
+          )}>
+            <Link href="/leaderboard" className={isMobile ? "w-full" : ""}>
+              <Button variant="outline" className={cn(
+                "button-hover",
+                isMobile ? "w-full justify-center" : ""
+              )}>
                 <Trophy className="mr-2 h-4 w-4" />
                 Leaderboard
               </Button>
             </Link>
-            <Button variant="outline" onClick={handleLogout} className="button-hover">
+            <Button 
+              variant="outline" 
+              onClick={handleLogout} 
+              className={cn(
+                "button-hover",
+                isMobile ? "w-full justify-center" : ""
+              )}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
@@ -137,7 +155,7 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {questions?.map((question) => {
             const isAnswered = answeredQuestions.has(question.id);
             const userAnswer = answers?.find(a => a.questionId === question.id)?.answer;
@@ -201,7 +219,7 @@ export default function HomePage() {
 
           {questions && questions.length > 0 && !submitted && (
             <Button 
-              className="w-full button-hover"
+              className="w-full button-hover mt-4"
               onClick={handleSubmit}
               disabled={Object.keys(selectedAnswers).length !== questions.length}
             >
@@ -211,7 +229,7 @@ export default function HomePage() {
 
           {submitted && (
             <Button 
-              className="w-full button-hover"
+              className="w-full button-hover mt-4"
               onClick={() => setLocation("/leaderboard")}
             >
               View Leaderboard

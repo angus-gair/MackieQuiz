@@ -4,6 +4,8 @@ import { ArrowLeft, Trophy, Medal, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const BADGES = [
   { icon: Trophy, color: "text-yellow-500" },
@@ -12,39 +14,49 @@ const BADGES = [
 ];
 
 export default function LeaderboardPage() {
+  const isMobile = useIsMobile();
   const { data: users } = useQuery<User[]>({
     queryKey: ["/api/leaderboard"],
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-8">
-          <Link href="/">
-            <Button variant="ghost" className="mr-4 button-hover">
+        <div className={cn(
+          "mb-8",
+          isMobile ? "flex flex-col gap-4" : "flex items-center"
+        )}>
+          <Link href="/" className={isMobile ? "w-full" : ""}>
+            <Button 
+              variant="ghost" 
+              className={cn(
+                "button-hover",
+                isMobile ? "w-full justify-center" : "mr-4"
+              )}
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-primary">Weekly Leaderboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary">Weekly Leaderboard</h1>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:gap-6">
           {users?.map((user, index) => {
             const Badge = BADGES[index]?.icon;
             const color = BADGES[index]?.color;
 
             return (
               <Card key={user.id} className={`card ${index === 0 ? 'border-yellow-500/50' : ''}`}>
-                <CardHeader className="py-4">
-                  <CardTitle className="flex items-center justify-between">
+                <CardHeader className="py-3 sm:py-4">
+                  <CardTitle className="flex items-center justify-between text-base sm:text-lg">
                     <div className="flex items-center">
                       {Badge && (
-                        <Badge className={`h-6 w-6 mr-3 ${color}`} />
+                        <Badge className={`h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 ${color}`} />
                       )}
                       <span>{user.username}</span>
                     </div>
-                    <span className="text-xl font-bold">{user.weeklyScore} pts</span>
+                    <span className="text-lg sm:text-xl font-bold">{user.weeklyScore} pts</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
