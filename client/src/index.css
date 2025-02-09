@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --primary: 13 13 13; /* #0D0D0D */
-    --secondary: 31 31 31; /* #1F1F1F */
-    --accent: 6 214 160; /* #06D6A0 */
-    --highlight: 255 51 102; /* #FF3366 */
-    --text: 234 234 234; /* #EAEAEA */
-    --background: 13 13 13; /* #0D0D0D */
-    --foreground: 234 234 234; /* #EAEAEA */
+    --primary: 4 104 191; /* #0468BF */
+    --secondary: 122 133 191; /* #7A85BF */
+    --accent: 242 114 137; /* #F27289 */
+    --highlight: 145 217 217; /* #91D9D9 */
+    --background: 242 242 242; /* #F2F2F2 */
+    --text: 51 51 51; /* #333333 */
+    --foreground: 51 51 51; /* #333333 */
   }
 
   * {
@@ -24,7 +24,7 @@
 
 @layer components {
   .card {
-    @apply transition-shadow hover:shadow-lg bg-secondary;
+    @apply transition-shadow hover:shadow-lg bg-white border-secondary/20;
   }
 
   .button-hover {
@@ -44,15 +44,15 @@
   }
 
   .card-answer {
-    @apply transition-all duration-300 hover:bg-muted/50;
+    @apply transition-all duration-300 hover:bg-background;
   }
 
   .quiz-card {
-    @apply transition-all duration-300 hover:translate-y-[-1px] bg-secondary;
+    @apply transition-all duration-300 hover:translate-y-[-1px] bg-white;
   }
 
   .explanation-panel {
-    @apply transition-all duration-300 ease-in-out bg-primary/50;
+    @apply transition-all duration-300 ease-in-out bg-muted/50;
   }
 }
 
