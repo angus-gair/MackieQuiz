@@ -112,6 +112,14 @@ export default function HomePage() {
     const answerDate = new Date(a.answeredAt);
     const today = new Date();
     return answerDate.toDateString() === today.toDateString();
+  }).filter(a => {
+    // Only count answers until the most recent submission
+    const answerTime = new Date(a.answeredAt).getTime();
+    const latestAnswer = answers?.reduce((latest, current) => {
+      const currentTime = new Date(current.answeredAt).getTime();
+      return currentTime > latest ? currentTime : latest;
+    }, 0);
+    return submitted ? answerTime === latestAnswer : true;
   }).map(a => a.questionId));
   const progress = questions ? Math.min((answeredQuestions.size / questions.length) * 100, 100) : 0;
 
