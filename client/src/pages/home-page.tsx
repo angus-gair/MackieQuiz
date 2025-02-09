@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -95,6 +95,14 @@ export default function HomePage() {
     setShowConfetti(true);
   };
 
+  const handleReset = () => {
+    setSelectedAnswers({});
+    setSubmitted(false);
+    setShowConfetti(false);
+    queryClient.invalidateQueries({ queryKey: ["/api/questions/daily"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/answers"] });
+  };
+
   const answeredQuestions = new Set(answers?.map(a => a.questionId));
   const progress = questions ? (answeredQuestions.size / questions.length) * 100 : 0;
 
@@ -126,6 +134,17 @@ export default function HomePage() {
                 Leaderboard
               </Button>
             </Link>
+            <Button 
+              variant="outline" 
+              onClick={handleReset}
+              className={cn(
+                "button-hover",
+                isMobile ? "w-full justify-center" : ""
+              )}
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Retake Quiz
+            </Button>
             <Button 
               variant="outline" 
               onClick={handleLogout} 
