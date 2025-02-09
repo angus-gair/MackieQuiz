@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight, Plus } from "lucide-react"; // Added Plus icon import
+import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -167,7 +167,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-b from-background/5 to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         <div className={cn(
           "mb-8",
@@ -175,18 +175,21 @@ export default function HomePage() {
         )}>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
-            <p className="text-muted-foreground">Team: {user?.team}</p>
+            <p className="text-secondary/80">Team: {user?.team}</p>
           </div>
           <div className={cn(
             "flex gap-4",
             isMobile ? "flex-col w-full" : ""
           )}>
             <Link href="/leaderboard" className={isMobile ? "w-full" : ""}>
-              <Button variant="outline" className={cn(
-                "button-hover",
-                isMobile ? "w-full justify-center" : ""
-              )}>
-                <Trophy className="mr-2 h-4 w-4" />
+              <Button 
+                variant="outline" 
+                className={cn(
+                  "border-secondary hover:bg-secondary/10",
+                  isMobile ? "w-full justify-center" : ""
+                )}
+              >
+                <Trophy className="mr-2 h-4 w-4 text-accent" />
                 Leaderboard
               </Button>
             </Link>
@@ -194,72 +197,60 @@ export default function HomePage() {
               variant="outline" 
               onClick={handleReset}
               className={cn(
-                "button-hover",
+                "border-secondary hover:bg-secondary/10",
                 isMobile ? "w-full justify-center" : ""
               )}
             >
-              <RotateCcw className="mr-2 h-4 w-4" />
+              <RotateCcw className="mr-2 h-4 w-4 text-secondary" />
               Retake Quiz
             </Button>
-            {user?.isAdmin && ( // Added conditional rendering for admin link
-              <Link href="/admin" className={isMobile ? "w-full" : ""}>
-                <Button 
-                  variant="outline" 
-                  className={cn(
-                    "button-hover",
-                    isMobile ? "w-full justify-center" : ""
-                  )}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Admin
-                </Button>
-              </Link>
-            )}
             <Button 
               variant="outline" 
               onClick={handleLogout} 
               className={cn(
-                "button-hover",
+                "border-secondary hover:bg-secondary/10",
                 isMobile ? "w-full justify-center" : ""
               )}
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2 h-4 w-4 text-accent" />
               Logout
             </Button>
           </div>
         </div>
 
-        <Card className="mb-6 card">
+        <Card className="mb-6 border-secondary/20">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
+              <Trophy className="mr-2 h-5 w-5 text-highlight" />
               Your Progress
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress value={progress} className="mb-2 progress-bar" />
-            <p className="text-sm text-muted-foreground slide-up">
+            <Progress value={progress} className="mb-2 bg-secondary/20" />
+            <p className="text-sm text-secondary">
               {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
             </p>
           </CardContent>
         </Card>
 
         {submitted ? (
-          // Summary view after submission
           <div className="space-y-4 sm:space-y-6">
             {questions?.map((question, index) => (
               <Card 
                 key={question.id}
-                className="quiz-card slide-down"
+                className={cn(
+                  "border-secondary/20 hover:shadow-md transition-all duration-300",
+                  "slide-down"
+                )}
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 <CardHeader>
                   <CardTitle className="text-xl flex items-start gap-2">
                     {answers?.find(a => a.questionId === question.id)?.correct ? 
-                      <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1" /> :
-                      <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
+                      <CheckCircle2 className="h-6 w-6 text-secondary flex-shrink-0 mt-1" /> :
+                      <XCircle className="h-6 w-6 text-accent flex-shrink-0 mt-1" />
                     }
-                    <span>{question.question}</span>
+                    <span className="text-primary">{question.question}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -270,17 +261,16 @@ export default function HomePage() {
                       className="space-y-3"
                     >
                       {question.options.map((option) => (
-                        <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                        <div key={option} className="flex items-center space-x-2 rounded-md p-2 hover:bg-secondary/5">
                           <RadioGroupItem 
                             value={option} 
                             checked={selectedAnswers[question.id] === option}
-                            className="radio-group-item"
+                            className="border-secondary"
                           />
                           <Label 
                             className={cn(
-                              "radio-label",
-                              option === question.correctAnswer && "text-green-600 font-semibold",
-                              option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
+                              option === question.correctAnswer && "text-secondary font-semibold",
+                              option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-accent"
                             )}
                           >
                             {option}
@@ -290,11 +280,11 @@ export default function HomePage() {
                     </RadioGroup>
                   </div>
 
-                  <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel">
-                    <p className="font-semibold mb-2">
+                  <div className="mt-4 p-4 bg-background/5 rounded-lg border border-secondary/20">
+                    <p className="font-semibold mb-2 text-primary">
                       {answers?.find(a => a.questionId === question.id)?.correct ? "Correct!" : "Incorrect"}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-secondary">
                       {question.explanation}
                     </p>
                   </div>
@@ -303,7 +293,7 @@ export default function HomePage() {
             ))}
 
             <Button 
-              className="w-full button-hover mt-4 slide-up"
+              className="w-full bg-accent hover:bg-accent/90 text-white slide-up"
               onClick={() => setLocation("/leaderboard")}
               style={{ animationDelay: '800ms' }}
             >
@@ -311,12 +301,11 @@ export default function HomePage() {
             </Button>
           </div>
         ) : (
-          // Single question view during quiz
           currentQuestion && (
             <div key={quizKey} className="space-y-4 sm:space-y-6">
-              <Card className="quiz-card">
+              <Card className="border-secondary/20 hover:shadow-md transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-xl">
+                  <CardTitle className="text-xl text-primary">
                     {currentQuestion.question}
                   </CardTitle>
                 </CardHeader>
@@ -332,15 +321,15 @@ export default function HomePage() {
                     className="space-y-3"
                   >
                     {currentQuestion.options.map((option) => (
-                      <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                      <div key={option} className="flex items-center space-x-2 rounded-md p-2 hover:bg-secondary/5">
                         <RadioGroupItem 
                           value={option} 
                           id={`${currentQuestion.id}-${option}`}
-                          className="radio-group-item"
+                          className="border-secondary"
                         />
                         <Label 
                           htmlFor={`${currentQuestion.id}-${option}`}
-                          className="radio-label cursor-pointer"
+                          className="cursor-pointer text-primary"
                         >
                           {option}
                         </Label>
@@ -353,7 +342,7 @@ export default function HomePage() {
                       variant="outline"
                       onClick={handlePrevious}
                       disabled={currentQuestionIndex === 0}
-                      className="button-hover"
+                      className="border-secondary hover:bg-secondary/10"
                     >
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Previous
@@ -362,7 +351,7 @@ export default function HomePage() {
                       <Button
                         onClick={handleSubmit}
                         disabled={!canGoNext}
-                        className="button-hover"
+                        className="bg-accent hover:bg-accent/90 text-white"
                       >
                         Submit Quiz
                       </Button>
@@ -370,7 +359,7 @@ export default function HomePage() {
                       <Button
                         onClick={handleNext}
                         disabled={!canGoNext}
-                        className="button-hover"
+                        className="bg-accent hover:bg-accent/90 text-white"
                       >
                         Next
                         <ArrowRight className="ml-2 h-4 w-4" />
