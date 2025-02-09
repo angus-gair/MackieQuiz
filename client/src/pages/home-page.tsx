@@ -113,13 +113,34 @@ export default function HomePage() {
     const today = new Date();
     return answerDate.toDateString() === today.toDateString();
   }).filter(a => {
-    // Only count answers until the most recent submission
+    // Only count answers until the most recent quiz completion
     const answerTime = new Date(a.answeredAt).getTime();
-    const latestAnswer = answers?.reduce((latest, current) => {
-      const currentTime = new Date(current.answeredAt).getTime();
-      return currentTime > latest ? currentTime : latest;
-    }, 0);
-    return submitted ? answerTime === latestAnswer : true;
+    const todaysAnswers = answers?.filter(a => {
+      const date = new Date(a.answeredAt);
+      return date.toDateString() === today.toDateString();
+    });
+
+    // Get the most recent quiz completion by finding sets of 3 answers
+    const quizzes = [];
+    let currentQuiz = [];
+    for (const answer of todaysAnswers.sort((a, b) => 
+      new Date(a.answeredAt).getTime() - new Date(b.answeredAt).getTime()
+    )) {
+      currentQuiz.push(answer);
+      if (currentQuiz.length === 3) {
+        quizzes.push([...currentQuiz]);
+        currentQuiz = [];
+      }
+    }
+
+    // If there's no completed quiz or we haven't submitted yet, show all answers
+    if (quizzes.length === 0 || !submitted) {
+      return true;
+    }
+
+    // Only show answers from the most recent completed quiz
+    const lastQuiz = quizzes[quizzes.length - 1];
+    return lastQuiz.some(qa => qa.id === a.id);
   }).map(a => a.questionId));
   const progress = questions ? Math.min((answeredQuestions.size / questions.length) * 100, 100) : 0;
 
