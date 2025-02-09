@@ -77,7 +77,7 @@ export default function AuthPage() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+                    <Button type="submit" className="w-full button-hover" disabled={loginMutation.isPending}>
                       Login
                     </Button>
                   </form>
@@ -126,7 +126,7 @@ export default function AuthPage() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
+                    <Button type="submit" className="w-full button-hover" disabled={registerMutation.isPending}>
                       Register
                     </Button>
                   </form>
@@ -140,11 +140,13 @@ export default function AuthPage() {
         <div className="max-w-lg text-white">
           <h1 className="text-4xl font-bold mb-4">Welcome to Business Quiz Challenge</h1>
           <p className="text-lg mb-6">Test your business knowledge, compete with your team, and win weekly prizes!</p>
-          <img 
-            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c" 
-            alt="Team collaboration" 
-            className="rounded-lg shadow-xl"
-          />
+          <div className="rounded-lg shadow-xl overflow-hidden">
+            <img 
+              src="/attached_assets/wine.jpg" 
+              alt="Wine cellar" 
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </div>
     </div>
