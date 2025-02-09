@@ -20,6 +20,7 @@ export default function HomePage() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [quizKey, setQuizKey] = useState(0);
   const isMobile = useIsMobile();
 
   const { data: questions } = useQuery<Question[]>({
@@ -99,8 +100,9 @@ export default function HomePage() {
     setSelectedAnswers({});
     setSubmitted(false);
     setShowConfetti(false);
-    queryClient.invalidateQueries({ queryKey: ["/api/questions/daily"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/answers"] });
+    setQuizKey(prev => prev + 1);
+    queryClient.resetQueries({ queryKey: ["/api/questions/daily"] });
+    queryClient.resetQueries({ queryKey: ["/api/answers"] });
   };
 
   const answeredQuestions = new Set(answers?.map(a => a.questionId));
@@ -174,7 +176,7 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        <div className="space-y-4 sm:space-y-6">
+        <div key={quizKey} className="space-y-4 sm:space-y-6">
           {questions?.map((question, index) => {
             const isAnswered = answeredQuestions.has(question.id);
             const userAnswer = answers?.find(a => a.questionId === question.id)?.answer;
