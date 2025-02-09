@@ -65,10 +65,15 @@ export class DatabaseStorage implements IStorage {
 
     // Update user's weekly score if answer is correct
     if (answer.correct) {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, answer.userId));
+
       await db
         .update(users)
         .set({
-          weeklyScore: users.weeklyScore + 10,
+          weeklyScore: (user?.weeklyScore || 0) + 10,
         })
         .where(eq(users.id, answer.userId));
     }
