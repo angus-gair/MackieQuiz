@@ -11,6 +11,9 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getUsers(): Promise<User[]>;  // Added this method
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User>;  // Added this method
+  deleteUser(id: number): Promise<void>;  // Added this method
   getQuestions(): Promise<Question[]>;
   getDailyQuestions(): Promise<Question[]>;
   createQuestion(question: InsertQuestion): Promise<Question>;
@@ -46,12 +49,31 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  // Added method to get all users
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  // Added method to update a user
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  // Added method to delete a user
+  async deleteUser(id: number): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
   async getQuestions(): Promise<Question[]> {
     return await db.select().from(questions);
   }
 
   async getDailyQuestions(): Promise<Question[]> {
-    // Get all questions and randomly select 3
     const allQuestions = await this.getQuestions();
     return this.shuffleArray(allQuestions).slice(0, 3);
   }
@@ -64,7 +86,6 @@ export class DatabaseStorage implements IStorage {
   async submitAnswer(answer: InsertAnswer): Promise<Answer> {
     const [newAnswer] = await db.insert(answers).values(answer).returning();
 
-    // Update user's weekly score and quizzes if answer is correct
     if (answer.correct) {
       const [user] = await db
         .select()
@@ -79,7 +100,6 @@ export class DatabaseStorage implements IStorage {
         .where(eq(users.id, answer.userId));
     }
 
-    // Check if this is the last answer of the quiz (3 questions)
     const userAnswers = await this.getUserAnswers(answer.userId);
     const today = new Date();
     const todaysAnswers = userAnswers.filter(a => {
@@ -88,7 +108,6 @@ export class DatabaseStorage implements IStorage {
     });
 
     if (todaysAnswers.length % 3 === 0) {
-      // Increment weekly quizzes count
       await db
         .update(users)
         .set({
@@ -111,6 +130,10 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(users.weeklyScore));
   }
 
+  async deleteQuestion(id: number): Promise<void> {
+    await db.delete(questions).where(eq(questions.id, id));
+  }
+
   private shuffleArray<T>(array: T[]): T[] {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
@@ -118,54 +141,6 @@ export class DatabaseStorage implements IStorage {
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     return newArray;
-  }
-
-  async seedQuestions() {
-    const sampleQuestions: InsertQuestion[] = [
-      {
-        question: "What are Dan Murphy's typical opening hours?",
-        correctAnswer: "9:00 AM – 9:00 PM (Weekdays & Saturdays), 10:00 AM – 7:00 PM (Sundays)",
-        options: [
-          "6:00 AM – 10:00 PM",
-          "9:00 AM – 9:00 PM (Weekdays & Saturdays), 10:00 AM – 7:00 PM (Sundays)",
-          "10:00 AM – 5:00 PM every day",
-          "24/7"
-        ],
-        category: "Operations",
-        explanation: "Dan Murphy's opening hours vary by location, but generally, stores operate from 9:00 AM to 9:00 PM on weekdays and Saturdays and from 10:00 AM to 7:00 PM on Sundays. However, public holidays or specific store policies may affect these hours."
-      },
-      {
-        question: "How can you find your nearest Dan Murphy's store?",
-        correctAnswer: "Use the 'Find a Store' tool on their website",
-        options: [
-          "Call customer service and ask",
-          "Use the 'Find a Store' tool on their website",
-          "Google 'Dan Murphy's near me'",
-          "Walk around and look for one"
-        ],
-        category: "Customer Service",
-        explanation: "Dan Murphy's has a store locator tool on its website where you can enter your postcode or suburb to find the nearest store. This tool provides store addresses, trading hours, and any special services offered at each location."
-      },
-      {
-        question: "Does Dan Murphy's offer online ordering and delivery?",
-        correctAnswer: "Yes, with same-day delivery and in-store pickup options",
-        options: [
-          "No, only in-store purchases are available",
-          "Yes, but only for wine",
-          "Yes, with same-day delivery and in-store pickup options",
-          "Only for bulk orders"
-        ],
-        category: "Services",
-        explanation: "Dan Murphy's offers online ordering through their website, with options for home delivery and in-store pickup. Customers in metro areas can get same-day delivery, while 30-minute in-store pickup is available at selected locations."
-      }
-    ];
-
-    for (const question of sampleQuestions) {
-      await this.createQuestion(question);
-    }
-  }
-  async deleteQuestion(id: number): Promise<void> {
-    await db.delete(questions).where(eq(questions.id, id));
   }
 }
 

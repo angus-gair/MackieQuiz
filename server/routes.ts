@@ -7,6 +7,26 @@ import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
+  app.get("/api/users", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const users = await storage.getUsers();
+    res.json(users);
+  });
+
+  app.patch("/api/users/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const id = parseInt(req.params.id);
+    const result = await storage.updateUser(id, req.body);
+    res.json(result);
+  });
+
+  app.delete("/api/users/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const id = parseInt(req.params.id);
+    await storage.deleteUser(id);
+    res.sendStatus(200);
+  });
+
   app.get("/api/questions/daily", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const questions = await storage.getDailyQuestions();
