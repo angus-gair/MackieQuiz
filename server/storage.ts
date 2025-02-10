@@ -40,19 +40,12 @@ export interface IStorage {
     knowledgeScore: number;
     movingAverage: number;
   }[]>;
-  assignTeam(userId: number): Promise<User>; // Modified signature
+  assignTeam(userId: number, team: string): Promise<User>;
   getQuestionsByWeek(weekOf: Date): Promise<Question[]>;
   getActiveWeeks(): Promise<Date[]>;
   getArchivedQuestions(): Promise<Question[]>;
   archiveQuestion(id: number): Promise<void>;
 }
-
-const AVAILABLE_TEAMS = [
-  "Alpha",
-  "Beta",
-  "Gamma",
-  "Delta"
-];
 
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
@@ -334,56 +327,17 @@ export class DatabaseStorage implements IStorage {
     return weeks;
   }
 
-  private async getTeamDistribution(): Promise<Record<string, number>> {
-    const users = await this.getUsers();
-    const distribution: Record<string, number> = {};
-
-    // Initialize all teams with 0 members
-    AVAILABLE_TEAMS.forEach(team => {
-      distribution[team] = 0;
-    });
-
-    // Count members in each team
-    users.forEach(user => {
-      if (user.team) {
-        distribution[user.team] = (distribution[user.team] || 0) + 1;
-      }
-    });
-
-    return distribution;
-  }
-
-  async assignTeam(userId: number): Promise<User> { // Modified method
-    return this.assignRandomTeam(userId);
-  }
-
-  async assignRandomTeam(userId: number): Promise<User> {
-    const distribution = await this.getTeamDistribution();
-
-    // Find the team with the minimum number of members
-    let minTeam = AVAILABLE_TEAMS[0];
-    let minCount = distribution[minTeam];
-
-    for (const team of AVAILABLE_TEAMS) {
-      if (distribution[team] < minCount) {
-        minTeam = team;
-        minCount = distribution[team];
-      }
-    }
-
-    // Assign the user to the team with the least members
+  async assignTeam(userId: number, team: string): Promise<User> {
     const [user] = await db
       .update(users)
       .set({
-        team: minTeam,
+        team,
         teamAssigned: true
       })
       .where(eq(users.id, userId))
       .returning();
-
     return user;
   }
-
   async getQuestionsByWeek(weekOf: Date): Promise<Question[]> {
     const startOfWeek = new Date(weekOf);
     startOfWeek.setHours(0, 0, 0, 0);

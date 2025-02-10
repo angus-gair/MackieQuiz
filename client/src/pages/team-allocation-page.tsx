@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import confetti from 'canvas-confetti';
@@ -9,70 +9,37 @@ import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-const TEAMS = ["Alpha", "Beta", "Gamma", "Delta"];
+const TEAMS = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kensington Corkers"];
 
 export default function TeamAllocationPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [spinning, setSpinning] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
 
-  const triggerConfetti = () => {
-    const duration = 2 * 1000;
-    const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-    const randomInRange = (min: number, max: number) => {
-      return Math.random() * (max - min) + min;
-    };
-
-    const interval = setInterval(function() {
-      const timeLeft = animationEnd - Date.now();
-
-      if (timeLeft <= 0) {
-        clearInterval(interval);
-        return;
-      }
-
-      const particleCount = 50 * (timeLeft / duration);
-
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-      });
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-      });
-    }, 250);
-  };
-
-  const startSpinning = async () => {
-    if (spinning || !user) return;
+  const startSpinning = () => {
+    if (spinning) return;
 
     setSpinning(true);
     let currentIndex = 0;
-    const duration = 3000;
+    const duration = 10000;
     const startTime = Date.now();
-    const spinInterval = setInterval(() => {
+    let spinInterval: NodeJS.Timeout;
+
+    const animate = () => {
       const elapsed = Date.now() - startTime;
 
       if (elapsed >= duration) {
         clearInterval(spinInterval);
+        const finalTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
+        setSelectedTeam(finalTeam);
         setSpinning(false);
+        setShowConfetti(true);
 
-        // Make API call to assign team
-        apiRequest("POST", `/api/users/${user.id}/assign-team`)
-          .then(res => res.json())
-          .then(updatedUser => {
-            setSelectedTeam(updatedUser.team);
-            triggerConfetti();
-            queryClient.setQueryData(["/api/user"], updatedUser);
-          })
-          .catch(() => {
+        apiRequest("POST", "/api/assign-team", { team: finalTeam })
+          .catch((error) => {
             toast({
               title: "Error",
               description: "Failed to assign team. Please try again.",
@@ -82,17 +49,81 @@ export default function TeamAllocationPage() {
             setSelectedTeam(null);
           });
       } else {
+        const progress = elapsed / duration;
+        const intervalDelay = Math.min(1500, 400 + (progress * 1100));
         currentIndex = (currentIndex + 1) % TEAMS.length;
         setSelectedTeam(TEAMS[currentIndex]);
       }
-    }, 100);
+    };
+
+    spinInterval = setInterval(animate, 400);
+    return () => clearInterval(spinInterval);
   };
 
-  const handleContinue = () => {
-    setLocation("/");
-  };
+  useEffect(() => {
+    if (!user?.teamAssigned && !spinning && !selectedTeam) {
+      startSpinning();
+    }
+  }, [user, spinning, selectedTeam]);
+
+  useEffect(() => {
+    if (showConfetti) {
+      const duration = 6 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+      const randomInRange = (min: number, max: number) => {
+        return Math.random() * (max - min) + min;
+      };
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          return;
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+      }, 250);
+
+      return () => clearInterval(interval);
+    }
+  }, [showConfetti]);
+
+  useEffect(() => {
+    if (user?.teamAssigned) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
 
   if (!user || user.teamAssigned) return null;
+
+  const handleContinue = async () => {
+    try {
+      const res = await apiRequest("GET", "/api/user");
+      const updatedUser = await res.json();
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      setLocation("/");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load user data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
