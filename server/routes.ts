@@ -124,7 +124,12 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.post("/api/users/:id/assign-team", async (req, res) => {
-    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    // Only allow users to assign themselves to teams
+    if (req.params.id !== req.user.id.toString() && !req.user.isAdmin) {
+      return res.sendStatus(403);
+    }
 
     const id = parseInt(req.params.id);
     const user = await storage.assignRandomTeam(id);
