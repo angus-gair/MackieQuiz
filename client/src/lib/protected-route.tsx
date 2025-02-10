@@ -29,5 +29,25 @@ export function ProtectedRoute({
     );
   }
 
-  return <Component />
+  // If user is not assigned to a team and trying to access any route except team allocation,
+  // redirect to team allocation
+  if (!user.teamAssigned && path !== "/team-allocation") {
+    return (
+      <Route path={path}>
+        <Redirect to="/team-allocation" />
+      </Route>
+    );
+  }
+
+  // If user is already assigned to a team and trying to access team allocation,
+  // redirect to home
+  if (user.teamAssigned && path === "/team-allocation") {
+    return (
+      <Route path={path}>
+        <Redirect to="/" />
+      </Route>
+    );
+  }
+
+  return <Route path={path} component={Component} />;
 }

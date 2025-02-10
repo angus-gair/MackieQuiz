@@ -29,12 +29,12 @@ export default function AuthPage() {
     defaultValues: {
       username: "",
       password: "",
-      team: "",
     },
   });
 
+  // Only redirect if the user is already authenticated
   if (user) {
-    return <Redirect to={user.teamAssigned ? "/" : "/team-allocation"} />;
+    return <Redirect to="/" />;
   }
 
   return (
@@ -114,19 +114,6 @@ export default function AuthPage() {
                           <FormLabel>Password</FormLabel>
                           <FormControl>
                             <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="team"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Team</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
