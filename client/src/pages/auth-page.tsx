@@ -21,7 +21,6 @@ export default function AuthPage() {
     defaultValues: {
       username: "",
       password: "",
-      team: "",
     },
   });
 
@@ -35,7 +34,7 @@ export default function AuthPage() {
   });
 
   if (user) {
-    return <Redirect to="/" />;
+    return <Redirect to={user.teamAssigned ? "/" : "/team-allocation"} />;
   }
 
   return (
