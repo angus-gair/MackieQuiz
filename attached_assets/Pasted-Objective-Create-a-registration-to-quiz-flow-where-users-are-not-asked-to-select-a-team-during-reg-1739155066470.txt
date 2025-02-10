@@ -1,0 +1,54 @@
+Objective:
+Create a registration-to-quiz flow where users are not asked to select a team during registration. Instead, after registering for the first time, users will be randomly assigned to one of four predefined teams using an engaging spinning animation. Once allocated, they will see a confetti effect and a button to proceed to the quiz page. On subsequent logins, users should bypass the team allocation screen and go directly to the quiz.
+
+Requirements:
+
+Registration Form Adjustments:
+
+Remove "Team" Field:
+The registration form should no longer include any option for team selection.
+User Data Persistence:
+Ensure the system saves the registration details without team information.
+Team Allocation Screen:
+
+Random Team Assignment:
+Upon a user's first registration, navigate them to a team allocation page.
+Predefined Teams:
+The four teams to choose from are:
+Pour Decisions
+Sip Happens
+Grape Minds
+Kensington Corkers
+
+Spinning Animation:
+Display a spinning element or wheel that cycles through the four team names.
+The animation should start spinning rapidly and then gradually slow down until it stops, revealing the selected team.
+
+Confetti Celebration:
+When the spinning stops and the team is revealed, trigger a confetti animation to celebrate the allocation.
+
+Navigation to Quiz:
+Include a prominent "Next" or "Continue" button at the bottom of the page. When clicked, this should navigate the user to the quiz page.
+One-Time Team Allocation:
+
+First-Time Only:
+The random team assignment process should only occur immediately after a user's first registration.
+
+Subsequent Logins:
+On any future login, the user should be taken directly to the quiz page without seeing the team allocation screen again.
+
+Technology & Implementation Details:
+Consider using animation libraries (such as GreenSock (GSAP) or CSS animations) to create a smooth spinning and confetti effect.
+
+User State Management:
+Implement a method (e.g., using local storage, cookies, or a backend flag) to track whether a user has already been allocated a team so that the allocation occurs only once.
+
+User Flow Summary:
+Registration:
+User registers on the site without selecting a team.
+Team Allocation (First Login Only):
+User is redirected to the team allocation page, sees a spinning animation with the four teams, and after the spin, their team is revealed along with a confetti effect.
+Proceed to Quiz:
+User clicks "Next/Continue" to navigate to the quiz page.
+Future Logins:
+User is taken directly to the quiz page, skipping the team allocation process.
