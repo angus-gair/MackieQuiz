@@ -45,7 +45,7 @@ export default function AuthPage() {
       )}>
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl">The Round Table: Kensington Edition</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">The Round Table: Kingsford Edition</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
