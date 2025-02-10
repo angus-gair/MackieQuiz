@@ -1,3 +1,4 @@
+import "@/styles/global.css";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -127,8 +128,8 @@ export default function HomePage() {
           isMobile ? "flex flex-col gap-4" : "flex justify-between items-center"
         )}>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
-            <p className="text-muted-foreground">Team: {user?.team}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Welcome, {user?.username}!</h1>
+            <p className="text-gray-600">Team: {user?.team}</p>
           </div>
           <div className={cn(
             "flex gap-4",
@@ -201,7 +202,7 @@ export default function HomePage() {
                 }}
               >
                 <CardHeader>
-                  <CardTitle className="text-xl flex items-start gap-2">
+                  <CardTitle className="text-xl flex items-start gap-2 text-gray-800">
                     {submitted && (
                       isCorrect ? 
                         <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1 slide-down" /> :
@@ -232,9 +233,10 @@ export default function HomePage() {
                         <Label 
                           htmlFor={`${question.id}-${option}`}
                           className={cn(
-                            "radio-label cursor-pointer",
+                            "cursor-pointer",
                             submitted && option === question.correctAnswer && "text-green-600 font-semibold",
-                            submitted && option === userAnswer && option !== question.correctAnswer && "text-red-600"
+                            submitted && option === userAnswer && option !== question.correctAnswer && "text-red-600",
+                            !submitted && "text-gray-800"
                           )}
                         >
                           {option}
@@ -250,10 +252,10 @@ export default function HomePage() {
                     style={{ 
                       animationDelay: `${(index * 150) + 300}ms`,
                     }}>
-                      <p className="font-semibold mb-2">
+                      <p className="font-semibold mb-2 text-gray-800">
                         {isCorrect ? "Correct!" : "Incorrect"}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-600">
                         {question.explanation}
                       </p>
                     </div>

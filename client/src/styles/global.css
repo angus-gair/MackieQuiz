@@ -1,0 +1,80 @@
+
+/* Base styles */
+body {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  color: #333;
+}
+
+p {
+  color: #666;
+}
+
+/* Buttons */
+button {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+button:hover {
+  background-color: #f0f0f0;
+  border-color: #bbb;
+}
+
+/* Links */
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Cards */
+.card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Progress Bar */
+.progress-bar {
+  background-color: #007bff;
+}
+
+/* Radio Group */
+.radio-group-item {
+  border: 1px solid #ccc;
+}
+
+.radio-label {
+  color: #333;
+}
+
+/* Other elements */
+.text-muted-foreground {
+  color: #999;
+}
+
+.bg-muted {
+  background-color: #f0f0f0;
+}
+
+.border-border {
+  border-color: #ddd;
+}
