@@ -91,6 +91,12 @@ export function registerRoutes(app: Express): Server {
     res.json(stats);
   });
 
+  app.get("/api/analytics/team-knowledge", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const stats = await storage.getTeamKnowledge();
+    res.json(stats);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

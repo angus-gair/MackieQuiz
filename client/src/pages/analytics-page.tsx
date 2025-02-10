@@ -23,6 +23,12 @@ type DailyStats = {
   completionRate: number;
 };
 
+type TeamKnowledge = {
+  week: string;
+  knowledgeScore: number;
+  movingAverage: number;
+};
+
 export default function AnalyticsPage() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
@@ -33,6 +39,10 @@ export default function AnalyticsPage() {
 
   const { data: dailyStats } = useQuery<DailyStats[]>({
     queryKey: ["/api/analytics/daily"],
+  });
+
+  const { data: teamKnowledge } = useQuery<TeamKnowledge[]>({
+    queryKey: ["/api/analytics/team-knowledge"],
   });
 
   return (
@@ -142,6 +152,68 @@ export default function AnalyticsPage() {
                       name="Completion Rate (%)" 
                       stroke="#82ca9d"
                       strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Team Knowledge Chart */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5" />
+                Team Knowledge Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={teamKnowledge}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="week" 
+                      tickFormatter={(value) => {
+                        const date = new Date(value);
+                        return date.toLocaleDateString('en-US', { 
+                          month: 'short',
+                          year: '2-digit'
+                        });
+                      }}
+                      interval={12} 
+                    />
+                    <YAxis 
+                      domain={[60, 90]} 
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip 
+                      labelFormatter={(label) => {
+                        const date = new Date(label);
+                        return date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        });
+                      }}
+                      formatter={(value: number) => [`${value}%`, value === 0 ? "No data" : value]}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="knowledgeScore"
+                      name="Weekly Score"
+                      stroke="#8884d8"
+                      strokeWidth={1}
+                      dot={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="movingAverage"
+                      name="4-Week Moving Average"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
