@@ -24,7 +24,7 @@ export default function TeamAllocationPage() {
 
     setSpinning(true);
     let currentIndex = 0;
-    const duration = 10000; // Extended from 6000 to 10000ms
+    const duration = 10000; 
     const startTime = Date.now();
 
     const spinInterval = setInterval(() => {
@@ -37,7 +37,6 @@ export default function TeamAllocationPage() {
         setSpinning(false);
         setShowConfetti(true);
 
-        // Assign team in backend but don't update queryClient yet
         apiRequest("POST", "/api/assign-team", { team: selectedTeam })
           .catch((error) => {
             toast({
@@ -49,21 +48,18 @@ export default function TeamAllocationPage() {
             setSelectedTeam(null);
           });
       } else {
-        // Slow down the spinning speed based on progress
         const progress = elapsed / duration;
-        // Start faster (400ms) and gradually increase delay up to 1500ms
         const intervalDelay = Math.min(1500, 400 + (progress * 1100));
         setTimeout(() => {
           currentIndex = (currentIndex + 1) % TEAMS.length;
           setSelectedTeam(TEAMS[currentIndex]);
         }, intervalDelay);
       }
-    }, 400); // Decreased from 800ms to 400ms for faster initial spinning
+    }, 400); 
 
     return () => clearInterval(spinInterval);
   };
 
-  // Start spinning on mount
   useEffect(() => {
     if (!user?.teamAssigned && !spinning && !selectedTeam) {
       startSpinning();
@@ -72,7 +68,7 @@ export default function TeamAllocationPage() {
 
   useEffect(() => {
     if (showConfetti) {
-      const duration = 6 * 1000; // Doubled duration to match spinning animation
+      const duration = 6 * 1000; 
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
@@ -106,7 +102,6 @@ export default function TeamAllocationPage() {
     }
   }, [showConfetti]);
 
-  // If user already has a team, redirect to quiz
   useEffect(() => {
     if (user?.teamAssigned) {
       setLocation("/");
@@ -117,12 +112,9 @@ export default function TeamAllocationPage() {
 
   const handleContinue = async () => {
     try {
-      // Fetch fresh user data after team assignment
       const res = await apiRequest("GET", "/api/user");
       const updatedUser = await res.json();
-      // Update the user data in the cache
       queryClient.setQueryData(["/api/user"], updatedUser);
-      // Navigate to the quiz page
       setLocation("/");
     } catch (error) {
       toast({
@@ -149,7 +141,7 @@ export default function TeamAllocationPage() {
                   y: [-20, 20, -20]
                 }}
                 transition={{
-                  duration: 0.8, // Reduced from 1.5s to 0.8s
+                  duration: 1.0, 
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
