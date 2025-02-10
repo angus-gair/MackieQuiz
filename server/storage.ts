@@ -339,12 +339,21 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   async getQuestionsByWeek(weekOf: Date): Promise<Question[]> {
+    const startOfWeek = new Date(weekOf);
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setMinutes(0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+    endOfWeek.setHours(23, 59, 59);
+
     return await db
       .select()
       .from(questions)
       .where(
         and(
-          eq(questions.weekOf, weekOf),
+          sql`${questions.weekOf} >= DATE(${startOfWeek})`,
+          sql`${questions.weekOf} < DATE(${endOfWeek})`,
           eq(questions.isArchived, false)
         )
       );

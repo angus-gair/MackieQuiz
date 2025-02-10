@@ -35,7 +35,7 @@ export default function AdminPage() {
 
   // Get current week and next 3 weeks
   const currentWeek = startOfWeek(new Date());
-  const futureWeeks = Array.from({ length: 4 }, (_, i) => 
+  const futureWeeks = Array.from({ length: 4 }, (_, i) =>
     addWeeks(currentWeek, i)
   );
 
@@ -60,7 +60,13 @@ export default function AdminPage() {
 
   const createQuestionMutation = useMutation({
     mutationFn: async (question: InsertQuestion) => {
-      const res = await apiRequest("POST", "/api/questions", question);
+      // Add weekOf to the question before sending
+      const currentWeek = startOfWeek(new Date());
+      const questionWithWeek = {
+        ...question,
+        weekOf: currentWeek.toISOString().split('T')[0], // Format as YYYY-MM-DD
+      };
+      const res = await apiRequest("POST", "/api/questions", questionWithWeek);
       return await res.json();
     },
     onSuccess: () => {
