@@ -37,13 +37,8 @@ export default function TeamAllocationPage() {
         setSpinning(false);
         setShowConfetti(true);
 
-        // Assign team in backend
+        // Assign team in backend but don't update queryClient yet
         apiRequest("POST", "/api/assign-team", { team: selectedTeam })
-          .then(async (res) => {
-            const updatedUser = await res.json();
-            // Update the user data in the cache
-            queryClient.setQueryData(["/api/user"], updatedUser);
-          })
           .catch((error) => {
             toast({
               title: "Error",
@@ -114,10 +109,22 @@ export default function TeamAllocationPage() {
 
   if (!user || user.teamAssigned) return null;
 
-  const handleContinue = () => {
-    // Ensure the user data is refreshed before navigating
-    queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-    setLocation("/");
+  const handleContinue = async () => {
+    try {
+      // Fetch fresh user data after team assignment
+      const res = await apiRequest("GET", "/api/user");
+      const updatedUser = await res.json();
+      // Update the user data in the cache
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      // Navigate to the quiz page
+      setLocation("/");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load user data. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
