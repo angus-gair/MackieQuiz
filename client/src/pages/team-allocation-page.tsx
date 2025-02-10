@@ -27,20 +27,17 @@ export default function TeamAllocationPage() {
     const duration = 10000; 
     const startTime = Date.now();
 
-    // Show each team during the animation
     const spinInterval = setInterval(() => {
       const elapsed = Date.now() - startTime;
-
       if (elapsed >= duration) {
         clearInterval(spinInterval);
-        // Only select the random team at the very end
         const randomIndex = Math.floor(Math.random() * TEAMS.length);
-        const finalTeam = TEAMS[randomIndex];
-        setSelectedTeam(finalTeam);
+        const selectedTeam = TEAMS[randomIndex];
+        setSelectedTeam(selectedTeam);
         setSpinning(false);
         setShowConfetti(true);
 
-        apiRequest("POST", "/api/assign-team", { team: finalTeam })
+        apiRequest("POST", "/api/assign-team", { team: selectedTeam })
           .catch((error) => {
             toast({
               title: "Error",
@@ -51,15 +48,14 @@ export default function TeamAllocationPage() {
             setSelectedTeam(null);
           });
       } else {
-        // During animation, cycle through teams evenly
         const progress = elapsed / duration;
-        const cycleSpeed = Math.min(800, 200 + (progress * 600)); // Slower cycle speed
+        const intervalDelay = Math.min(1500, 400 + (progress * 1100));
         setTimeout(() => {
           currentIndex = (currentIndex + 1) % TEAMS.length;
           setSelectedTeam(TEAMS[currentIndex]);
-        }, cycleSpeed);
+        }, intervalDelay);
       }
-    }, 200); // Faster initial cycling
+    }, 400); 
 
     return () => clearInterval(spinInterval);
   };
