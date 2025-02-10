@@ -7,6 +7,7 @@ import { useLocation } from "wouter";
 import confetti from 'canvas-confetti';
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const TEAMS = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kensington Corkers"];
 
@@ -18,47 +19,54 @@ export default function TeamAllocationPage() {
   const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Start spinning animation on mount
-    if (!spinning && !selectedTeam) {
-      setSpinning(true);
-      let currentIndex = 0;
-      const duration = 3000; // 3 seconds
-      const startTime = Date.now();
+  const startSpinning = () => {
+    if (spinning) return;
 
-      const spinInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const progress = elapsed / duration;
+    setSpinning(true);
+    let currentIndex = 0;
+    const duration = 3000; // 3 seconds
+    const startTime = Date.now();
 
-        if (progress >= 1) {
-          clearInterval(spinInterval);
-          // Random team selection
-          const randomIndex = Math.floor(Math.random() * TEAMS.length);
-          setSelectedTeam(TEAMS[randomIndex]);
-          setSpinning(false);
-          setShowConfetti(true);
+    const spinInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      if (elapsed >= duration) {
+        clearInterval(spinInterval);
+        const randomIndex = Math.floor(Math.random() * TEAMS.length);
+        const selectedTeam = TEAMS[randomIndex];
+        setSelectedTeam(selectedTeam);
+        setSpinning(false);
+        setShowConfetti(true);
 
-          // Assign team in backend
-          apiRequest("POST", "/api/assign-team", {
-            team: TEAMS[randomIndex]
-          }).catch((error) => {
+        // Assign team in backend
+        apiRequest("POST", "/api/assign-team", { team: selectedTeam })
+          .then(() => {
+            // Force reload to update user state
+            window.location.href = "/";
+          })
+          .catch((error) => {
             toast({
               title: "Error",
               description: "Failed to assign team. Please try again.",
               variant: "destructive",
             });
-            setLocation("/auth");
+            setSpinning(false);
+            setSelectedTeam(null);
           });
-        } else {
-          // Update visible team during spin with easing
-          currentIndex = (currentIndex + 1) % TEAMS.length;
-          setSelectedTeam(TEAMS[currentIndex]);
-        }
-      }, 100); // Update every 100ms
+      } else {
+        currentIndex = (currentIndex + 1) % TEAMS.length;
+        setSelectedTeam(TEAMS[currentIndex]);
+      }
+    }, 100);
 
-      return () => clearInterval(spinInterval);
+    return () => clearInterval(spinInterval);
+  };
+
+  // Start spinning on mount
+  useEffect(() => {
+    if (!user?.teamAssigned && !spinning && !selectedTeam) {
+      startSpinning();
     }
-  }, [spinning, setLocation, toast]);
+  }, [user, spinning, selectedTeam]);
 
   useEffect(() => {
     if (showConfetti) {
@@ -113,40 +121,50 @@ export default function TeamAllocationPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center">
-            <motion.div
-              animate={{
-                scale: spinning ? [1, 1.1, 1] : 1,
-                rotate: spinning ? [0, 360] : 0
-              }}
-              transition={{
-                duration: 0.5,
-                repeat: spinning ? Infinity : 0,
-                ease: "easeInOut"
-              }}
-              className="inline-block"
-            >
-              <div className="text-4xl font-bold text-primary mb-4">
-                {selectedTeam || "Spinning..."}
-              </div>
-            </motion.div>
-          </div>
-
-          {!spinning && selectedTeam && (
-            <div className="space-y-4 text-center">
-              <p className="text-lg">
-                Congratulations! You've been assigned to:
-              </p>
-              <p className="text-2xl font-bold text-primary">
-                {selectedTeam}
-              </p>
-              <Button 
-                className="w-full mt-4"
-                onClick={() => setLocation("/")}
+            {spinning ? (
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 360]
+                }}
+                transition={{
+                  duration: 0.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="inline-block"
               >
-                Continue to Quiz
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="text-2xl font-bold text-primary">
+                    {selectedTeam || "Selecting team..."}
+                  </span>
+                </div>
+              </motion.div>
+            ) : selectedTeam ? (
+              <div className="space-y-4">
+                <p className="text-lg">
+                  Congratulations! You've been assigned to:
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {selectedTeam}
+                </p>
+                <Button 
+                  className="w-full mt-4"
+                  onClick={() => window.location.href = "/"}
+                >
+                  Continue to Quiz
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                className="w-full"
+                onClick={startSpinning}
+              >
+                Assign Team
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
