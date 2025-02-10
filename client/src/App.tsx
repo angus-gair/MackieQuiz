@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import AdminPage from "@/pages/admin-page";
+import AdminArchivedPage from "@/pages/admin-archived-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
 import UsersTeamsPage from "@/pages/users-teams-page";
 import UsersViewPage from "@/pages/users-view-page";
@@ -23,6 +24,7 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/users" component={UsersViewPage} />
       <AdminRoute path="/admin" component={AdminPage} />
+      <AdminRoute path="/admin/archived" component={AdminArchivedPage} />
       <AdminRoute path="/admin/users" component={UsersTeamsPage} />
       <AdminRoute path="/admin/analytics" component={AnalyticsPage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />

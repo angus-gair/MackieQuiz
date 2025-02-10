@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -20,6 +20,8 @@ export const questions = pgTable("questions", {
   options: text("options").array().notNull(),
   category: text("category").notNull(),
   explanation: text("explanation").notNull(),
+  weekOf: date("week_of").notNull(),  // New field to track which week the question belongs to
+  isArchived: boolean("is_archived").notNull().default(false), // New field to mark archived questions
 });
 
 export const answers = pgTable("answers", {

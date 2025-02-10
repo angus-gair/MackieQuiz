@@ -41,6 +41,10 @@ export interface IStorage {
     movingAverage: number;
   }[]>;
   assignTeam(userId: number, team: string): Promise<User>;
+  getQuestionsByWeek(weekOf: Date): Promise<Question[]>;
+  getActiveWeeks(): Promise<Date[]>;
+  getArchivedQuestions(): Promise<Question[]>;
+  archiveQuestion(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -333,6 +337,43 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+  async getQuestionsByWeek(weekOf: Date): Promise<Question[]> {
+    return await db
+      .select()
+      .from(questions)
+      .where(
+        and(
+          eq(questions.weekOf, weekOf),
+          eq(questions.isArchived, false)
+        )
+      );
+  }
+
+  async getActiveWeeks(): Promise<Date[]> {
+    const result = await db
+      .select({ weekOf: questions.weekOf })
+      .from(questions)
+      .where(eq(questions.isArchived, false))
+      .groupBy(questions.weekOf)
+      .orderBy(questions.weekOf);
+
+    return result.map(r => r.weekOf);
+  }
+
+  async getArchivedQuestions(): Promise<Question[]> {
+    return await db
+      .select()
+      .from(questions)
+      .where(eq(questions.isArchived, true))
+      .orderBy(desc(questions.weekOf));
+  }
+
+  async archiveQuestion(id: number): Promise<void> {
+    await db
+      .update(questions)
+      .set({ isArchived: true })
+      .where(eq(questions.id, id));
   }
 }
 

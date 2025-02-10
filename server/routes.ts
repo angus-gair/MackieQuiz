@@ -55,6 +55,32 @@ export function registerRoutes(app: Express): Server {
     res.sendStatus(200);
   });
 
+  app.get("/api/questions/weekly/:date", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const weekOf = new Date(req.params.date);
+    const questions = await storage.getQuestionsByWeek(weekOf);
+    res.json(questions);
+  });
+
+  app.get("/api/questions/weeks", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const weeks = await storage.getActiveWeeks();
+    res.json(weeks);
+  });
+
+  app.get("/api/questions/archived", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const questions = await storage.getArchivedQuestions();
+    res.json(questions);
+  });
+
+  app.post("/api/questions/:id/archive", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const id = parseInt(req.params.id);
+    await storage.archiveQuestion(id);
+    res.sendStatus(200);
+  });
+
   app.post("/api/answers", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
