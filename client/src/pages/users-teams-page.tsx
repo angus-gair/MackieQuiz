@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, UserPlus, Users, Building } from "lucide-react";
+import { UserPlus, Users, Building } from "lucide-react";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
 import { cn } from "@/lib/utils";
@@ -122,7 +122,6 @@ export default function UsersTeamsPage() {
     },
   });
 
-  // Group users by team
   const teamGroups = users?.reduce((groups: Record<string, User[]>, user) => {
     if (!groups[user.team]) {
       groups[user.team] = [];
@@ -146,15 +145,7 @@ export default function UsersTeamsPage() {
           "mb-8",
           isMobile ? "flex flex-col gap-4" : "flex items-center justify-between"
         )}>
-          <div className="flex items-center gap-4">
-            <Link href="/admin">
-              <Button variant="ghost" className="button-hover">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Admin
-              </Button>
-            </Link>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Users & Teams Management</h1>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary">Users & Teams Management</h1>
         </div>
 
         <div className="grid gap-6">
