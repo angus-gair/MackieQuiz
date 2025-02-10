@@ -23,8 +23,7 @@ export default function TeamAllocationPage() {
     if (spinning) return;
 
     setSpinning(true);
-    let currentIndex = 0;
-    const duration = 10000;
+    const duration = 8000 + Math.random() * 4000; // Random duration between 8-12 seconds
     const startTime = Date.now();
     let spinInterval: NodeJS.Timeout;
 
@@ -51,8 +50,8 @@ export default function TeamAllocationPage() {
       } else {
         const progress = elapsed / duration;
         const intervalDelay = Math.min(1500, 400 + (progress * 1100));
-        currentIndex = (currentIndex + 1) % TEAMS.length;
-        setSelectedTeam(TEAMS[currentIndex]);
+        const randomTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
+        setSelectedTeam(randomTeam);
       }
     };
 
