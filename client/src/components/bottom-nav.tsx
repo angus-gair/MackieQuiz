@@ -24,21 +24,19 @@ export function BottomNav() {
             <span className="sr-only">Quiz</span>
           </Button>
         </Link>
-        {user?.isAdmin ? (
-          <Link href="/admin/users">
-            <Button 
-              variant="ghost" 
-              size="lg" 
-              className={cn(
-                "h-16 px-6",
-                location === "/admin/users" && "text-primary"
-              )}
-            >
-              <Users className="h-5 w-5" />
-              <span className="sr-only">Users</span>
-            </Button>
-          </Link>
-        ) : null}
+        <Link href={user?.isAdmin ? "/admin/users" : "/users"}>
+          <Button 
+            variant="ghost" 
+            size="lg" 
+            className={cn(
+              "h-16 px-6",
+              (location === "/admin/users" || location === "/users") && "text-primary"
+            )}
+          >
+            <Users className="h-5 w-5" />
+            <span className="sr-only">Users</span>
+          </Button>
+        </Link>
         <Link href={user?.isAdmin ? "/admin/analytics" : "/leaderboard"}>
           <Button 
             variant="ghost" 
