@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-const TEAMS = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kensington Corkers"];
+const TEAMS = ["Alpha", "Beta", "Gamma", "Delta"];
 
 export default function TeamAllocationPage() {
   const { user } = useAuth();
@@ -19,56 +19,64 @@ export default function TeamAllocationPage() {
   const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
 
-  const startSpinning = () => {
+  const startSpinning = async () => {
     if (spinning) return;
 
     setSpinning(true);
     let currentIndex = 0;
-    const duration = 10000;
+    const duration = 3000; // Shortened for better UX
     const startTime = Date.now();
     let spinInterval: NodeJS.Timeout;
 
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
+    try {
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
 
-      if (elapsed >= duration) {
-        clearInterval(spinInterval);
-        const finalTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
-        setSelectedTeam(finalTeam);
-        setSpinning(false);
-        setShowConfetti(true);
+        if (elapsed >= duration) {
+          clearInterval(spinInterval);
+          setSpinning(false);
 
-        apiRequest("POST", "/api/assign-team", { team: finalTeam })
-          .catch((error) => {
-            toast({
-              title: "Error",
-              description: "Failed to assign team. Please try again.",
-              variant: "destructive",
-            });
-            setSpinning(false);
-            setSelectedTeam(null);
-          });
-      } else {
-        const progress = elapsed / duration;
-        const intervalDelay = Math.min(1500, 400 + (progress * 1100));
-        currentIndex = (currentIndex + 1) % TEAMS.length;
-        setSelectedTeam(TEAMS[currentIndex]);
-      }
-    };
+          // Automatically assign team through API
+          if (user) {
+            apiRequest("POST", `/api/users/${user.id}/assign-team`)
+              .then(res => res.json())
+              .then(updatedUser => {
+                setSelectedTeam(updatedUser.team);
+                setShowConfetti(true);
+                // Update the cached user data
+                queryClient.setQueryData(["/api/user"], updatedUser);
+              })
+              .catch(() => {
+                toast({
+                  title: "Error",
+                  description: "Failed to assign team. Please try again.",
+                  variant: "destructive",
+                });
+                setSpinning(false);
+                setSelectedTeam(null);
+              });
+          }
+        } else {
+          const progress = elapsed / duration;
+          currentIndex = (currentIndex + 1) % TEAMS.length;
+          setSelectedTeam(TEAMS[currentIndex]);
+        }
+      };
 
-    spinInterval = setInterval(animate, 400);
-    return () => clearInterval(spinInterval);
+      spinInterval = setInterval(animate, 100);
+    } catch (error) {
+      setSpinning(false);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
-    if (!user?.teamAssigned && !spinning && !selectedTeam) {
-      startSpinning();
-    }
-  }, [user, spinning, selectedTeam]);
-
-  useEffect(() => {
     if (showConfetti) {
-      const duration = 6 * 1000;
+      const duration = 2 * 1000;
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
@@ -110,19 +118,8 @@ export default function TeamAllocationPage() {
 
   if (!user || user.teamAssigned) return null;
 
-  const handleContinue = async () => {
-    try {
-      const res = await apiRequest("GET", "/api/user");
-      const updatedUser = await res.json();
-      queryClient.setQueryData(["/api/user"], updatedUser);
-      setLocation("/");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load user data. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const handleContinue = () => {
+    setLocation("/");
   };
 
   return (
