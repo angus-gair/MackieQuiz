@@ -171,7 +171,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-between px-4 h-14">
+        <div className="flex items-center justify-between px-3 h-12">
           <h1 className="text-lg font-semibold">Daily Quiz</h1>
           <Button 
             variant="outline" 
@@ -179,25 +179,25 @@ export default function HomePage() {
             size="icon"
             className="rounded-full"
           >
-            <RotateCcw className="h-5 w-5" />
+            <RotateCcw className="h-4 w-4" />
             <span className="sr-only">Retake Quiz</span>
           </Button>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pt-14 pb-16">
-        <div className="p-4">
+      <main className="flex-1 overflow-y-auto pt-12 pb-14">
+        <div className="p-3">
           <div className="max-w-4xl mx-auto">
             <div className={cn(
-              "mb-8",
-              isMobile ? "flex flex-col gap-4" : "flex justify-between items-center"
+              "mb-4",
+              isMobile ? "flex flex-col gap-2" : "flex justify-between items-center"
             )}>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-primary">Welcome, {user?.username}!</h1>
                 <p className="text-muted-foreground">Team: {user?.team}</p>
               </div>
               <div className={cn(
-                "flex gap-4",
+                "flex gap-2",
                 isMobile ? "flex-col w-full" : ""
               )}>
                 <Link href="/leaderboard" className={isMobile ? "w-full" : ""}>
@@ -237,8 +237,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            <Card className="mb-6 card">
-              <CardHeader>
+            <Card className="mb-4 card">
+              <CardHeader className="py-2">
                 <CardTitle className="flex items-center">
                   <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
                   Your Progress

@@ -99,7 +99,7 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-between px-4 h-14">
+        <div className="flex items-center justify-between px-3 h-12">
           <h1 className="text-lg font-semibold">Quiz Admin</h1>
           <div className="flex items-center gap-2">
             <Link href="/admin/archived">
@@ -223,14 +223,14 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pt-14 pb-16">
-        <div className="p-4 space-y-6">
+      <main className="flex-1 overflow-y-auto pt-12 pb-14">
+        <div className="p-3 space-y-4">
           {futureWeeks.map((week) => {
             const questions = weeklyQuestions.data?.[week.toISOString()] || [];
             const isCurrentWeek = week.getTime() === currentWeek.getTime();
 
             return (
-              <div key={week.toISOString()} className="space-y-3">
+              <div key={week.toISOString()} className="space-y-2">
                 <h2 className="text-lg font-semibold flex items-center gap-2">
                   {isCurrentWeek && "📍"} Week of {format(week, 'PPP')}
                   {isCurrentWeek && (
@@ -240,7 +240,7 @@ export default function AdminPage() {
                   )}
                 </h2>
                 {questions.length === 0 ? (
-                  <Card className="p-4">
+                  <Card className="p-3">
                     <p className="text-sm text-muted-foreground">
                       No questions added for this week yet.
                     </p>
@@ -248,8 +248,8 @@ export default function AdminPage() {
                 ) : (
                   questions.map((question) => (
                     <Card key={question.id} className="relative">
-                      <div className="p-4 space-y-3">
-                        <div className="flex items-start justify-between gap-4">
+                      <div className="p-3 space-y-2">
+                        <div className="flex items-start justify-between gap-3">
                           <h3 className="text-base font-medium leading-tight flex-1">
                             {question.question}
                           </h3>
@@ -269,12 +269,12 @@ export default function AdminPage() {
                         <p className="text-sm text-muted-foreground">
                           Category: {question.category}
                         </p>
-                        <div className="space-y-1.5">
+                        <div className="space-y-1">
                           {question.options.map((option) => (
                             <div
                               key={option}
                               className={cn(
-                                "text-sm px-3 py-1.5 rounded-md",
+                                "text-sm px-2 py-1 rounded-md",
                                 option === question.correctAnswer
                                   ? "bg-primary/10 text-primary font-medium"
                                   : "bg-muted"
