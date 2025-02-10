@@ -163,6 +163,10 @@ export class DatabaseStorage implements IStorage {
     return monday;
   }
 
+  private formatDayName(date: Date): string {
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  }
+
   async getTeamStats() {
     const allUsers = await this.getUsers();
     const startOfWeek = this.getStartOfWeek();
@@ -217,40 +221,56 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyStats() {
-    const allAnswers = await db
+    // Get start of current week (Monday)
+    const startOfWeek = this.getStartOfWeek();
+
+    // Get all answers from this week
+    const weekAnswers = await db
       .select()
       .from(answers)
-      .orderBy(answers.answeredAt);
+      .where(and(
+        gte(answers.answeredAt, startOfWeek),
+        sql`date(${answers.answeredAt}) <= current_date`
+      ));
 
-    const dailyStats = new Map<string, {
-      completedQuizzes: number;
-      totalScore: number;
-      totalAnswers: number;
-    }>();
+    // Initialize stats for all days of the week
+    const weekDays: { date: Date; stats: { completedQuizzes: number; totalScore: number; totalAnswers: number } }[] = [];
 
-    for (const answer of allAnswers) {
-      const date = new Date(answer.answeredAt).toISOString().split('T')[0];
-      const stats = dailyStats.get(date) || { completedQuizzes: 0, totalScore: 0, totalAnswers: 0 };
-
-      if (answer.correct) {
-        stats.totalScore += 10;
-      }
-      stats.totalAnswers += 1;
-
-      if (stats.totalAnswers % 3 === 0) {
-        stats.completedQuizzes += 1;
-      }
-
-      dailyStats.set(date, stats);
+    // Generate all days of the week
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      weekDays.push({
+        date,
+        stats: { completedQuizzes: 0, totalScore: 0, totalAnswers: 0 }
+      });
     }
 
-    return Array.from(dailyStats.entries())
-      .map(([date, stats]) => ({
-        date,
-        completedQuizzes: stats.completedQuizzes,
-        averageScore: stats.totalScore / (stats.totalAnswers / 3),
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+    // Process answers
+    for (const answer of weekAnswers) {
+      const answerDate = new Date(answer.answeredAt);
+      const dayEntry = weekDays.find(
+        d => d.date.toDateString() === answerDate.toDateString()
+      );
+
+      if (dayEntry) {
+        if (answer.correct) {
+          dayEntry.stats.totalScore += 10;
+        }
+        dayEntry.stats.totalAnswers += 1;
+
+        if (dayEntry.stats.totalAnswers % 3 === 0) {
+          dayEntry.stats.completedQuizzes += 1;
+        }
+      }
+    }
+
+    // Convert to required format
+    return weekDays.map(({ date, stats }) => ({
+      date: this.formatDayName(date),
+      completedQuizzes: stats.completedQuizzes,
+      averageScore: stats.totalAnswers ? stats.totalScore / (stats.totalAnswers / 3) : 0,
+    }));
   }
 }
 

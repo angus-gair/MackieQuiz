@@ -105,12 +105,41 @@ export default function AnalyticsPage() {
                   <LineChart data={dailyStats}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
-                    <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                    <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                    <Tooltip />
+                    <YAxis 
+                      yAxisId="left" 
+                      orientation="left" 
+                      stroke="#8884d8"
+                      allowDecimals={false}
+                    />
+                    <YAxis 
+                      yAxisId="right" 
+                      orientation="right" 
+                      stroke="#82ca9d"
+                      domain={[0, 'auto']}
+                    />
+                    <Tooltip 
+                      formatter={(value: number) => [
+                        Number.isInteger(value) ? value : value.toFixed(1),
+                        value === 0 ? "No data yet" : value
+                      ]}
+                    />
                     <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="completedQuizzes" name="Completed Quizzes" stroke="#8884d8" />
-                    <Line yAxisId="right" type="monotone" dataKey="averageScore" name="Average Score" stroke="#82ca9d" />
+                    <Line 
+                      yAxisId="left" 
+                      type="monotone" 
+                      dataKey="completedQuizzes" 
+                      name="Completed Quizzes" 
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                    />
+                    <Line 
+                      yAxisId="right" 
+                      type="monotone" 
+                      dataKey="averageScore" 
+                      name="Average Score" 
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
