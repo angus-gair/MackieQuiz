@@ -192,7 +192,7 @@ export default function HomePage() {
                 variant="outline" 
                 className={cn(
                   "border-secondary hover:bg-secondary/10",
-                isMobile ? "w-full justify-center" : ""
+                  isMobile ? "w-full justify-center" : ""
                 )}
               >
                 <Trophy className="mr-2 h-4 w-4 text-accent" />
@@ -243,7 +243,7 @@ export default function HomePage() {
           <div className="space-y-4 sm:space-y-6">
             {questions?.map((question, index) => (
               <Card 
-                key={question.id} 
+                key={question.id}
                 className={cn(
                   "border-secondary/20 hover:shadow-md transition-all duration-300",
                   "slide-down"
