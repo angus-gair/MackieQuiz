@@ -145,10 +145,11 @@ export default function TeamAllocationPage() {
               <motion.div
                 animate={{
                   scale: [1, 1.1, 1],
-                  y: [-20, 0]
+                  rotateX: [0, -180, -360],
+                  y: [-20, 20, -20]
                 }}
                 transition={{
-                  duration: 1.0,
+                  duration: 1.5,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
