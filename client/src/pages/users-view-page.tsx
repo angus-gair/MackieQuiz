@@ -1,9 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Building, Users } from "lucide-react";
-import { Link } from "wouter";
+import { Users, Building } from "lucide-react";
 import type { User } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,7 +15,6 @@ export default function UsersViewPage() {
     queryKey: ["/api/users"],
   });
 
-  // Group users by team, including all teams
   const teamGroups = users?.reduce((groups: Record<string, User[]>, user) => {
     if (!groups[user.team]) {
       groups[user.team] = [];
@@ -33,15 +30,7 @@ export default function UsersViewPage() {
           "mb-8",
           isMobile ? "flex flex-col gap-4" : "flex items-center justify-between"
         )}>
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" className="button-hover">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Quiz
-              </Button>
-            </Link>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Teams Overview</h1>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary">Users & Teams</h1>
         </div>
 
         <div className="grid gap-6">
@@ -50,13 +39,13 @@ export default function UsersViewPage() {
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center">
                   <Users className="h-5 w-5 mr-2" />
-                  Team Members
+                  Users Overview
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {teamGroups && Object.entries(teamGroups).map(([team, teamUsers]) => (
+                {teamGroups && Object.entries(teamGroups).map(([team, users]) => (
                   <Card key={team} className={cn(
                     "hover:shadow-md transition-shadow",
                     team === user?.team && "border-primary/50 bg-primary/5"
@@ -72,9 +61,9 @@ export default function UsersViewPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-4">
-                        {teamUsers.map((teamUser) => (
-                          <div 
-                            key={teamUser.id} 
+                        {users.map((teamUser) => (
+                          <div
+                            key={teamUser.id}
                             className={cn(
                               "flex items-center justify-between p-3 bg-muted/50 rounded-lg",
                               teamUser.id === user?.id && "border border-primary/50"
