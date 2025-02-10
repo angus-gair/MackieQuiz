@@ -11,9 +11,9 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  getUsers(): Promise<User[]>;  // Added this method
-  updateUser(id: number, user: Partial<InsertUser>): Promise<User>;  // Added this method
-  deleteUser(id: number): Promise<void>;  // Added this method
+  getUsers(): Promise<User[]>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
+  deleteUser(id: number): Promise<void>;
   getQuestions(): Promise<Question[]>;
   getDailyQuestions(): Promise<Question[]>;
   createQuestion(question: InsertQuestion): Promise<Question>;
@@ -22,6 +22,18 @@ export interface IStorage {
   getLeaderboard(): Promise<User[]>;
   sessionStore: session.Store;
   deleteQuestion(id: number): Promise<void>;
+  getTeamStats(): Promise<{
+    teamName: string;
+    totalScore: number;
+    averageScore: number;
+    completedQuizzes: number;
+    members: number;
+  }[]>;
+  getDailyStats(): Promise<{
+    date: string;
+    completedQuizzes: number;
+    averageScore: number;
+  }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -49,12 +61,10 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Added method to get all users
   async getUsers(): Promise<User[]> {
     return await db.select().from(users);
   }
 
-  // Added method to update a user
   async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
     const [user] = await db
       .update(users)
@@ -64,7 +74,6 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Added method to delete a user
   async deleteUser(id: number): Promise<void> {
     await db.delete(users).where(eq(users.id, id));
   }
@@ -141,6 +150,68 @@ export class DatabaseStorage implements IStorage {
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     return newArray;
+  }
+
+  async getTeamStats() {
+    const allUsers = await this.getUsers();
+    const teamStats = new Map<string, {
+      totalScore: number;
+      members: number;
+      completedQuizzes: number;
+    }>();
+
+    for (const user of allUsers) {
+      const stats = teamStats.get(user.team) || { totalScore: 0, members: 0, completedQuizzes: 0 };
+      stats.totalScore += user.weeklyScore || 0;
+      stats.members += 1;
+      stats.completedQuizzes += user.weeklyQuizzes || 0;
+      teamStats.set(user.team, stats);
+    }
+
+    return Array.from(teamStats.entries()).map(([teamName, stats]) => ({
+      teamName,
+      totalScore: stats.totalScore,
+      averageScore: stats.totalScore / stats.members,
+      completedQuizzes: stats.completedQuizzes,
+      members: stats.members,
+    }));
+  }
+
+  async getDailyStats() {
+    const allAnswers = await db
+      .select()
+      .from(answers)
+      .orderBy(answers.answeredAt);
+
+    const dailyStats = new Map<string, {
+      completedQuizzes: number;
+      totalScore: number;
+      totalAnswers: number;
+    }>();
+
+    for (const answer of allAnswers) {
+      const date = new Date(answer.answeredAt).toISOString().split('T')[0];
+      const stats = dailyStats.get(date) || { completedQuizzes: 0, totalScore: 0, totalAnswers: 0 };
+
+      if (answer.correct) {
+        stats.totalScore += 10;
+      }
+      stats.totalAnswers += 1;
+
+      if (stats.totalAnswers % 3 === 0) {
+        stats.completedQuizzes += 1;
+      }
+
+      dailyStats.set(date, stats);
+    }
+
+    return Array.from(dailyStats.entries())
+      .map(([date, stats]) => ({
+        date,
+        completedQuizzes: stats.completedQuizzes,
+        averageScore: stats.totalScore / (stats.totalAnswers / 3),
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
   }
 }
 

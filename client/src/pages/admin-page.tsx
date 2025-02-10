@@ -109,20 +109,22 @@ export default function AdminPage() {
             </Card>
           </Link>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="space-y-1">
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">View quiz performance and team statistics</p>
-              <Button className="w-full" variant="outline">
-                View Stats
-              </Button>
-            </CardContent>
-          </Card>
+          <Link href="/admin/analytics">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader className="space-y-1">
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">View quiz performance and team statistics</p>
+                <Button className="w-full" variant="outline">
+                  View Stats
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="space-y-1">

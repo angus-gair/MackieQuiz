@@ -79,6 +79,18 @@ export function registerRoutes(app: Express): Server {
     res.json(leaderboard);
   });
 
+  app.get("/api/analytics/teams", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const stats = await storage.getTeamStats();
+    res.json(stats);
+  });
+
+  app.get("/api/analytics/daily", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const stats = await storage.getDailyStats();
+    res.json(stats);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

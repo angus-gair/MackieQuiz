@@ -8,6 +8,7 @@ import AuthPage from "@/pages/auth-page";
 import AdminPage from "@/pages/admin-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
 import UsersTeamsPage from "@/pages/users-teams-page";
+import AnalyticsPage from "@/pages/analytics-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
@@ -18,6 +19,7 @@ function Router() {
       <ProtectedRoute path="/" component={HomePage} />
       <AdminRoute path="/admin" component={AdminPage} />
       <AdminRoute path="/admin/users" component={UsersTeamsPage} />
+      <AdminRoute path="/admin/analytics" component={AnalyticsPage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
