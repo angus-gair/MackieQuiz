@@ -24,7 +24,7 @@ export default function TeamAllocationPage() {
 
     setSpinning(true);
     let currentIndex = 0;
-    const duration = 6000; // 6 seconds (doubled from 3 seconds)
+    const duration = 6000; // 6 seconds
     const startTime = Date.now();
 
     const spinInterval = setInterval(() => {
@@ -51,13 +51,14 @@ export default function TeamAllocationPage() {
       } else {
         // Slow down the spinning speed based on progress
         const progress = elapsed / duration;
-        const intervalDelay = Math.min(300, 100 + (progress * 400)); // Gradually slow down from 100ms to 500ms
+        // Start slower (800ms) and gradually increase delay up to 1500ms
+        const intervalDelay = Math.min(1500, 800 + (progress * 700));
         setTimeout(() => {
           currentIndex = (currentIndex + 1) % TEAMS.length;
           setSelectedTeam(TEAMS[currentIndex]);
         }, intervalDelay);
       }
-    }, 300); // Increased interval from 100ms to 300ms for better readability
+    }, 800); // Increased base interval from 300ms to 800ms for better readability
 
     return () => clearInterval(spinInterval);
   };
