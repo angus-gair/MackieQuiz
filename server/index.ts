@@ -39,12 +39,6 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Seed initial questions if none exist
-    const questions = await storage.getQuestions();
-    if (questions.length === 0) {
-      await storage.seedQuestions();
-    }
-
     const server = registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
