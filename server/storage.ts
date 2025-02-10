@@ -39,6 +39,7 @@ export interface IStorage {
     week: string;
     knowledgeScore: number;
     movingAverage: number;
+    trendValue?: number;
   }[]>;
 }
 
@@ -283,7 +284,7 @@ export class DatabaseStorage implements IStorage {
 
   async getTeamKnowledge() {
     // Generate 2 years of weekly data (104 weeks)
-    const weeks: { week: string; knowledgeScore: number; movingAverage: number }[] = [];
+    const weeks: { week: string; knowledgeScore: number; movingAverage: number; trendValue?: number }[] = [];
     const today = new Date();
     const movingAveragePeriod = 4; // 4-week moving average
 
@@ -315,6 +316,24 @@ export class DatabaseStorage implements IStorage {
         weeks[i].movingAverage = weeks[i].knowledgeScore;
       }
     }
+
+    // Calculate linear regression for trend line
+    const n = weeks.length;
+    const xValues = Array.from({ length: n }, (_, i) => i);
+    const yValues = weeks.map(w => w.knowledgeScore);
+
+    const sumX = xValues.reduce((a, b) => a + b, 0);
+    const sumY = yValues.reduce((a, b) => a + b, 0);
+    const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+    const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
+
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+
+    // Add trend values
+    weeks.forEach((week, i) => {
+      week.trendValue = Number((slope * i + intercept).toFixed(1));
+    });
 
     return weeks;
   }

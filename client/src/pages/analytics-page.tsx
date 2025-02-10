@@ -27,6 +27,7 @@ type TeamKnowledge = {
   week: string;
   knowledgeScore: number;
   movingAverage: number;
+  trendValue: number; // Added trendValue
 };
 
 export default function AnalyticsPage() {
@@ -212,6 +213,14 @@ export default function AnalyticsPage() {
                       dataKey="movingAverage"
                       name="4-Week Moving Average"
                       stroke="#82ca9d"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line
+                      type="linear"
+                      dataKey="trendValue"
+                      name="Overall Trend"
+                      stroke="#000000"
                       strokeWidth={2}
                       dot={false}
                     />
