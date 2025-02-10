@@ -15,6 +15,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
+import { BottomNav } from "@/components/bottom-nav";
 
 type UserFormData = {
   username: string;
@@ -268,8 +269,8 @@ export default function UsersTeamsPage() {
                     <CardContent>
                       <div className="grid gap-4">
                         {users.map((user) => (
-                          <div 
-                            key={user.id} 
+                          <div
+                            key={user.id}
                             className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                           >
                             <div>
@@ -279,16 +280,16 @@ export default function UsersTeamsPage() {
                               </p>
                             </div>
                             <div className="flex gap-2">
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => setEditingUser(user)}
                               >
                                 Edit
                               </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 className="text-red-500 hover:text-red-600"
                                 onClick={() => {
                                   if (window.confirm("Are you sure you want to remove this user?")) {
@@ -310,6 +311,7 @@ export default function UsersTeamsPage() {
           </Card>
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 }
