@@ -67,8 +67,21 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="teamName" />
                     <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                    <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" domain={[0, 100]} />
-                    <Tooltip />
+                    <YAxis 
+                      yAxisId="right" 
+                      orientation="right" 
+                      stroke="#82ca9d" 
+                      domain={[0, 100]}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip 
+                      formatter={(value: number, name: string) => {
+                        if (name === "Completion Rate (%)") {
+                          return [`${value}%`, name];
+                        }
+                        return [value, name];
+                      }}
+                    />
                     <Legend />
                     <Bar yAxisId="left" dataKey="totalScore" name="Total Score" fill="#8884d8" />
                     <Bar yAxisId="right" dataKey="weeklyCompletionPercentage" name="Completion Rate (%)" fill="#82ca9d" />
