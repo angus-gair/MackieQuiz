@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import confetti from 'canvas-confetti';
 import { motion } from "framer-motion";
@@ -39,6 +39,11 @@ export default function TeamAllocationPage() {
 
         // Assign team in backend
         apiRequest("POST", "/api/assign-team", { team: selectedTeam })
+          .then(async (res) => {
+            const updatedUser = await res.json();
+            // Update the user data in the cache
+            queryClient.setQueryData(["/api/user"], updatedUser);
+          })
           .catch((error) => {
             toast({
               title: "Error",
@@ -109,6 +114,12 @@ export default function TeamAllocationPage() {
 
   if (!user || user.teamAssigned) return null;
 
+  const handleContinue = () => {
+    // Ensure the user data is refreshed before navigating
+    queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    setLocation("/");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -147,7 +158,7 @@ export default function TeamAllocationPage() {
                 </p>
                 <Button 
                   className="w-full mt-4"
-                  onClick={() => setLocation("/")}
+                  onClick={handleContinue}
                 >
                   Continue to Quiz
                 </Button>
