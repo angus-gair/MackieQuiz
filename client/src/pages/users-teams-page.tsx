@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type UserFormData = {
   username: string;
@@ -28,7 +28,7 @@ export default function UsersTeamsPage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: users } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -43,6 +43,18 @@ export default function UsersTeamsPage() {
     },
   });
 
+  useEffect(() => {
+    if (editingUser) {
+      form.reset({
+        username: editingUser.username,
+        team: editingUser.team,
+        isAdmin: editingUser.isAdmin,
+        password: "",
+      });
+      setDialogOpen(true);
+    }
+  }, [editingUser, form]);
+
   const addUserMutation = useMutation({
     mutationFn: async (data: UserFormData) => {
       const res = await apiRequest("POST", "/api/register", data);
@@ -50,7 +62,7 @@ export default function UsersTeamsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      setIsAddUserOpen(false);
+      setDialogOpen(false);
       form.reset();
       toast({
         title: "Success",
@@ -74,6 +86,7 @@ export default function UsersTeamsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       setEditingUser(null);
+      setDialogOpen(false);
       toast({
         title: "Success",
         description: "User updated successfully",
@@ -151,16 +164,24 @@ export default function UsersTeamsPage() {
                   <Users className="h-5 w-5 mr-2" />
                   Users Overview
                 </div>
-                <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="button-hover">
+                    <Button className="button-hover" onClick={() => {
+                      setEditingUser(null);
+                      form.reset({
+                        username: "",
+                        password: "",
+                        team: "",
+                        isAdmin: false,
+                      });
+                    }}>
                       <UserPlus className="h-4 w-4 mr-2" />
                       Add User
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Add New User</DialogTitle>
+                      <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
                     </DialogHeader>
                     <Form {...form}>
                       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -226,7 +247,7 @@ export default function UsersTeamsPage() {
                           )}
                         />
                         <Button type="submit" className="w-full">
-                          Add User
+                          {editingUser ? 'Update User' : 'Add User'}
                         </Button>
                       </form>
                     </Form>
@@ -261,15 +282,7 @@ export default function UsersTeamsPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => {
-                                  setEditingUser(user);
-                                  form.reset({
-                                    username: user.username,
-                                    team: user.team,
-                                    isAdmin: user.isAdmin,
-                                    password: "",
-                                  });
-                                }}
+                                onClick={() => setEditingUser(user)}
                               >
                                 Edit
                               </Button>
