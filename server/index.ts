@@ -54,14 +54,18 @@ app.use((req, res, next) => {
       res.status(status).json({ message });
     });
 
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
     if (app.get("env") === "development") {
       await setupVite(app, server);
     } else {
       serveStatic(app);
     }
 
-    // Changed port from 5000 to 3000
-    const PORT = 3000;
+    // ALWAYS serve the app on port 5000
+    // this serves both the API and the client
+    const PORT = 5000;
     const HOST = "0.0.0.0";
     server.listen(PORT, HOST, () => {
       log(`Server started successfully on ${HOST}:${PORT}`);
