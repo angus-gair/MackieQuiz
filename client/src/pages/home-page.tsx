@@ -175,13 +175,8 @@ export default function HomePage() {
           isMobile ? "flex flex-col gap-4" : "flex justify-between items-center"
         )}>
           <div>
-<<<<<<< HEAD
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Welcome, {user?.username}!</h1>
-            <p className="text-gray-600">Team: {user?.team}</p>
-=======
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
+<h1 className="text-2xl sm:text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
             <p className="text-secondary/80">Team: {user?.team}</p>
->>>>>>> 89ddb746454259fdbfaa194cd7955e8027c7f1a1
           </div>
           <div className={cn(
             "flex gap-4",
