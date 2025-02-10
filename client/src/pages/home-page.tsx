@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -22,6 +22,7 @@ export default function HomePage() {
   const [submitted, setSubmitted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [quizKey, setQuizKey] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const isMobile = useIsMobile();
 
   const { data: questions } = useQuery<Question[]>({
@@ -51,9 +52,9 @@ export default function HomePage() {
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
-      function randomInRange(min: number, max: number) {
+      const randomInRange = (min: number, max: number) => {
         return Math.random() * (max - min) + min;
-      }
+      };
 
       const interval: NodeJS.Timeout = setInterval(function() {
         const timeLeft = animationEnd - Date.now();
@@ -102,45 +103,99 @@ export default function HomePage() {
     setSubmitted(false);
     setShowConfetti(false);
     setQuizKey(prev => prev + 1);
-    // Use invalidateQueries to refresh the data while maintaining cache
+    setCurrentQuestionIndex(0);
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["/api/questions/daily"] }),
       queryClient.invalidateQueries({ queryKey: ["/api/answers"] })
     ]);
   };
 
+  const today = new Date();
   const answeredQuestions = new Set(answers?.filter(a => {
     const answerDate = new Date(a.answeredAt);
-    const today = new Date();
     return answerDate.toDateString() === today.toDateString();
+  }).filter(a => {
+    const answerTime = new Date(a.answeredAt).getTime();
+    const todaysAnswers = answers?.filter(a => {
+      const date = new Date(a.answeredAt);
+      return date.toDateString() === today.toDateString();
+    }) ?? [];
+
+    const quizzes = [];
+    let currentQuiz = [];
+    for (const answer of todaysAnswers.sort((a, b) => 
+      new Date(a.answeredAt).getTime() - new Date(b.answeredAt).getTime()
+    )) {
+      currentQuiz.push(answer);
+      if (currentQuiz.length === 3) {
+        quizzes.push([...currentQuiz]);
+        currentQuiz = [];
+      }
+    }
+
+    if (!submitted) {
+      return currentQuiz.some(qa => qa.id === a.id);
+    }
+
+    if (quizzes.length === 0) {
+      return false;
+    }
+
+    const lastQuiz = quizzes[quizzes.length - 1];
+    return lastQuiz.some(qa => qa.id === a.id);
   }).map(a => a.questionId));
-  const progress = questions ? Math.min((answeredQuestions.size / questions.length) * 100, 100) : 0;
+
+  const progress = questions ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
 
   const handleLogout = () => {
     logoutMutation.mutate();
   };
 
+  const currentQuestion = questions?.[currentQuestionIndex];
+  const canGoNext = currentQuestion && selectedAnswers[currentQuestion.id];
+  const isLastQuestion = questions && currentQuestionIndex === questions.length - 1;
+
+  const handleNext = () => {
+    if (!isLastQuestion) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-b from-background/5 to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         <div className={cn(
           "mb-8",
           isMobile ? "flex flex-col gap-4" : "flex justify-between items-center"
         )}>
           <div>
+<<<<<<< HEAD
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Welcome, {user?.username}!</h1>
             <p className="text-gray-600">Team: {user?.team}</p>
+=======
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Welcome, {user?.username}!</h1>
+            <p className="text-secondary/80">Team: {user?.team}</p>
+>>>>>>> 89ddb746454259fdbfaa194cd7955e8027c7f1a1
           </div>
           <div className={cn(
             "flex gap-4",
             isMobile ? "flex-col w-full" : ""
           )}>
             <Link href="/leaderboard" className={isMobile ? "w-full" : ""}>
-              <Button variant="outline" className={cn(
-                "button-hover",
+              <Button 
+                variant="outline" 
+                className={cn(
+                  "border-secondary hover:bg-secondary/10",
                 isMobile ? "w-full justify-center" : ""
-              )}>
-                <Trophy className="mr-2 h-4 w-4" />
+                )}
+              >
+                <Trophy className="mr-2 h-4 w-4 text-accent" />
                 Leaderboard
               </Button>
             </Link>
@@ -148,60 +203,55 @@ export default function HomePage() {
               variant="outline" 
               onClick={handleReset}
               className={cn(
-                "button-hover",
+                "border-secondary hover:bg-secondary/10",
                 isMobile ? "w-full justify-center" : ""
               )}
             >
-              <RotateCcw className="mr-2 h-4 w-4" />
+              <RotateCcw className="mr-2 h-4 w-4 text-secondary" />
               Retake Quiz
             </Button>
             <Button 
               variant="outline" 
               onClick={handleLogout} 
               className={cn(
-                "button-hover",
+                "border-secondary hover:bg-secondary/10",
                 isMobile ? "w-full justify-center" : ""
               )}
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2 h-4 w-4 text-accent" />
               Logout
             </Button>
           </div>
         </div>
 
-        <Card className="mb-6 card">
+        <Card className="mb-6 border-secondary/20">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
+              <Trophy className="mr-2 h-5 w-5 text-highlight" />
               Your Progress
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress value={progress} className="mb-2 progress-bar" />
-            <p className="text-sm text-muted-foreground slide-up">
-              {answeredQuestions.size} of {questions?.length || 0} questions answered
+            <Progress value={progress} className="mb-2 bg-secondary/20" />
+            <p className="text-sm text-secondary">
+              {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
             </p>
           </CardContent>
         </Card>
 
-        <div key={quizKey} className="space-y-4 sm:space-y-6">
-          {questions?.map((question, index) => {
-            const isAnswered = answeredQuestions.has(question.id);
-            const userAnswer = answers?.find(a => a.questionId === question.id)?.answer;
-            const isCorrect = userAnswer === question.correctAnswer;
-
-            return (
+        {submitted ? (
+          <div className="space-y-4 sm:space-y-6">
+            {questions?.map((question, index) => (
               <Card 
                 key={question.id} 
                 className={cn(
-                  "quiz-card",
-                  submitted ? "slide-down" : ""
+                  "border-secondary/20 hover:shadow-md transition-all duration-300",
+                  "slide-down"
                 )}
-                style={{ 
-                  animationDelay: `${index * 150}ms`,
-                }}
+                style={{ animationDelay: `${index * 150}ms` }}
               >
                 <CardHeader>
+<<<<<<< HEAD
                   <CardTitle className="text-xl flex items-start gap-2 text-gray-800">
                     {submitted && (
                       isCorrect ? 
@@ -209,28 +259,92 @@ export default function HomePage() {
                         <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1 slide-down" />
                     )}
                     <span>{question.question}</span>
+=======
+                  <CardTitle className="text-xl flex items-start gap-2">
+                    {answers?.find(a => a.questionId === question.id)?.correct ? 
+                      <CheckCircle2 className="h-6 w-6 text-secondary flex-shrink-0 mt-1" /> :
+                      <XCircle className="h-6 w-6 text-accent flex-shrink-0 mt-1" />
+                    }
+                    <span className="text-primary">{question.question}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <RadioGroup
+                      disabled
+                      value={selectedAnswers[question.id]}
+                      className="space-y-3"
+                    >
+                      {question.options.map((option) => (
+                        <div key={option} className="flex items-center space-x-2 rounded-md p-2 hover:bg-secondary/5">
+                          <RadioGroupItem 
+                            value={option} 
+                            checked={selectedAnswers[question.id] === option}
+                            className="border-secondary"
+                          />
+                          <Label 
+                            className={cn(
+                              option === question.correctAnswer && "text-secondary font-semibold",
+                              option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-accent"
+                            )}
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+
+                  <div className="mt-4 p-4 bg-background/5 rounded-lg border border-secondary/20">
+                    <p className="font-semibold mb-2 text-primary">
+                      {answers?.find(a => a.questionId === question.id)?.correct ? "Correct!" : "Incorrect"}
+                    </p>
+                    <p className="text-sm text-secondary">
+                      {question.explanation}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            <Button 
+              className="w-full bg-accent hover:bg-accent/90 text-white slide-up"
+              onClick={() => setLocation("/leaderboard")}
+              style={{ animationDelay: '800ms' }}
+            >
+              View Leaderboard
+            </Button>
+          </div>
+        ) : (
+          currentQuestion && (
+            <div key={quizKey} className="space-y-4 sm:space-y-6">
+              <Card className="border-secondary/20 hover:shadow-md transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="text-xl text-primary">
+                    {currentQuestion.question}
+>>>>>>> 89ddb746454259fdbfaa194cd7955e8027c7f1a1
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <RadioGroup
-                    disabled={submitted}
-                    value={selectedAnswers[question.id]}
+                    value={selectedAnswers[currentQuestion.id]}
                     onValueChange={(value) =>
                       setSelectedAnswers(prev => ({
                         ...prev,
-                        [question.id]: value,
+                        [currentQuestion.id]: value,
                       }))
                     }
                     className="space-y-3"
                   >
-                    {question.options.map((option) => (
-                      <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                    {currentQuestion.options.map((option) => (
+                      <div key={option} className="flex items-center space-x-2 rounded-md p-2 hover:bg-secondary/5">
                         <RadioGroupItem 
                           value={option} 
-                          id={`${question.id}-${option}`}
-                          className="radio-group-item"
+                          id={`${currentQuestion.id}-${option}`}
+                          className="border-secondary"
                         />
                         <Label 
+<<<<<<< HEAD
                           htmlFor={`${question.id}-${option}`}
                           className={cn(
                             "cursor-pointer",
@@ -238,6 +352,10 @@ export default function HomePage() {
                             submitted && option === userAnswer && option !== question.correctAnswer && "text-red-600",
                             !submitted && "text-gray-800"
                           )}
+=======
+                          htmlFor={`${currentQuestion.id}-${option}`}
+                          className="cursor-pointer text-primary"
+>>>>>>> 89ddb746454259fdbfaa194cd7955e8027c7f1a1
                         >
                           {option}
                         </Label>
@@ -245,10 +363,35 @@ export default function HomePage() {
                     ))}
                   </RadioGroup>
 
-                  {submitted && (
-                    <div className={cn(
-                      "mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel slide-up",
+                  <div className="flex justify-between mt-6">
+                    <Button
+                      variant="outline"
+                      onClick={handlePrevious}
+                      disabled={currentQuestionIndex === 0}
+                      className="border-secondary hover:bg-secondary/10"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Previous
+                    </Button>
+                    {isLastQuestion ? (
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={!canGoNext}
+                        className="bg-accent hover:bg-accent/90 text-white"
+                      >
+                        Submit Quiz
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleNext}
+                        disabled={!canGoNext}
+                        className="bg-accent hover:bg-accent/90 text-white"
+                      >
+                        Next
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
                     )}
+<<<<<<< HEAD
                     style={{ 
                       animationDelay: `${(index * 150) + 300}ms`,
                     }}>
@@ -260,34 +403,14 @@ export default function HomePage() {
                       </p>
                     </div>
                   )}
+=======
+                  </div>
+>>>>>>> 89ddb746454259fdbfaa194cd7955e8027c7f1a1
                 </CardContent>
               </Card>
-            );
-          })}
-
-          {questions && questions.length > 0 && !submitted && (
-            <Button 
-              className={cn(
-                "w-full button-hover mt-4",
-                Object.keys(selectedAnswers).length === questions.length && "slide-up"
-              )}
-              onClick={handleSubmit}
-              disabled={Object.keys(selectedAnswers).length !== questions.length}
-            >
-              Submit Answers
-            </Button>
-          )}
-
-          {submitted && (
-            <Button 
-              className="w-full button-hover mt-4 slide-up"
-              onClick={() => setLocation("/leaderboard")}
-              style={{ animationDelay: '800ms' }}
-            >
-              View Leaderboard
-            </Button>
-          )}
-        </div>
+            </div>
+          )
+        )}
       </div>
     </div>
   );

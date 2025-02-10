@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertAnswerSchema } from "@shared/schema";
+import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -13,14 +13,36 @@ export function registerRoutes(app: Express): Server {
     res.json(questions);
   });
 
+  app.get("/api/questions", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const questions = await storage.getQuestions();
+    res.json(questions);
+  });
+
+  app.post("/api/questions", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+
+    const question = insertQuestionSchema.parse(req.body);
+    const result = await storage.createQuestion(question);
+    res.json(result);
+  });
+
+  app.delete("/api/questions/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+
+    const id = parseInt(req.params.id);
+    await storage.deleteQuestion(id);
+    res.sendStatus(200);
+  });
+
   app.post("/api/answers", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     const answer = insertAnswerSchema.parse({
       ...req.body,
       userId: req.user.id
     });
-    
+
     const result = await storage.submitAnswer(answer);
     res.json(result);
   });

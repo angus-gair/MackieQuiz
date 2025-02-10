@@ -18,6 +18,7 @@ export interface IStorage {
   getUserAnswers(userId: number): Promise<Answer[]>;
   getLeaderboard(): Promise<User[]>;
   sessionStore: session.Store;
+  deleteQuestion(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -162,6 +163,9 @@ export class DatabaseStorage implements IStorage {
     for (const question of sampleQuestions) {
       await this.createQuestion(question);
     }
+  }
+  async deleteQuestion(id: number): Promise<void> {
+    await db.delete(questions).where(eq(questions.id, id));
   }
 }
 
