@@ -221,8 +221,7 @@ export default function AnalyticsPage() {
                       dataKey="trendValue"
                       name="Overall Trend"
                       stroke="#000000"
-                      strokeWidth={1}
-                      strokeOpacity={0.5}
+                      strokeWidth={2}
                       dot={false}
                     />
                   </LineChart>
