@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import confetti from 'canvas-confetti';
-import { motion, animate } from "framer-motion";
+import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 const TEAMS = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kensington Corkers"];
 
@@ -15,13 +16,14 @@ export default function TeamAllocationPage() {
   const [spinning, setSpinning] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Start spinning animation on mount
     if (!spinning && !selectedTeam) {
       setSpinning(true);
       let currentIndex = 0;
-      const duration = 5000; // 5 seconds
+      const duration = 3000; // 3 seconds
       const startTime = Date.now();
 
       const spinInterval = setInterval(() => {
@@ -35,10 +37,17 @@ export default function TeamAllocationPage() {
           setSelectedTeam(TEAMS[randomIndex]);
           setSpinning(false);
           setShowConfetti(true);
-          
+
           // Assign team in backend
           apiRequest("POST", "/api/assign-team", {
             team: TEAMS[randomIndex]
+          }).catch((error) => {
+            toast({
+              title: "Error",
+              description: "Failed to assign team. Please try again.",
+              variant: "destructive",
+            });
+            setLocation("/auth");
           });
         } else {
           // Update visible team during spin with easing
@@ -49,7 +58,7 @@ export default function TeamAllocationPage() {
 
       return () => clearInterval(spinInterval);
     }
-  }, [spinning]);
+  }, [spinning, setLocation, toast]);
 
   useEffect(() => {
     if (showConfetti) {
