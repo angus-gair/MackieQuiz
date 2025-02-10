@@ -8,7 +8,7 @@ export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
   app.get("/api/users", async (req, res) => {
-    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    if (!req.isAuthenticated()) return res.sendStatus(401);
     const users = await storage.getUsers();
     res.json(users);
   });
