@@ -148,7 +148,7 @@ export default function TeamAllocationPage() {
                   rotate: [0, 360]
                 }}
                 transition={{
-                  duration: 0.5,
+                  duration: 1.0,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
