@@ -15,13 +15,15 @@ export default function UsersViewPage() {
     queryKey: ["/api/users"],
   });
 
-  const teamGroups = users?.reduce((groups: Record<string, User[]>, user) => {
-    if (!groups[user.team]) {
-      groups[user.team] = [];
+  const teamGroups = users?.reduce((groups: Record<string, User[]>, currentUser) => {
+    if (currentUser.team) {
+      if (!groups[currentUser.team]) {
+        groups[currentUser.team] = [];
+      }
+      groups[currentUser.team].push(currentUser);
     }
-    groups[user.team].push(user);
     return groups;
-  }, {});
+  }, {} as Record<string, User[]>);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
@@ -45,7 +47,7 @@ export default function UsersViewPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {teamGroups && Object.entries(teamGroups).map(([team, users]) => (
+                {teamGroups && Object.entries(teamGroups).map(([team, teamUsers]) => (
                   <Card key={team} className={cn(
                     "hover:shadow-md transition-shadow",
                     team === user?.team && "border-primary/50 bg-primary/5"
@@ -61,7 +63,7 @@ export default function UsersViewPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-4">
-                        {users.map((teamUser) => (
+                        {teamUsers.map((teamUser) => (
                           <div
                             key={teamUser.id}
                             className={cn(
