@@ -1,9 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, BarChart3, Users, Trophy } from "lucide-react";
-import { Link } from "wouter";
+import { BarChart3, Users, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
@@ -53,13 +51,7 @@ export default function AnalyticsPage() {
           "mb-8",
           isMobile ? "flex flex-col gap-4" : "flex items-center"
         )}>
-          <Link href="/admin">
-            <Button variant="ghost" className="button-hover">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Admin
-            </Button>
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary ml-4">Analytics Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary">Analytics Dashboard</h1>
         </div>
 
         <div className="grid gap-6">
