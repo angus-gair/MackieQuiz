@@ -106,14 +106,14 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
                     <YAxis 
-                      yAxisId="left" 
-                      orientation="left" 
+                      yAxisId="right" 
+                      orientation="right" 
                       stroke="#8884d8"
                       allowDecimals={false}
                     />
                     <YAxis 
-                      yAxisId="right" 
-                      orientation="right" 
+                      yAxisId="left" 
+                      orientation="left" 
                       stroke="#82ca9d"
                       domain={[0, 'auto']}
                     />
@@ -125,18 +125,18 @@ export default function AnalyticsPage() {
                     />
                     <Legend />
                     <Line 
-                      yAxisId="left" 
-                      type="monotone" 
-                      dataKey="completedQuizzes" 
-                      name="Completed Quizzes" 
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                    />
-                    <Line 
                       yAxisId="right" 
                       type="monotone" 
                       dataKey="averageScore" 
                       name="Average Score" 
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                    />
+                    <Line 
+                      yAxisId="left" 
+                      type="monotone" 
+                      dataKey="completedQuizzes" 
+                      name="Completed Quizzes" 
                       stroke="#82ca9d"
                       strokeWidth={2}
                     />
