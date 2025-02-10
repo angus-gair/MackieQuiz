@@ -20,7 +20,7 @@ type TeamStats = {
 type DailyStats = {
   date: string;
   completedQuizzes: number;
-  averageScore: number;
+  completionRate: number;
 };
 
 export default function AnalyticsPage() {
@@ -115,13 +115,16 @@ export default function AnalyticsPage() {
                       yAxisId="right" 
                       orientation="right" 
                       stroke="#82ca9d"
-                      domain={[0, 'auto']}
+                      domain={[0, 100]}
+                      tickFormatter={(value) => `${value}%`}
                     />
                     <Tooltip 
-                      formatter={(value: number) => [
-                        Number.isInteger(value) ? value : value.toFixed(1),
-                        value === 0 ? "No data yet" : value
-                      ]}
+                      formatter={(value: number, name: string) => {
+                        if (name === "Completion Rate (%)") {
+                          return [`${value}%`, name];
+                        }
+                        return [Number.isInteger(value) ? value : value.toFixed(1), name];
+                      }}
                     />
                     <Legend />
                     <Line 
@@ -135,8 +138,8 @@ export default function AnalyticsPage() {
                     <Line 
                       yAxisId="right" 
                       type="monotone" 
-                      dataKey="averageScore" 
-                      name="Average Score" 
+                      dataKey="completionRate" 
+                      name="Completion Rate (%)" 
                       stroke="#82ca9d"
                       strokeWidth={2}
                     />

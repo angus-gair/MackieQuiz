@@ -33,7 +33,7 @@ export interface IStorage {
   getDailyStats(): Promise<{
     date: string;
     completedQuizzes: number;
-    averageScore: number;
+    completionRate: number;
   }[]>;
 }
 
@@ -234,7 +234,7 @@ export class DatabaseStorage implements IStorage {
       ));
 
     // Initialize stats for all days of the week
-    const weekDays: { date: Date; stats: { completedQuizzes: number; totalScore: number; totalAnswers: number } }[] = [];
+    const weekDays: { date: Date; stats: { completedQuizzes: number; totalAnswers: number; completionRate: number } }[] = [];
 
     // Generate all days of the week
     for (let i = 0; i < 7; i++) {
@@ -242,9 +242,13 @@ export class DatabaseStorage implements IStorage {
       date.setDate(startOfWeek.getDate() + i);
       weekDays.push({
         date,
-        stats: { completedQuizzes: 0, totalScore: 0, totalAnswers: 0 }
+        stats: { completedQuizzes: 0, totalAnswers: 0, completionRate: 0 }
       });
     }
+
+    // Get all users for calculating completion rate
+    const allUsers = await this.getUsers();
+    const totalUsers = allUsers.length;
 
     // Process answers
     for (const answer of weekAnswers) {
@@ -254,13 +258,12 @@ export class DatabaseStorage implements IStorage {
       );
 
       if (dayEntry) {
-        if (answer.correct) {
-          dayEntry.stats.totalScore += 10;
-        }
         dayEntry.stats.totalAnswers += 1;
 
         if (dayEntry.stats.totalAnswers % 3 === 0) {
           dayEntry.stats.completedQuizzes += 1;
+          // Calculate completion rate as percentage of users who completed the quiz
+          dayEntry.stats.completionRate = (dayEntry.stats.completedQuizzes / totalUsers) * 100;
         }
       }
     }
@@ -269,7 +272,7 @@ export class DatabaseStorage implements IStorage {
     return weekDays.map(({ date, stats }) => ({
       date: this.formatDayName(date),
       completedQuizzes: stats.completedQuizzes,
-      averageScore: stats.totalAnswers ? stats.totalScore / (stats.totalAnswers / 3) : 0,
+      completionRate: stats.completionRate
     }));
   }
 }
