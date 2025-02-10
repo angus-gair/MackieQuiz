@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, UserPlus, Users, Building } from "lucide-react";
@@ -7,13 +7,105 @@ import { Link } from "wouter";
 import type { User } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+
+type UserFormData = {
+  username: string;
+  password: string;
+  team: string;
+  isAdmin: boolean;
+};
 
 export default function UsersTeamsPage() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
   const { data: users } = useQuery<User[]>({
     queryKey: ["/api/users"],
+  });
+
+  const form = useForm<UserFormData>({
+    defaultValues: {
+      username: "",
+      password: "",
+      team: "",
+      isAdmin: false,
+    },
+  });
+
+  const addUserMutation = useMutation({
+    mutationFn: async (data: UserFormData) => {
+      const res = await apiRequest("POST", "/api/register", data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      setIsAddUserOpen(false);
+      form.reset();
+      toast({
+        title: "Success",
+        description: "User added successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<UserFormData> }) => {
+      const res = await apiRequest("PATCH", `/api/users/${id}`, data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      setEditingUser(null);
+      toast({
+        title: "Success",
+        description: "User updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeUserMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/users/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      toast({
+        title: "Success",
+        description: "User removed successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   // Group users by team
@@ -25,20 +117,30 @@ export default function UsersTeamsPage() {
     return groups;
   }, {});
 
+  const onSubmit = (data: UserFormData) => {
+    if (editingUser) {
+      updateUserMutation.mutate({ id: editingUser.id, data });
+    } else {
+      addUserMutation.mutate(data);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         <div className={cn(
           "mb-8",
-          isMobile ? "flex flex-col gap-4" : "flex items-center"
+          isMobile ? "flex flex-col gap-4" : "flex items-center justify-between"
         )}>
-          <Link href="/admin">
-            <Button variant="ghost" className="button-hover">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Admin
-            </Button>
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary ml-4">Users & Teams Management</h1>
+          <div className="flex items-center gap-4">
+            <Link href="/admin">
+              <Button variant="ghost" className="button-hover">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Admin
+              </Button>
+            </Link>
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary">Users & Teams Management</h1>
+          </div>
         </div>
 
         <div className="grid gap-6">
@@ -49,10 +151,87 @@ export default function UsersTeamsPage() {
                   <Users className="h-5 w-5 mr-2" />
                   Users Overview
                 </div>
-                <Button className="button-hover">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add User
-                </Button>
+                <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="button-hover">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Add User
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New User</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Username</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Password</FormLabel>
+                              <FormControl>
+                                <Input type="password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="team"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Team</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="isAdmin"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Role</FormLabel>
+                              <Select
+                                onValueChange={(value) => field.onChange(value === "admin")}
+                                defaultValue={field.value ? "admin" : "member"}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="member">Team Member</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" className="w-full">
+                          Add User
+                        </Button>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -79,10 +258,31 @@ export default function UsersTeamsPage() {
                               </p>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setEditingUser(user);
+                                  form.reset({
+                                    username: user.username,
+                                    team: user.team,
+                                    isAdmin: user.isAdmin,
+                                    password: "",
+                                  });
+                                }}
+                              >
                                 Edit
                               </Button>
-                              <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-red-500 hover:text-red-600"
+                                onClick={() => {
+                                  if (window.confirm("Are you sure you want to remove this user?")) {
+                                    removeUserMutation.mutate(user.id);
+                                  }
+                                }}
+                              >
                                 Remove
                               </Button>
                             </div>
