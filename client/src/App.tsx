@@ -12,6 +12,7 @@ import UsersTeamsPage from "@/pages/users-teams-page";
 import UsersViewPage from "@/pages/users-view-page";
 import AnalyticsPage from "@/pages/analytics-page";
 import SettingsPage from "@/pages/settings-page";
+import TeamAllocationPage from "@/pages/team-allocation-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
@@ -28,6 +29,7 @@ function Router() {
       <AdminRoute path="/admin/archived" component={AdminArchivedPage} />
       <AdminRoute path="/admin/users" component={UsersTeamsPage} />
       <AdminRoute path="/admin/analytics" component={AnalyticsPage} />
+      <AdminRoute path="/team-allocation" component={TeamAllocationPage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <Route component={NotFound} />
     </Switch>
