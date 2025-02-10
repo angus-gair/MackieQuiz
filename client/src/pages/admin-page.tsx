@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { BottomNav } from "@/components/bottom-nav";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -248,33 +249,7 @@ export default function AdminPage() {
         </div>
       </main>
 
-      {/* Fixed Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-around h-16">
-          <Link href="/admin">
-            <Button variant="ghost" size="lg" className="h-16 px-6">
-              <Home className="h-5 w-5" />
-              <span className="sr-only">Home</span>
-            </Button>
-          </Link>
-          <Link href="/admin/users">
-            <Button variant="ghost" size="lg" className="h-16 px-6">
-              <Users className="h-5 w-5" />
-              <span className="sr-only">Users</span>
-            </Button>
-          </Link>
-          <Link href="/admin/analytics">
-            <Button variant="ghost" size="lg" className="h-16 px-6">
-              <BarChart3 className="h-5 w-5" />
-              <span className="sr-only">Analytics</span>
-            </Button>
-          </Link>
-          <Button variant="ghost" size="lg" className="h-16 px-6">
-            <Settings className="h-5 w-5" />
-            <span className="sr-only">Settings</span>
-          </Button>
-        </div>
-      </nav>
+      <BottomNav />
     </div>
   );
 }

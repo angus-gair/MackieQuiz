@@ -9,7 +9,7 @@ import AdminPage from "@/pages/admin-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
 import UsersTeamsPage from "@/pages/users-teams-page";
 import AnalyticsPage from "@/pages/analytics-page";
-import TeamAllocationPage from "@/pages/team-allocation-page"; // Added import
+import SettingsPage from "@/pages/settings-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
@@ -18,8 +18,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/team-allocation" component={TeamAllocationPage} />
       <ProtectedRoute path="/" component={HomePage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
       <AdminRoute path="/admin" component={AdminPage} />
       <AdminRoute path="/admin/users" component={UsersTeamsPage} />
       <AdminRoute path="/admin/analytics" component={AnalyticsPage} />
