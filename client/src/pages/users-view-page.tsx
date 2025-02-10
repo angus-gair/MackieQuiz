@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Building } from "lucide-react";
+import { ArrowLeft, Building, Users } from "lucide-react";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
 import { cn } from "@/lib/utils";
@@ -17,13 +17,12 @@ export default function UsersViewPage() {
     queryKey: ["/api/users"],
   });
 
-  // Group users by team
+  // Group users by team, including all teams
   const teamGroups = users?.reduce((groups: Record<string, User[]>, user) => {
-    const team = user.team || 'Unassigned';
-    if (!groups[team]) {
-      groups[team] = [];
+    if (!groups[user.team]) {
+      groups[user.team] = [];
     }
-    groups[team].push(user);
+    groups[user.team].push(user);
     return groups;
   }, {});
 
@@ -50,30 +49,44 @@ export default function UsersViewPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <Building className="h-5 w-5 mr-2" />
-                  Teams
+                  <Users className="h-5 w-5 mr-2" />
+                  Team Members
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {teamGroups && Object.entries(teamGroups).map(([team, users]) => (
-                  <Card key={team} className="hover:shadow-md transition-shadow">
+                {teamGroups && Object.entries(teamGroups).map(([team, teamUsers]) => (
+                  <Card key={team} className={cn(
+                    "hover:shadow-md transition-shadow",
+                    team === user?.team && "border-primary/50 bg-primary/5"
+                  )}>
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center">
                         <Building className="h-5 w-5 mr-2 text-muted-foreground" />
                         Team: {team}
+                        {team === user?.team && (
+                          <span className="ml-2 text-sm text-primary">(Your Team)</span>
+                        )}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-4">
-                        {users.map((teamUser) => (
+                        {teamUsers.map((teamUser) => (
                           <div 
                             key={teamUser.id} 
-                            className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                            className={cn(
+                              "flex items-center justify-between p-3 bg-muted/50 rounded-lg",
+                              teamUser.id === user?.id && "border border-primary/50"
+                            )}
                           >
                             <div>
-                              <p className="font-medium">{teamUser.username}</p>
+                              <p className="font-medium">
+                                {teamUser.username}
+                                {teamUser.id === user?.id && (
+                                  <span className="ml-2 text-sm text-primary">(You)</span>
+                                )}
+                              </p>
                               <p className="text-sm text-muted-foreground">
                                 {teamUser.isAdmin ? "Admin" : "Team Member"}
                               </p>
