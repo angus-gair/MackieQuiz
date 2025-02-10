@@ -7,7 +7,6 @@ import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import type { User, Answer } from "@shared/schema";
 
 type TeamStats = {
   teamName: string;
@@ -15,6 +14,7 @@ type TeamStats = {
   averageScore: number;
   completedQuizzes: number;
   members: number;
+  weeklyCompletionPercentage: number;
 };
 
 type DailyStats = {
@@ -131,6 +131,17 @@ export default function AnalyticsPage() {
                     <div>
                       <dt className="text-sm text-muted-foreground">Team Members</dt>
                       <dd>{stat.members}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm text-muted-foreground">Weekly Quiz Completion</dt>
+                      <dd className={cn(
+                        "font-semibold",
+                        stat.weeklyCompletionPercentage >= 80 ? "text-green-500" :
+                        stat.weeklyCompletionPercentage >= 50 ? "text-yellow-500" :
+                        "text-red-500"
+                      )}>
+                        {stat.weeklyCompletionPercentage.toFixed(1)}%
+                      </dd>
                     </div>
                   </dl>
                 </CardContent>

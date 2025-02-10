@@ -1,6 +1,6 @@
 import { users, questions, answers, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, gte } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -28,6 +28,7 @@ export interface IStorage {
     averageScore: number;
     completedQuizzes: number;
     members: number;
+    weeklyCompletionPercentage: number;
   }[]>;
   getDailyStats(): Promise<{
     date: string;
@@ -152,19 +153,56 @@ export class DatabaseStorage implements IStorage {
     return newArray;
   }
 
+  private getStartOfWeek(): Date {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = (day + 6) % 7; // Adjust to make Monday = 0
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - diff);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  }
+
   async getTeamStats() {
     const allUsers = await this.getUsers();
+    const startOfWeek = this.getStartOfWeek();
+
+    // Get all answers from this week
+    const weeklyAnswers = await db
+      .select()
+      .from(answers)
+      .where(gte(answers.answeredAt, startOfWeek));
+
+    // Calculate weekly quiz completions per user
+    const weeklyCompletions = new Map<number, boolean>();
+    for (const answer of weeklyAnswers) {
+      const userAnswers = weeklyAnswers.filter(a => a.userId === answer.userId);
+      weeklyCompletions.set(answer.userId, userAnswers.length >= 3);
+    }
+
     const teamStats = new Map<string, {
       totalScore: number;
       members: number;
       completedQuizzes: number;
+      weeklyCompleted: number;
     }>();
 
     for (const user of allUsers) {
-      const stats = teamStats.get(user.team) || { totalScore: 0, members: 0, completedQuizzes: 0 };
+      const stats = teamStats.get(user.team) || { 
+        totalScore: 0, 
+        members: 0, 
+        completedQuizzes: 0,
+        weeklyCompleted: 0 
+      };
+
       stats.totalScore += user.weeklyScore || 0;
       stats.members += 1;
       stats.completedQuizzes += user.weeklyQuizzes || 0;
+
+      if (weeklyCompletions.get(user.id)) {
+        stats.weeklyCompleted += 1;
+      }
+
       teamStats.set(user.team, stats);
     }
 
@@ -174,6 +212,7 @@ export class DatabaseStorage implements IStorage {
       averageScore: stats.totalScore / stats.members,
       completedQuizzes: stats.completedQuizzes,
       members: stats.members,
+      weeklyCompletionPercentage: (stats.weeklyCompleted / stats.members) * 100
     }));
   }
 
