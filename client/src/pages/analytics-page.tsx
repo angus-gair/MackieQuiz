@@ -209,6 +209,7 @@ export default function AnalyticsPage() {
                       stroke="#8884d8"
                       strokeWidth={1}
                       dot={false}
+                      opacity={0.6}
                     />
                     <Line
                       type="monotone"

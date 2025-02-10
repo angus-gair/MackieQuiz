@@ -288,7 +288,7 @@ export class DatabaseStorage implements IStorage {
   async getTeamKnowledge() {
     const startDate = new Date('2023-01-01');
     const today = new Date();
-    const weeks: { week: string; knowledgeScore: number; movingAverage: number; trendValue?: number; trend2023?: number; trend2024?: number; trend2025?: number }[] = [];
+    const weeks: { week: string; knowledgeScore: number; movingAverage: number; trend2023?: number; trend2024?: number; trend2025?: number }[] = [];
     const movingAveragePeriod = 4; // 4-week moving average
 
     // Generate weekly data from 2023-01-01 to today
