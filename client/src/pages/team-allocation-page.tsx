@@ -39,10 +39,6 @@ export default function TeamAllocationPage() {
 
         // Assign team in backend
         apiRequest("POST", "/api/assign-team", { team: selectedTeam })
-          .then(() => {
-            // Force reload to update user state
-            window.location.href = "/";
-          })
           .catch((error) => {
             toast({
               title: "Error",
@@ -151,7 +147,7 @@ export default function TeamAllocationPage() {
                 </p>
                 <Button 
                   className="w-full mt-4"
-                  onClick={() => window.location.href = "/"}
+                  onClick={() => setLocation("/")}
                 >
                   Continue to Quiz
                 </Button>
