@@ -246,15 +246,6 @@ export default function HomePage() {
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 <CardHeader>
-<<<<<<< HEAD
-                  <CardTitle className="text-xl flex items-start gap-2 text-gray-800">
-                    {submitted && (
-                      isCorrect ? 
-                        <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1 slide-down" /> :
-                        <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1 slide-down" />
-                    )}
-                    <span>{question.question}</span>
-=======
                   <CardTitle className="text-xl flex items-start gap-2">
                     {answers?.find(a => a.questionId === question.id)?.correct ? 
                       <CheckCircle2 className="h-6 w-6 text-secondary flex-shrink-0 mt-1" /> :
@@ -317,7 +308,6 @@ export default function HomePage() {
                 <CardHeader>
                   <CardTitle className="text-xl text-primary">
                     {currentQuestion.question}
->>>>>>> 89ddb746454259fdbfaa194cd7955e8027c7f1a1
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -339,18 +329,8 @@ export default function HomePage() {
                           className="border-secondary"
                         />
                         <Label 
-<<<<<<< HEAD
-                          htmlFor={`${question.id}-${option}`}
-                          className={cn(
-                            "cursor-pointer",
-                            submitted && option === question.correctAnswer && "text-green-600 font-semibold",
-                            submitted && option === userAnswer && option !== question.correctAnswer && "text-red-600",
-                            !submitted && "text-gray-800"
-                          )}
-=======
                           htmlFor={`${currentQuestion.id}-${option}`}
                           className="cursor-pointer text-primary"
->>>>>>> 89ddb746454259fdbfaa194cd7955e8027c7f1a1
                         >
                           {option}
                         </Label>
@@ -386,21 +366,7 @@ export default function HomePage() {
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     )}
-<<<<<<< HEAD
-                    style={{ 
-                      animationDelay: `${(index * 150) + 300}ms`,
-                    }}>
-                      <p className="font-semibold mb-2 text-gray-800">
-                        {isCorrect ? "Correct!" : "Incorrect"}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {question.explanation}
-                      </p>
-                    </div>
-                  )}
-=======
                   </div>
->>>>>>> 89ddb746454259fdbfaa194cd7955e8027c7f1a1
                 </CardContent>
               </Card>
             </div>
