@@ -15,6 +15,7 @@ import SettingsPage from "@/pages/settings-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
+import { FullscreenToggle } from "@/components/fullscreen-toggle";
 
 function Router() {
   return (
@@ -38,6 +39,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router />
+        <FullscreenToggle />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
