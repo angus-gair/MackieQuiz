@@ -83,8 +83,8 @@ export default function AnalyticsPage() {
                       }}
                     />
                     <Legend />
-                    <Bar yAxisId="left" dataKey="totalScore" name="Total Score" fill="#8884d8" />
                     <Bar yAxisId="right" dataKey="weeklyCompletionPercentage" name="Completion Rate (%)" fill="#82ca9d" />
+                    <Bar yAxisId="left" dataKey="totalScore" name="Total Score" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
