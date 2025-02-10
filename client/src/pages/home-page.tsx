@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight, Plus } from "lucide-react"; // Added Plus icon import
+import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -166,6 +166,17 @@ export default function HomePage() {
     }
   };
 
+  // Add team assignment check
+  useEffect(() => {
+    if (user && !user.teamAssigned) {
+      setLocation("/team-allocation");
+    }
+  }, [user, setLocation]);
+
+  // If user is not team assigned, don't render the quiz
+  if (!user?.teamAssigned) return null;
+
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
@@ -201,7 +212,7 @@ export default function HomePage() {
               <RotateCcw className="mr-2 h-4 w-4" />
               Retake Quiz
             </Button>
-            {user?.isAdmin && ( // Added conditional rendering for admin link
+            {user?.isAdmin && (
               <Link href="/admin" className={isMobile ? "w-full" : ""}>
                 <Button 
                   variant="outline" 
@@ -245,7 +256,6 @@ export default function HomePage() {
         </Card>
 
         {submitted ? (
-          // Summary view after submission
           <div className="space-y-4 sm:space-y-6">
             {questions?.map((question, index) => (
               <Card 
@@ -311,7 +321,6 @@ export default function HomePage() {
             </Button>
           </div>
         ) : (
-          // Single question view during quiz
           currentQuestion && (
             <div key={quizKey} className="space-y-4 sm:space-y-6">
               <Card className="quiz-card">
