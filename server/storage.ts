@@ -40,6 +40,9 @@ export interface IStorage {
     knowledgeScore: number;
     movingAverage: number;
     trendValue?: number;
+    trend2023?: number;
+    trend2024?: number;
+    trend2025?: number;
   }[]>;
 }
 
@@ -283,26 +286,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTeamKnowledge() {
-    // Generate 2 years of weekly data (104 weeks)
-    const weeks: { week: string; knowledgeScore: number; movingAverage: number; trendValue?: number }[] = [];
+    const startDate = new Date('2023-01-01');
     const today = new Date();
+    const weeks: { week: string; knowledgeScore: number; movingAverage: number; trendValue?: number; trend2023?: number; trend2024?: number; trend2025?: number }[] = [];
     const movingAveragePeriod = 4; // 4-week moving average
 
-    // Generate base knowledge scores with some randomization and trend
-    for (let i = 0; i < 104; i++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - (i * 7));
-
+    // Generate weekly data from 2023-01-01 to today
+    let currentDate = new Date(startDate);
+    while (currentDate <= today) {
       // Generate a score between 60-90 with some randomization and overall upward trend
-      const baseScore = 75 + (i * 0.1); // Slight upward trend
+      const daysFromStart = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      const baseScore = 75 + (daysFromStart * 0.01); // Slight upward trend
       const randomVariation = (Math.random() - 0.5) * 10; // +/- 5 points variation
       const knowledgeScore = Math.min(Math.max(baseScore + randomVariation, 60), 90);
 
-      weeks.unshift({
-        week: date.toISOString().split('T')[0],
+      weeks.push({
+        week: currentDate.toISOString().split('T')[0],
         knowledgeScore,
         movingAverage: 0 // Will be calculated after
       });
+
+      // Move to next week
+      currentDate.setDate(currentDate.getDate() + 7);
     }
 
     // Calculate moving average
@@ -317,22 +322,64 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Calculate linear regression for trend line
-    const n = weeks.length;
-    const xValues = Array.from({ length: n }, (_, i) => i);
-    const yValues = weeks.map(w => w.knowledgeScore);
+    // Calculate trend lines for each year
+    const calculateTrendForPeriod = (data: typeof weeks, startDate: Date, endDate: Date) => {
+      const periodData = data.filter(w => {
+        const weekDate = new Date(w.week);
+        return weekDate >= startDate && weekDate <= endDate;
+      });
 
-    const sumX = xValues.reduce((a, b) => a + b, 0);
-    const sumY = yValues.reduce((a, b) => a + b, 0);
-    const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
-    const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
+      if (periodData.length === 0) return null;
 
-    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
+      const n = periodData.length;
+      const xValues = Array.from({ length: n }, (_, i) => i);
+      const yValues = periodData.map(w => w.knowledgeScore);
 
-    // Add trend values
+      const sumX = xValues.reduce((a, b) => a + b, 0);
+      const sumY = yValues.reduce((a, b) => a + b, 0);
+      const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+      const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
+
+      const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+      const intercept = (sumY - slope * sumX) / n;
+
+      return { slope, intercept, startIndex: weeks.indexOf(periodData[0]) };
+    };
+
+    // Calculate trends for each year
+    const trends = [
+      {
+        year: 2023,
+        start: new Date('2023-01-01'),
+        end: new Date('2023-12-31'),
+        field: 'trend2023'
+      },
+      {
+        year: 2024,
+        start: new Date('2024-01-01'),
+        end: new Date('2024-12-31'),
+        field: 'trend2024'
+      },
+      {
+        year: 2025,
+        start: new Date('2025-01-01'),
+        end: today,
+        field: 'trend2025'
+      }
+    ].map(year => ({
+      ...year,
+      trend: calculateTrendForPeriod(weeks, year.start, year.end)
+    }));
+
+    // Apply trend values to weeks
     weeks.forEach((week, i) => {
-      week.trendValue = Number((slope * i + intercept).toFixed(1));
+      const weekDate = new Date(week.week);
+      trends.forEach(({ trend, start, end, field }) => {
+        if (trend && weekDate >= start && weekDate <= end) {
+          const relativeIndex = i - trend.startIndex;
+          week[field] = Number((trend.slope * relativeIndex + trend.intercept).toFixed(1));
+        }
+      });
     });
 
     return weeks;

@@ -27,7 +27,9 @@ type TeamKnowledge = {
   week: string;
   knowledgeScore: number;
   movingAverage: number;
-  trendValue: number; // Added trendValue
+  trend2023?: number;
+  trend2024?: number;
+  trend2025?: number;
 };
 
 export default function AnalyticsPage() {
@@ -218,10 +220,26 @@ export default function AnalyticsPage() {
                     />
                     <Line
                       type="linear"
-                      dataKey="trendValue"
-                      name="Overall Trend"
-                      stroke="#000000"
-                      strokeWidth={2}
+                      dataKey="trend2023"
+                      name="2023 Trend"
+                      stroke="rgba(0,0,0,0.3)"
+                      strokeWidth={1}
+                      dot={false}
+                    />
+                    <Line
+                      type="linear"
+                      dataKey="trend2024"
+                      name="2024 Trend"
+                      stroke="rgba(0,0,0,0.3)"
+                      strokeWidth={1}
+                      dot={false}
+                    />
+                    <Line
+                      type="linear"
+                      dataKey="trend2025"
+                      name="2025 Trend"
+                      stroke="rgba(0,0,0,0.3)"
+                      strokeWidth={1}
                       dot={false}
                     />
                   </LineChart>
