@@ -283,22 +283,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTeamKnowledge() {
-    // Generate 2 years of weekly data (104 weeks)
-    const weeks: { week: string; knowledgeScore: number; movingAverage: number; trendValue?: number }[] = [];
+    // Calculate the number of weeks from 2023-01-01 to today
+    const startDate = new Date('2023-01-01');
     const today = new Date();
+    const weeksDiff = Math.ceil((today.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+
+    const weeks: { week: string; knowledgeScore: number; movingAverage: number; trendValue?: number }[] = [];
     const movingAveragePeriod = 4; // 4-week moving average
 
     // Generate base knowledge scores with some randomization and trend
-    for (let i = 0; i < 104; i++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - (i * 7));
+    for (let i = 0; i < weeksDiff; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + (i * 7));
 
       // Generate a score between 60-90 with some randomization and overall upward trend
       const baseScore = 75 + (i * 0.1); // Slight upward trend
       const randomVariation = (Math.random() - 0.5) * 10; // +/- 5 points variation
       const knowledgeScore = Math.min(Math.max(baseScore + randomVariation, 60), 90);
 
-      weeks.unshift({
+      weeks.push({
         week: date.toISOString().split('T')[0],
         knowledgeScore,
         movingAverage: 0 // Will be calculated after
