@@ -24,20 +24,21 @@ export default function TeamAllocationPage() {
 
     setSpinning(true);
     let currentIndex = 0;
-    const duration = 10000; 
+    const duration = 10000;
     const startTime = Date.now();
+    let spinInterval: NodeJS.Timeout;
 
-    const spinInterval = setInterval(() => {
+    const animate = () => {
       const elapsed = Date.now() - startTime;
+
       if (elapsed >= duration) {
         clearInterval(spinInterval);
-        const randomIndex = Math.floor(Math.random() * TEAMS.length);
-        const selectedTeam = TEAMS[randomIndex];
-        setSelectedTeam(selectedTeam);
+        const finalTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
+        setSelectedTeam(finalTeam);
         setSpinning(false);
         setShowConfetti(true);
 
-        apiRequest("POST", "/api/assign-team", { team: selectedTeam })
+        apiRequest("POST", "/api/assign-team", { team: finalTeam })
           .catch((error) => {
             toast({
               title: "Error",
@@ -50,13 +51,12 @@ export default function TeamAllocationPage() {
       } else {
         const progress = elapsed / duration;
         const intervalDelay = Math.min(1500, 400 + (progress * 1100));
-        setTimeout(() => {
-          currentIndex = (currentIndex + 1) % TEAMS.length;
-          setSelectedTeam(TEAMS[currentIndex]);
-        }, intervalDelay);
+        currentIndex = (currentIndex + 1) % TEAMS.length;
+        setSelectedTeam(TEAMS[currentIndex]);
       }
-    }, 400); 
+    };
 
+    spinInterval = setInterval(animate, 400);
     return () => clearInterval(spinInterval);
   };
 
@@ -68,7 +68,7 @@ export default function TeamAllocationPage() {
 
   useEffect(() => {
     if (showConfetti) {
-      const duration = 6 * 1000; 
+      const duration = 6 * 1000;
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
@@ -141,7 +141,7 @@ export default function TeamAllocationPage() {
                   y: [-20, 20, -20]
                 }}
                 transition={{
-                  duration: 1.0, 
+                  duration: 1.0,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
