@@ -15,13 +15,11 @@ export default function UsersViewPage() {
     queryKey: ["/api/users"],
   });
 
-  const teamGroups = users?.reduce((groups: Record<string, User[]>, currentUser) => {
-    if (currentUser.team) {
-      if (!groups[currentUser.team]) {
-        groups[currentUser.team] = [];
-      }
-      groups[currentUser.team].push(currentUser);
+  const teamGroups = users?.reduce((groups: Record<string, User[]>, user) => {
+    if (!groups[user.team]) {
+      groups[user.team] = [];
     }
+    groups[user.team].push(user);
     return groups;
   }, {} as Record<string, User[]>);
 
@@ -32,7 +30,7 @@ export default function UsersViewPage() {
           "mb-8",
           isMobile ? "flex flex-col gap-4" : "flex items-center justify-between"
         )}>
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary">Users & Teams</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary">Users & Teams Management</h1>
         </div>
 
         <div className="grid gap-6">
@@ -47,37 +45,23 @@ export default function UsersViewPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {teamGroups && Object.entries(teamGroups).map(([team, teamUsers]) => (
-                  <Card key={team} className={cn(
-                    "hover:shadow-md transition-shadow",
-                    team === user?.team && "border-primary/50 bg-primary/5"
-                  )}>
+                {teamGroups && Object.entries(teamGroups).map(([team, users]) => (
+                  <Card key={team} className="hover:shadow-md transition-shadow">
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center">
                         <Building className="h-5 w-5 mr-2 text-muted-foreground" />
                         Team: {team}
-                        {team === user?.team && (
-                          <span className="ml-2 text-sm text-primary">(Your Team)</span>
-                        )}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-4">
-                        {teamUsers.map((teamUser) => (
+                        {users.map((teamUser) => (
                           <div
                             key={teamUser.id}
-                            className={cn(
-                              "flex items-center justify-between p-3 bg-muted/50 rounded-lg",
-                              teamUser.id === user?.id && "border border-primary/50"
-                            )}
+                            className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                           >
                             <div>
-                              <p className="font-medium">
-                                {teamUser.username}
-                                {teamUser.id === user?.id && (
-                                  <span className="ml-2 text-sm text-primary">(You)</span>
-                                )}
-                              </p>
+                              <p className="font-medium">{teamUser.username}</p>
                               <p className="text-sm text-muted-foreground">
                                 {teamUser.isAdmin ? "Admin" : "Team Member"}
                               </p>
