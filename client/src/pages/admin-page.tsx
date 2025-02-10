@@ -92,20 +92,22 @@ export default function AdminPage() {
 
         {/* Admin Navigation Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="space-y-1">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Users & Teams
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">Manage user accounts and team assignments</p>
-              <Button className="w-full" variant="outline">
-                View Users
-              </Button>
-            </CardContent>
-          </Card>
+          <Link href="/admin/users">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader className="space-y-1">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Users & Teams
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">Manage user accounts and team assignments</p>
+                <Button className="w-full" variant="outline">
+                  View Users
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="space-y-1">
@@ -235,8 +237,8 @@ export default function AdminPage() {
                 />
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full button-hover"
                 disabled={createQuestionMutation.isPending}
               >
