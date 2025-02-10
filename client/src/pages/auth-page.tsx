@@ -45,7 +45,7 @@ export default function AuthPage() {
       )}>
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl">Business Quiz Challenge</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">The Round Table: Kensington Edition</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
@@ -150,8 +150,8 @@ export default function AuthPage() {
       {!isMobile && (
         <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-8">
           <div className="max-w-lg text-white">
-            <h1 className="text-4xl font-bold mb-4">Welcome to Business Quiz Challenge</h1>
-            <p className="text-lg mb-6">Test your business knowledge, compete with your team, and win weekly prizes!</p>
+            <h1 className="text-4xl font-bold mb-4">Welcome to The Round Table: Kensington Edition</h1>
+            <p className="text-lg mb-6">Test your wine knowledge, compete with your team, and win weekly prizes!</p>
             <div className="rounded-lg shadow-xl overflow-hidden">
               <img
                 src="/wine.jpg"
