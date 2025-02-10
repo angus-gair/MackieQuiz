@@ -30,25 +30,22 @@ export function ProtectedRoute({
     );
   }
 
-  // Team allocation page specific logic
-  if (path === "/team-allocation") {
-    // If already assigned to a team, redirect to home
-    if (user.teamAssigned) {
-      return (
-        <Route path={path}>
-          <Redirect to="/" />
-        </Route>
-      );
-    }
-  } else {
-    // For all other protected routes, if no team assigned, redirect to team allocation
-    if (!user.teamAssigned) {
-      return (
-        <Route path={path}>
-          <Redirect to="/team-allocation" />
-        </Route>
-      );
-    }
+  // For all routes except team allocation, redirect to team allocation if no team assigned
+  if (path !== "/team-allocation" && !user.teamAssigned) {
+    return (
+      <Route path={path}>
+        <Redirect to="/team-allocation" />
+      </Route>
+    );
+  }
+
+  // For team allocation page, redirect to home if already assigned to a team
+  if (path === "/team-allocation" && user.teamAssigned) {
+    return (
+      <Route path={path}>
+        <Redirect to="/" />
+      </Route>
+    );
   }
 
   return <Route path={path} component={Component} />;
