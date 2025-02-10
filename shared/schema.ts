@@ -6,10 +6,11 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  team: text("team").notNull(),
+  team: text("team"),  // Made nullable
   isAdmin: boolean("is_admin").notNull().default(false),
   weeklyScore: integer("weekly_score").notNull().default(0),
   weeklyQuizzes: integer("weekly_quizzes").notNull().default(0),
+  teamAssigned: boolean("team_assigned").notNull().default(false), // Added to track if team is assigned
 });
 
 export const questions = pgTable("questions", {
@@ -33,9 +34,10 @@ export const answers = pgTable("answers", {
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
-  team: true,
 }).extend({
-  isAdmin: z.boolean().optional().default(false)
+  isAdmin: z.boolean().optional().default(false),
+  team: z.string().optional(),
+  teamAssigned: z.boolean().optional().default(false)
 });
 
 export const insertQuestionSchema = createInsertSchema(questions);

@@ -40,6 +40,7 @@ export interface IStorage {
     knowledgeScore: number;
     movingAverage: number;
   }[]>;
+  assignTeam(userId: number, team: string): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -63,7 +64,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+    const [user] = await db.insert(users).values({
+      ...insertUser,
+      teamAssigned: false // Ensure new users start with teamAssigned as false
+    }).returning();
     return user;
   }
 
@@ -317,6 +321,18 @@ export class DatabaseStorage implements IStorage {
     }
 
     return weeks;
+  }
+
+  async assignTeam(userId: number, team: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        team,
+        teamAssigned: true
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
 }
 

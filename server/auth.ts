@@ -105,7 +105,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, password, team, isAdmin } = req.body;
+      const { username, password, isAdmin } = req.body;
       log(`Registration attempt for user: ${username}`);
 
       const existingUser = await storage.getUserByUsername(username);
@@ -118,8 +118,8 @@ export function setupAuth(app: Express) {
       const user = await storage.createUser({
         username,
         password: hashedPassword,
-        team,
-        isAdmin: isAdmin || false
+        isAdmin: isAdmin || false,
+        teamAssigned: false
       });
 
       log(`Registration successful for user: ${username}`);
@@ -152,6 +152,29 @@ export function setupAuth(app: Express) {
       log(`Logout successful for user: ${userId}`);
       res.sendStatus(200);
     });
+  });
+
+  app.post("/api/assign-team", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    const userId = req.user.id;
+    const { team } = req.body;
+
+    // Validate team name
+    const validTeams = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kensington Corkers"];
+    if (!validTeams.includes(team)) {
+      return res.status(400).json({ message: "Invalid team name" });
+    }
+
+    try {
+      const updatedUser = await storage.assignTeam(userId, team);
+      res.json(updatedUser);
+    } catch (err) {
+      log(`Team assignment error: ${err}`);
+      res.status(500).json({ message: "Failed to assign team" });
+    }
   });
 
   app.get("/api/user", (req, res) => {
