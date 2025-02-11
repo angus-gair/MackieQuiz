@@ -137,6 +137,7 @@ export default function AdminQuestionsPage() {
             const questions = weeklyQuestions?.filter(q => {
               // Ensure we're comparing the dates in the same format
               const questionWeek = format(new Date(q.weekOf), 'yyyy-MM-dd');
+              const weekString = format(week, 'yyyy-MM-dd');
               console.log('Question week:', questionWeek, 'Comparing with:', weekString);
               return questionWeek === weekString;
             }) || [];
