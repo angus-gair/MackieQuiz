@@ -27,7 +27,7 @@ export default function TeamAllocationPage() {
     const startTime = Date.now();
     let spinInterval: NodeJS.Timeout;
 
-    const animate = () => {
+    const animate = async () => {
       const elapsed = Date.now() - startTime;
 
       if (elapsed >= duration) {
@@ -35,26 +35,34 @@ export default function TeamAllocationPage() {
         const finalTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
         setSelectedTeam(finalTeam);
         setSpinning(false);
-        setShowConfetti(true);
 
-        apiRequest("POST", "/api/assign-team", { team: finalTeam })
-          .then(() => {
-            // Only show confetti after successful team assignment
-            setShowConfetti(true);
-            // Return to avoid the catch block
-            return;
-          })
-          .catch((error) => {
-            console.error('Team assignment error:', error);
-            toast({
-              title: "Error",
-              description: "Failed to assign team. Please try again.",
-              variant: "destructive",
-            });
-            setSpinning(false);
-            setSelectedTeam(null);
-            setShowConfetti(false);
+        try {
+          // First verify we're still authenticated
+          const userResponse = await apiRequest("GET", "/api/user");
+          if (!userResponse.ok) {
+            throw new Error('Authentication check failed');
+          }
+
+          // Then make the team assignment request
+          const response = await apiRequest("POST", "/api/assign-team", { team: finalTeam });
+          if (!response.ok) {
+            throw new Error(`Team assignment failed: ${response.status}`);
+          }
+
+          // If we get here, everything worked
+          setShowConfetti(true);
+        } catch (error) {
+          console.error('Team assignment error:', error);
+          toast({
+            title: "Error",
+            description: "Failed to assign team. Please try logging in again.",
+            variant: "destructive",
           });
+          setSpinning(false);
+          setSelectedTeam(null);
+          setShowConfetti(false);
+          setLocation("/auth"); // Redirect to auth page on session error
+        }
       } else {
         const progress = elapsed / duration;
         const intervalDelay = Math.min(1500, 400 + (progress * 1100));
@@ -123,15 +131,19 @@ export default function TeamAllocationPage() {
   const handleContinue = async () => {
     try {
       const res = await apiRequest("GET", "/api/user");
+      if (!res.ok) {
+        throw new Error('Failed to verify user session');
+      }
       const updatedUser = await res.json();
       queryClient.setQueryData(["/api/user"], updatedUser);
       setLocation("/");
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load user data. Please try again.",
+        description: "Failed to load user data. Please try logging in again.",
         variant: "destructive",
       });
+      setLocation("/auth");
     }
   };
 
