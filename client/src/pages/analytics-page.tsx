@@ -56,8 +56,8 @@ export default function AnalyticsPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-primary mb-1">Kingsford Corkers</h1>
-            <p className="text-sm text-muted-foreground">Analytics Dashboard</p>
+            <h1 className="text-xl font-bold text-primary mb-1">Analytics Dashboard</h1>
+            <p className="text-sm text-muted-foreground">Team Performance Overview</p>
           </div>
         </div>
 
