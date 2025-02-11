@@ -94,7 +94,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getQuestions(): Promise<Question[]> {
-    return await db.select().from(questions);
+    return await db
+      .select()
+      .from(questions)
+      .where(eq(questions.isArchived, false))
+      .orderBy(questions.weekOf);
   }
 
   async getDailyQuestions(): Promise<Question[]> {

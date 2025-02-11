@@ -34,9 +34,18 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.get("/api/questions", async (req, res) => {
-    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
-    const questions = await storage.getQuestions();
-    res.json(questions);
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      console.log("Questions API: Unauthorized access attempt");
+      return res.sendStatus(401);
+    }
+    try {
+      const questions = await storage.getQuestions();
+      console.log(`Questions API: Retrieved ${questions.length} questions`);
+      res.json(questions);
+    } catch (error) {
+      console.error("Questions API Error:", error);
+      res.status(500).json({ error: "Failed to fetch questions" });
+    }
   });
 
   app.post("/api/questions", async (req, res) => {
