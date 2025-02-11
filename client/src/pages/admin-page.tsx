@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -27,6 +34,19 @@ import { useToast } from "@/hooks/use-toast";
 import { BottomNav } from "@/components/bottom-nav";
 import { format, addWeeks, startOfWeek } from "date-fns";
 import { Loader2 } from 'lucide-react';
+
+const CATEGORIES = [
+  "Wine Regions",
+  "Wine Making",
+  "Wine Service",
+  "Wine History",
+  "Wine Varietals",
+  "Food Pairing",
+  "Wine Storage",
+  "Wine Tasting",
+  "Wine Labels",
+  "Wine Chemistry"
+] as const;
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -282,12 +302,25 @@ export default function AdminPage() {
 
                                 <div className="space-y-1.5 sm:space-y-2">
                                   <Label className="text-xs font-medium sm:text-sm">Category</Label>
-                                  <Input
-                                    value={newQuestion.category || ""}
-                                    onChange={(e) => setNewQuestion(prev => ({ ...prev, category: e.target.value }))}
-                                    placeholder="e.g., Wine Knowledge, History"
-                                    className="h-8 sm:h-9 text-sm"
-                                  />
+                                  <Select
+                                    value={newQuestion.category}
+                                    onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category: value }))}
+                                  >
+                                    <SelectTrigger className="h-8 sm:h-9 text-sm">
+                                      <SelectValue placeholder="Select a category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {CATEGORIES.map((category) => (
+                                        <SelectItem 
+                                          key={category} 
+                                          value={category}
+                                          className="text-sm"
+                                        >
+                                          {category}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                 </div>
 
                                 <div className="space-y-1.5 sm:space-y-2">
