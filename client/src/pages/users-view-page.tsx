@@ -28,21 +28,18 @@ export default function UsersViewPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-8">
-          <Link href="/">
-            <Button variant="ghost" className="mr-3">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
-          <h1 className="text-2xl font-semibold">Users & Teams</h1>
-        </div>
-
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="h-5 w-5 mr-2" />
-              Users Overview
+            <CardTitle className="flex items-center gap-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="h-8">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
+              <div className="flex items-center">
+                <Users className="h-5 w-5 mr-2" />
+                Users Overview
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
