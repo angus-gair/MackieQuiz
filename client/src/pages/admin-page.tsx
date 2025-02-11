@@ -79,29 +79,47 @@ export default function AdminQuestionsPage() {
   // Add logging to debug filtering
   const filteredWeeklyQuestions = useMemo(() => {
     if (!weeklyQuestions) return [];
+    console.log('All weekly questions:', weeklyQuestions);
     return weeklyQuestions.filter(q => {
-      console.log('Question:', q);
-      console.log('Question weekOf:', q.weekOf);
+      console.log('Filtering question:', q);
       return !q.isArchived;
     });
   }, [weeklyQuestions]);
 
   const createQuestionMutation = useMutation({
     mutationFn: async (question: InsertQuestion) => {
+      if (!selectedQuestionSlot?.weekOf) {
+        throw new Error('Week not selected');
+      }
+      // Format the date correctly for the database
+      const formattedDate = format(selectedQuestionSlot.weekOf, 'yyyy-MM-dd');
+      console.log('Creating question with date:', formattedDate);
+
       const questionWithWeek = {
         ...question,
-        weekOf: selectedQuestionSlot?.weekOf.toISOString().split('T')[0],
+        weekOf: formattedDate,
       };
+      console.log('Sending question data:', questionWithWeek);
+
       const res = await apiRequest("POST", "/api/questions", questionWithWeek);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Question created successfully:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
       setNewQuestion({ options: ["", "", "", ""] });
       setSelectedQuestionSlot(null);
       toast({
         title: "Success",
         description: "Question created successfully",
+      });
+    },
+    onError: (error: Error) => {
+      console.error('Error creating question:', error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });
@@ -118,6 +136,18 @@ export default function AdminQuestionsPage() {
       });
     },
   });
+
+  const getQuestionsForWeek = (week: Date, questions: Question[]) => {
+    const weekString = format(week, 'yyyy-MM-dd');
+    console.log('Getting questions for week:', weekString);
+
+    return questions.filter(q => {
+      const questionDate = new Date(q.weekOf);
+      const questionWeek = format(questionDate, 'yyyy-MM-dd');
+      console.log('Comparing question date:', questionWeek, 'with week:', weekString);
+      return questionWeek === weekString && !q.isArchived;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
@@ -142,16 +172,8 @@ export default function AdminQuestionsPage() {
 
         <Accordion type="single" collapsible className="space-y-2">
           {futureWeeks.map((week) => {
-            const weekString = format(week, 'yyyy-MM-dd');
-            console.log('Current week:', weekString);
-            const questions = filteredWeeklyQuestions.filter(q => {
-              const questionWeek = new Date(q.weekOf).toISOString().split('T')[0];
-              console.log('Question week:', questionWeek, 'Comparing with:', weekString);
-              return questionWeek === weekString && !q.isArchived;
-            }) || [];
-
-            console.log('Filtered questions for week', weekString, ':', questions);
-
+            const questions = getQuestionsForWeek(week, filteredWeeklyQuestions);
+            console.log('Filtered questions for week:', format(week, 'yyyy-MM-dd'), questions);
             const isCurrentWeek = week.getTime() === currentWeek.getTime();
             const weekId = week.toISOString();
 
