@@ -177,231 +177,220 @@ export default function HomePage() {
 
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-between px-4 h-14">
-          <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold">Weekly Quiz</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/leaderboard">
-              <Button variant="ghost" size="sm" className="h-8 gap-2">
-                <Trophy className="h-4 w-4" />
-                <span className={cn("", { "hidden": isMobile })}>Leaderboard</span>
-              </Button>
-            </Link>
-            <Link href={user?.isAdmin ? "/admin/users" : "/users"}>
-              <Button variant="ghost" size="sm" className="h-8 gap-2">
-                <Users className="h-4 w-4" />
-                <span className={cn("", { "hidden": isMobile })}>Users</span>
-              </Button>
-            </Link>
-            {user?.isAdmin ? (
-              <Link href="/admin">
-                <Button variant="ghost" size="sm" className="h-8 gap-2">
-                  <Cog className="h-4 w-4" />
-                  <span className={cn("", { "hidden": isMobile })}>Admin</span>
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between h-14 px-4">
+            <div className="flex items-center gap-4">
+              <h1 className="text-lg font-semibold">Weekly Quiz</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href="/leaderboard">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3">
+                  <Trophy className="h-4 w-4" />
+                  <span className="hidden sm:inline-block sm:ml-2">Leaderboard</span>
                 </Button>
               </Link>
-            ) : (
-              <Link href="/settings">
-                <Button variant="ghost" size="sm" className="h-8 gap-2">
-                  <Cog className="h-4 w-4" />
-                  <span className={cn("", { "hidden": isMobile })}>Settings</span>
+              <Link href={user?.isAdmin ? "/admin/users" : "/users"}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3">
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline-block sm:ml-2">Users</span>
                 </Button>
               </Link>
-            )}
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleLogout}
-              className="h-8 gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className={cn("", { "hidden": isMobile })}>Logout</span>
-            </Button>
+              {user?.isAdmin ? (
+                <Link href="/admin">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3">
+                    <Cog className="h-4 w-4" />
+                    <span className="hidden sm:inline-block sm:ml-2">Admin</span>
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/settings">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3">
+                    <Cog className="h-4 w-4" />
+                    <span className="hidden sm:inline-block sm:ml-2">Settings</span>
+                  </Button>
+                </Link>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleLogout}
+                className="h-8 w-8 p-0 sm:w-auto sm:px-3"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline-block sm:ml-2">Logout</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pt-16 pb-14">
-        <div className="p-4">
-          <div className="max-w-4xl mx-auto">
-            <div className={cn(
-              "mb-4",
-              isMobile ? "flex flex-col gap-2" : "flex justify-between items-center"
-            )}>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-primary">Welcome, {user?.username}!</h1>
-                <p className="text-muted-foreground">Team: {user?.team}</p>
+      <main className="container mx-auto flex-1 pt-16 pb-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-xl sm:text-2xl font-bold text-primary">Welcome, {user?.username}!</h1>
+            <p className="text-muted-foreground">Team: {user?.team}</p>
+          </div>
+
+          <Card className="mb-6">
+            <CardHeader className="py-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center text-lg">
+                  <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
+                  Progress
+                </CardTitle>
+                <p className="text-sm text-muted-foreground slide-up">
+                  {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
+                </p>
               </div>
-            </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="w-full">
+                <Progress 
+                  value={progress} 
+                  className="h-3 rounded-full" 
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card className="mb-4">
-              <CardHeader className="py-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center text-lg">
-                    <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
-                    Progress
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground slide-up">
-                    {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className={cn(
-                  "relative w-full",
-                  isMobile && "px-2"
-                )}>
-                  <Progress 
-                    value={progress} 
-                    className={cn(
-                      "progress-bar h-3 rounded-full",
-                      isMobile && "bg-muted/50"
-                    )} 
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {submitted ? (
-              <div className="space-y-4 sm:space-y-6">
-                {questions?.map((question, index) => (
-                  <Card 
-                    key={question.id}
-                    className="quiz-card slide-down"
-                    style={{ animationDelay: `${index * 150}ms` }}
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-xl flex items-start gap-2">
-                        {answers?.find(a => a.questionId === question.id)?.correct ? 
-                          <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0 mt-1" /> :
-                          <XCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
-                        }
-                        <span>{question.question}</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <RadioGroup
-                          disabled
-                          value={selectedAnswers[question.id]}
-                          className="space-y-3"
-                        >
-                          {question.options.map((option) => (
-                            <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
-                              <RadioGroupItem 
-                                value={option} 
-                                checked={selectedAnswers[question.id] === option}
-                                className="radio-group-item"
-                              />
-                              <Label 
-                                className={cn(
-                                  "radio-label",
-                                  option === question.correctAnswer && "text-green-600 font-semibold",
-                                  option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
-                                )}
-                              >
-                                {option}
-                              </Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
-                      </div>
-
-                      <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border/50 explanation-panel">
-                        <p className="font-semibold mb-2">
-                          {answers?.find(a => a.questionId === question.id)?.correct ? "Correct!" : "Incorrect"}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {question.explanation}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-
-                <Button 
-                  className="w-full button-hover mt-4 slide-up"
-                  onClick={() => setLocation("/leaderboard")}
-                  style={{ animationDelay: '800ms' }}
+          {submitted ? (
+            <div className="space-y-4">
+              {questions?.map((question, index) => (
+                <Card 
+                  key={question.id}
+                  className="quiz-card slide-down overflow-hidden"
+                  style={{ animationDelay: `${index * 150}ms` }}
                 >
-                  View Leaderboard
-                </Button>
-              </div>
-            ) : (
-              currentQuestion && (
-                <div key={quizKey} className="space-y-4 sm:space-y-6">
-                  <Card className="quiz-card">
-                    <CardHeader>
-                      <CardTitle className="text-xl">
-                        {currentQuestion.question}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                  <CardHeader>
+                    <CardTitle className="text-base sm:text-lg flex items-start gap-2">
+                      {answers?.find(a => a.questionId === question.id)?.correct ? 
+                        <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" /> :
+                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      }
+                      <span>{question.question}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
                       <RadioGroup
-                        value={selectedAnswers[currentQuestion.id]}
-                        onValueChange={(value) =>
-                          setSelectedAnswers(prev => ({
-                            ...prev,
-                            [currentQuestion.id]: value,
-                          }))
-                        }
-                        className="space-y-1"
+                        disabled
+                        value={selectedAnswers[question.id]}
+                        className="space-y-2"
                       >
-                        {currentQuestion.options.map((option) => (
-                          <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
+                        {question.options.map((option) => (
+                          <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
                             <RadioGroupItem 
                               value={option} 
-                              id={`${currentQuestion.id}-${option}`}
+                              checked={selectedAnswers[question.id] === option}
                               className="radio-group-item"
                             />
                             <Label 
-                              htmlFor={`${currentQuestion.id}-${option}`}
-                              className="radio-label cursor-pointer"
+                              className={cn(
+                                "radio-label text-sm sm:text-base",
+                                option === question.correctAnswer && "text-green-600 font-semibold",
+                                option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
+                              )}
                             >
                               {option}
                             </Label>
                           </div>
                         ))}
                       </RadioGroup>
+                    </div>
 
-                      <div className="flex justify-between mt-6">
+                    <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+                      <p className="font-semibold mb-1 text-sm sm:text-base">
+                        {answers?.find(a => a.questionId === question.id)?.correct ? "Correct!" : "Incorrect"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {question.explanation}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              <Button 
+                className="w-full slide-up"
+                onClick={() => setLocation("/leaderboard")}
+                style={{ animationDelay: '800ms' }}
+              >
+                View Leaderboard
+              </Button>
+            </div>
+          ) : (
+            currentQuestion && (
+              <div key={quizKey} className="space-y-4">
+                <Card className="quiz-card">
+                  <CardHeader>
+                    <CardTitle className="text-base sm:text-lg">
+                      {currentQuestion.question}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <RadioGroup
+                      value={selectedAnswers[currentQuestion.id]}
+                      onValueChange={(value) =>
+                        setSelectedAnswers(prev => ({
+                          ...prev,
+                          [currentQuestion.id]: value,
+                        }))
+                      }
+                      className="space-y-2"
+                    >
+                      {currentQuestion.options.map((option) => (
+                        <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
+                          <RadioGroupItem 
+                            value={option} 
+                            id={`${currentQuestion.id}-${option}`}
+                            className="radio-group-item"
+                          />
+                          <Label 
+                            htmlFor={`${currentQuestion.id}-${option}`}
+                            className="radio-label cursor-pointer text-sm sm:text-base"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+
+                    <div className="flex justify-between mt-6">
+                      <Button
+                        variant="outline"
+                        onClick={handlePrevious}
+                        disabled={currentQuestionIndex === 0}
+                        className="h-9"
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Previous
+                      </Button>
+                      {isLastQuestion ? (
                         <Button
-                          variant="outline"
-                          onClick={handlePrevious}
-                          disabled={currentQuestionIndex === 0}
-                          className="button-hover"
+                          onClick={handleSubmit}
+                          disabled={!canGoNext}
+                          className="h-9"
                         >
-                          <ArrowLeft className="mr-2 h-4 w-4" />
-                          Previous
+                          Submit Quiz
                         </Button>
-                        {isLastQuestion ? (
-                          <Button
-                            onClick={handleSubmit}
-                            disabled={!canGoNext}
-                            className="button-hover"
-                          >
-                            Submit Quiz
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={handleNext}
-                            disabled={!canGoNext}
-                            className="button-hover"
-                          >
-                            Next
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )
-            )}
-          </div>
+                      ) : (
+                        <Button
+                          onClick={handleNext}
+                          disabled={!canGoNext}
+                          className="h-9"
+                        >
+                          Next
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )
+          )}
         </div>
       </main>
     </div>
