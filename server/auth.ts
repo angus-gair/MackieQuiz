@@ -166,7 +166,7 @@ export function setupAuth(app: Express) {
     const { team } = req.body;
 
     // Validate team name
-    const validTeams = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kensington Corkers"];
+    const validTeams = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kingsford Corkers"];
     if (!validTeams.includes(team)) {
       return res.status(400).json({ message: "Invalid team name" });
     }
