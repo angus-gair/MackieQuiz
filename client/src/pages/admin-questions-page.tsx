@@ -136,15 +136,9 @@ export default function AdminQuestionsPage() {
             </Link>
             <h1 className="text-2xl font-bold">Question Management</h1>
           </div>
-          <Link href="/admin/questions/archived">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <Archive className="h-4 w-4" />
-              View Archived
-            </Button>
-          </Link>
         </div>
 
-        <Accordion type="single" collapsible className="space-y-2">
+        <Accordion type="single" collapsible className="space-y-2 mb-4">
           {futureWeeks.map((week) => {
             const weekQuestions = getQuestionsForWeek(week, questions);
             const isCurrentWeek = week.getTime() === currentWeek.getTime();
@@ -388,6 +382,17 @@ export default function AdminQuestionsPage() {
             );
           })}
         </Accordion>
+
+        <Link href="/admin/questions/archived" className="block">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full flex items-center justify-center gap-2 h-9"
+          >
+            <Archive className="h-4 w-4" />
+            View Archived Questions
+          </Button>
+        </Link>
       </div>
     </div>
   );
