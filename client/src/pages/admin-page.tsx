@@ -21,7 +21,7 @@ import {
 import {
   Plus,
   Archive,
-  ArrowLeft, // Added import
+  ArrowLeft,
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -33,7 +33,6 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { format, addWeeks, startOfWeek } from "date-fns";
 import { Loader2 } from 'lucide-react';
-import { AdminLayout } from "@/components/admin-layout";
 
 const CATEGORIES = [
   "Store Ops",
@@ -53,8 +52,8 @@ export default function AdminQuestionsPage() {
     options: ["", "", "", ""],
   });
 
-  // Get current week and next 3 weeks
-  const currentWeek = startOfWeek(new Date());
+  // Get current week starting from Monday and next 3 weeks
+  const currentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
   const futureWeeks = Array.from({ length: 4 }, (_, i) =>
     addWeeks(currentWeek, i)
   );
@@ -66,9 +65,10 @@ export default function AdminQuestionsPage() {
       const questionsMap: Record<string, Question[]> = {};
       await Promise.all(
         futureWeeks.map(async (week) => {
+          const startDate = format(week, 'yyyy-MM-dd');
           const response = await apiRequest(
             "GET",
-            `/api/questions/weekly/${week.toISOString()}`
+            `/api/questions/weekly/${startDate}`
           );
           const questions = await response.json();
           questionsMap[week.toISOString()] = questions;
