@@ -26,6 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { BottomNav } from "@/components/bottom-nav";
 import { format, addWeeks, startOfWeek } from "date-fns";
+import { Loader2 } from 'lucide-react';
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -190,20 +191,25 @@ export default function AdminPage() {
                             <SheetTrigger asChild>
                               <Button
                                 variant="outline"
-                                className="w-full h-24 border-dashed flex-col gap-2"
+                                className="w-full h-20 border-dashed flex-col gap-1.5"
                                 onClick={() => setSelectedQuestionSlot({ weekOf: week, slot })}
                               >
-                                <Plus className="h-5 w-5 text-muted-foreground" />
+                                <Plus className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-xs text-muted-foreground">
                                   Question {slot + 1}
                                 </span>
                               </Button>
                             </SheetTrigger>
-                            <SheetContent side="bottom" className="h-[92%] sm:h-full sm:max-w-xl">
-                              <SheetHeader>
-                                <SheetTitle>Add Question {slot + 1} for {format(week, 'PPP')}</SheetTitle>
+                            <SheetContent 
+                              side="bottom" 
+                              className="h-[95%] px-4 pt-4 pb-0 sm:h-full sm:max-w-xl sm:px-6 sm:pt-6"
+                            >
+                              <SheetHeader className="space-y-1 sm:space-y-2.5">
+                                <SheetTitle className="text-base sm:text-lg">
+                                  Add Question {slot + 1} for {format(week, 'MMM d')}
+                                </SheetTitle>
                               </SheetHeader>
-                              <Separator className="my-4" />
+                              <Separator className="my-3 sm:my-4" />
                               <form onSubmit={(e) => {
                                 e.preventDefault();
                                 if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
@@ -234,20 +240,20 @@ export default function AdminPage() {
                                 }
 
                                 createQuestionMutation.mutate(newQuestion as InsertQuestion);
-                              }} className="space-y-4 overflow-y-auto pb-20">
-                                <div className="space-y-2">
-                                  <Label className="text-sm">Question Text</Label>
+                              }} className="flex flex-col space-y-3 sm:space-y-4 overflow-y-auto">
+                                <div className="space-y-1.5 sm:space-y-2">
+                                  <Label className="text-xs font-medium sm:text-sm">Question Text</Label>
                                   <Textarea
                                     value={newQuestion.question || ""}
                                     onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
                                     placeholder="Enter the question text"
-                                    className="min-h-[80px] text-sm"
+                                    className="min-h-[60px] sm:min-h-[80px] text-sm resize-none"
                                   />
                                 </div>
 
-                                <div className="space-y-2">
-                                  <Label className="text-sm">Options</Label>
-                                  <div className="grid gap-2">
+                                <div className="space-y-1.5 sm:space-y-2">
+                                  <Label className="text-xs font-medium sm:text-sm">Options</Label>
+                                  <div className="grid gap-1.5 sm:gap-2">
                                     {newQuestion.options?.map((option, index) => (
                                       <Input
                                         key={index}
@@ -258,49 +264,60 @@ export default function AdminPage() {
                                           setNewQuestion(prev => ({ ...prev, options: newOptions }));
                                         }}
                                         placeholder={`Option ${index + 1}`}
-                                        className="h-9 text-sm"
+                                        className="h-8 sm:h-9 text-sm"
                                       />
                                     ))}
                                   </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                  <Label className="text-sm">Correct Answer</Label>
+                                <div className="space-y-1.5 sm:space-y-2">
+                                  <Label className="text-xs font-medium sm:text-sm">Correct Answer</Label>
                                   <Input
                                     value={newQuestion.correctAnswer || ""}
                                     onChange={(e) => setNewQuestion(prev => ({ ...prev, correctAnswer: e.target.value }))}
-                                    placeholder="Enter the correct answer (must match one of the options)"
-                                    className="h-9 text-sm"
+                                    placeholder="Must match one of the options above"
+                                    className="h-8 sm:h-9 text-sm"
                                   />
                                 </div>
 
-                                <div className="space-y-2">
-                                  <Label className="text-sm">Category</Label>
+                                <div className="space-y-1.5 sm:space-y-2">
+                                  <Label className="text-xs font-medium sm:text-sm">Category</Label>
                                   <Input
                                     value={newQuestion.category || ""}
                                     onChange={(e) => setNewQuestion(prev => ({ ...prev, category: e.target.value }))}
-                                    placeholder="Enter the question category"
-                                    className="h-9 text-sm"
+                                    placeholder="e.g., Wine Knowledge, History"
+                                    className="h-8 sm:h-9 text-sm"
                                   />
                                 </div>
 
-                                <div className="space-y-2">
-                                  <Label className="text-sm">Explanation</Label>
+                                <div className="space-y-1.5 sm:space-y-2">
+                                  <Label className="text-xs font-medium sm:text-sm">Explanation</Label>
                                   <Textarea
                                     value={newQuestion.explanation || ""}
                                     onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
-                                    placeholder="Enter the explanation for the correct answer"
-                                    className="min-h-[80px] text-sm"
+                                    placeholder="Explain why this is the correct answer"
+                                    className="min-h-[60px] sm:min-h-[80px] text-sm resize-none"
                                   />
                                 </div>
 
-                                <Button
-                                  type="submit"
-                                  className="w-full h-9 text-sm font-medium"
-                                  disabled={createQuestionMutation.isPending}
-                                >
-                                  Add Question
-                                </Button>
+                                <div className="sticky bottom-0 -mx-4 sm:-mx-6 mt-auto">
+                                  <div className="px-4 py-3 sm:px-6 bg-background/80 backdrop-blur-sm border-t">
+                                    <Button
+                                      type="submit"
+                                      className="w-full h-9 text-sm font-medium"
+                                      disabled={createQuestionMutation.isPending}
+                                    >
+                                      {createQuestionMutation.isPending ? (
+                                        <>
+                                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                          Adding Question...
+                                        </>
+                                      ) : (
+                                        "Add Question"
+                                      )}
+                                    </Button>
+                                  </div>
+                                </div>
                               </form>
                             </SheetContent>
                           </Sheet>
