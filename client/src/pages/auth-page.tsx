@@ -37,7 +37,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#2563eb] to-[#1e40af]/20">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       {/* Hero Section - Visible on both mobile and desktop */}
       <div className="w-full bg-primary text-white">
         <div className="max-w-md mx-auto text-center px-4 py-6">
@@ -54,18 +54,18 @@ export default function AuthPage() {
       </div>
 
       {/* Auth Form Section */}
-      <div className="flex-1 flex items-start justify-center p-4">
-        <Card className="w-full max-w-sm border-0 sm:border">
-          <CardContent className="pt-4">
+      <div className="flex-1 flex items-start justify-center pt-2">
+        <Card className="w-full max-w-sm border-0 sm:border shadow-none sm:shadow">
+          <CardContent className="p-2 sm:p-3">
             <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsList className="grid w-full grid-cols-2 mb-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-3">
+                  <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-2">
                     <FormField
                       control={loginForm.control}
                       name="username"
@@ -73,7 +73,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel className="text-xs">Username</FormLabel>
                           <FormControl>
-                            <Input {...field} className="h-9" />
+                            <Input {...field} className="h-8" />
                           </FormControl>
                           <FormMessage className="text-xs" />
                         </FormItem>
@@ -86,13 +86,13 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel className="text-xs">Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} className="h-9" />
+                            <Input type="password" {...field} className="h-8" />
                           </FormControl>
                           <FormMessage className="text-xs" />
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full h-9 text-sm" disabled={loginMutation.isPending}>
+                    <Button type="submit" className="w-full h-8 text-sm" disabled={loginMutation.isPending}>
                       Login
                     </Button>
                   </form>
@@ -101,7 +101,7 @@ export default function AuthPage() {
 
               <TabsContent value="register">
                 <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))} className="space-y-3">
+                  <form onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))} className="space-y-2">
                     <FormField
                       control={registerForm.control}
                       name="username"
@@ -109,7 +109,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel className="text-xs">Username</FormLabel>
                           <FormControl>
-                            <Input {...field} className="h-9" />
+                            <Input {...field} className="h-8" />
                           </FormControl>
                           <FormMessage className="text-xs" />
                         </FormItem>
@@ -122,7 +122,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel className="text-xs">Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} className="h-9" />
+                            <Input type="password" {...field} className="h-8" />
                           </FormControl>
                           <FormMessage className="text-xs" />
                         </FormItem>
@@ -145,7 +145,7 @@ export default function AuthPage() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full h-9 text-sm" disabled={registerMutation.isPending}>
+                    <Button type="submit" className="w-full h-8 text-sm" disabled={registerMutation.isPending}>
                       Register
                     </Button>
                   </form>
