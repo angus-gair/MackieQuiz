@@ -43,7 +43,6 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router />
-        <FullscreenToggle />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
