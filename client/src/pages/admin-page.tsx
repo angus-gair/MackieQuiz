@@ -314,7 +314,9 @@ export default function AdminQuestionsPage() {
                               <div className="space-y-1.5 sm:space-y-2">
                                 <Label className="text-xs font-medium sm:text-sm">Correct Answer</Label>
                                 <Select
-                                  value={newQuestion.correctAnswer}
+                                  value={newQuestion.correctAnswer ? 
+                                    (newQuestion.options?.indexOf(newQuestion.correctAnswer) + 1).toString() : 
+                                    undefined}
                                   onValueChange={(value) => {
                                     const selectedIndex = parseInt(value) - 1;
                                     const selectedOption = newQuestion.options?.[selectedIndex] || '';
