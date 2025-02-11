@@ -76,6 +76,16 @@ export default function AdminQuestionsPage() {
     return PREDEFINED_CATEGORIES;
   }, []);
 
+  // Add logging to debug filtering
+  const filteredWeeklyQuestions = useMemo(() => {
+    if (!weeklyQuestions) return [];
+    return weeklyQuestions.filter(q => {
+      console.log('Question:', q);
+      console.log('Question weekOf:', q.weekOf);
+      return !q.isArchived;
+    });
+  }, [weeklyQuestions]);
+
   const createQuestionMutation = useMutation({
     mutationFn: async (question: InsertQuestion) => {
       const questionWithWeek = {
@@ -134,12 +144,10 @@ export default function AdminQuestionsPage() {
           {futureWeeks.map((week) => {
             const weekString = format(week, 'yyyy-MM-dd');
             console.log('Current week:', weekString);
-            const questions = weeklyQuestions?.filter(q => {
-              // Ensure we're comparing the dates in the same format
-              const questionWeek = format(new Date(q.weekOf), 'yyyy-MM-dd');
-              const weekString = format(week, 'yyyy-MM-dd');
+            const questions = filteredWeeklyQuestions.filter(q => {
+              const questionWeek = new Date(q.weekOf).toISOString().split('T')[0];
               console.log('Question week:', questionWeek, 'Comparing with:', weekString);
-              return questionWeek === weekString;
+              return questionWeek === weekString && !q.isArchived;
             }) || [];
 
             console.log('Filtered questions for week', weekString, ':', questions);
