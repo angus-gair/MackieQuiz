@@ -44,27 +44,26 @@ export default function SettingsPage() {
     },
   });
 
-  // Redirect admin users
   if (user?.isAdmin) {
     return <Redirect to="/admin" />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
+      <div className="max-w-md mx-auto">
+        <div className="flex items-center mb-6">
           <Link href="/">
-            <Button variant="ghost" className="mr-3">
+            <Button variant="ghost" size="sm" className="h-8 mr-3">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </Link>
-          <h1 className="text-2xl font-semibold">Settings</h1>
+          <h1 className="text-lg font-bold">Settings</h1>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Update Profile</CardTitle>
+          <CardHeader className="py-4">
+            <CardTitle className="text-base">Update Profile</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -74,11 +73,11 @@ export default function SettingsPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username</FormLabel>
+                      <FormLabel className="text-xs">Username</FormLabel>
                       <FormControl>
-                        <Input {...field} className="h-12" />
+                        <Input {...field} className="h-9" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -87,17 +86,17 @@ export default function SettingsPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>New Password</FormLabel>
+                      <FormLabel className="text-xs">New Password</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} className="h-12" />
+                        <Input type="password" {...field} className="h-9" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
                 <Button 
                   type="submit" 
-                  className="w-full h-12 text-base font-semibold"
+                  className="w-full h-9 text-sm font-medium"
                   disabled={updateProfileMutation.isPending}
                 >
                   Update Profile
