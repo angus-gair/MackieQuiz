@@ -296,7 +296,7 @@ export default function HomePage() {
           ) : currentQuestion && (
             <Card key={quizKey}>
               <CardHeader className="py-3">
-                <CardTitle className="text-base font-normal leading-relaxed">
+                <CardTitle className="text-base font-medium leading-relaxed">
                   {currentQuestion.question}
                 </CardTitle>
               </CardHeader>
