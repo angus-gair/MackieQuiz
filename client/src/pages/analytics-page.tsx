@@ -46,128 +46,99 @@ export default function AnalyticsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center mb-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="container max-w-full px-4 py-6 sm:px-6">
+        <div className="flex items-center mb-6">
           <Link href="/admin">
             <Button variant="ghost" className="mr-3">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary">Analytics Dashboard</h1>
+          <div>
+            <h1 className="text-xl font-bold text-primary mb-1">Kingsford Corkers</h1>
+            <p className="text-sm text-muted-foreground">Analytics Dashboard</p>
+          </div>
         </div>
 
-        <div className="grid gap-6">
-          {/* Team Performance Chart */}
+        {/* Team Statistics Grid - Mobile First */}
+        <div className="grid gap-4 mb-6">
+          {teamStats?.map((stat) => (
+            <Card key={stat.teamName} className="w-full">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Users className="h-4 w-4" />
+                  {stat.teamName}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Weekly Score</p>
+                    <p className="text-lg font-bold">{stat.totalScore}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Completion</p>
+                    <p className={cn(
+                      "text-lg font-bold",
+                      stat.weeklyCompletionPercentage >= 80 ? "text-green-500" :
+                      stat.weeklyCompletionPercentage >= 50 ? "text-yellow-500" :
+                      "text-red-500"
+                    )}>
+                      {stat.weeklyCompletionPercentage}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Avg Score</p>
+                    <p className="text-sm">{stat.averageScore.toFixed(1)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Members</p>
+                    <p className="text-sm">{stat.members}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Performance Charts - Mobile Optimized */}
+        <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
+              <CardTitle className="text-base flex items-center gap-2">
+                <Trophy className="h-4 w-4" />
                 Team Performance
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px]">
+              <div className="h-[300px] -mx-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={teamStats}>
+                  <BarChart data={teamStats} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="teamName" />
-                    <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                    <YAxis
-                      yAxisId="right"
-                      orientation="right"
-                      stroke="#82ca9d"
-                      domain={[0, 100]}
-                      tickFormatter={(value) => `${value}%`}
-                    />
-                    <Tooltip
-                      formatter={(value: number, name: string) => {
-                        if (name === "Completion Rate (%)") {
-                          return [`${value}%`, name];
-                        }
-                        return [value, name];
-                      }}
-                    />
-                    <Legend />
-                    <Bar yAxisId="right" dataKey="weeklyCompletionPercentage" name="Completion Rate (%)" fill="#82ca9d" />
-                    <Bar yAxisId="left" dataKey="totalScore" name="Total Score" fill="#8884d8" />
+                    <XAxis dataKey="teamName" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                    <Bar dataKey="weeklyCompletionPercentage" name="Completion %" fill="#82ca9d" />
+                    <Bar dataKey="totalScore" name="Score" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          {/* Daily Activity Chart */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Daily Activity
+              <CardTitle className="text-base flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Weekly Trend
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px]">
+              <div className="h-[300px] -mx-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={dailyStats}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis
-                      yAxisId="left"
-                      orientation="left"
-                      stroke="#8884d8"
-                      allowDecimals={false}
-                    />
-                    <YAxis
-                      yAxisId="right"
-                      orientation="right"
-                      stroke="#82ca9d"
-                      domain={[0, 100]}
-                      tickFormatter={(value) => `${value}%`}
-                    />
-                    <Tooltip
-                      formatter={(value: number, name: string) => {
-                        if (name === "Completion Rate (%)") {
-                          return [`${value}%`, name];
-                        }
-                        return [Number.isInteger(value) ? value : value.toFixed(1), name];
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="completedQuizzes"
-                      name="Completed Quizzes"
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="completionRate"
-                      name="Completion Rate (%)"
-                      stroke="#82ca9d"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Team Knowledge Chart */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
-                Team Knowledge Trend
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={teamKnowledge}>
+                  <LineChart data={teamKnowledge} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="week"
@@ -175,27 +146,28 @@ export default function AnalyticsPage() {
                         const date = new Date(value);
                         return date.toLocaleDateString('en-US', {
                           month: 'short',
-                          year: '2-digit'
+                          day: 'numeric'
                         });
                       }}
-                      interval={12}
+                      tick={{ fontSize: 12 }}
+                      interval={isMobile ? 6 : 2}
                     />
                     <YAxis
                       domain={[60, 90]}
                       tickFormatter={(value) => `${value}%`}
+                      tick={{ fontSize: 12 }}
                     />
                     <Tooltip
                       labelFormatter={(label) => {
                         const date = new Date(label);
                         return date.toLocaleDateString('en-US', {
-                          month: 'short',
+                          month: 'long',
                           day: 'numeric',
                           year: 'numeric'
                         });
                       }}
-                      formatter={(value: number) => [`${value}%`, value === 0 ? "No data" : value]}
                     />
-                    <Legend />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
                     <Line
                       type="monotone"
                       dataKey="knowledgeScore"
@@ -207,7 +179,7 @@ export default function AnalyticsPage() {
                     <Line
                       type="monotone"
                       dataKey="movingAverage"
-                      name="4-Week Moving Average"
+                      name="4-Week Average"
                       stroke="#82ca9d"
                       strokeWidth={2}
                       dot={false}
@@ -217,51 +189,6 @@ export default function AnalyticsPage() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Team Statistics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {teamStats?.map((stat) => (
-              <Card key={stat.teamName}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Users className="h-5 w-5" />
-                    {stat.teamName}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm text-muted-foreground">Total Score</dt>
-                      <dd className="text-2xl font-bold">{stat.totalScore}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-muted-foreground">Average Score</dt>
-                      <dd>{stat.averageScore.toFixed(1)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-muted-foreground">Completed Quizzes</dt>
-                      <dd>{stat.completedQuizzes}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-muted-foreground">Team Members</dt>
-                      <dd>{stat.members}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-muted-foreground">Weekly Quiz Completion</dt>
-                      <dd className={cn(
-                        "font-semibold",
-                        stat.weeklyCompletionPercentage >= 80 ? "text-green-500" :
-                          stat.weeklyCompletionPercentage >= 50 ? "text-yellow-500" :
-                            "text-red-500"
-                      )}>
-                        {stat.weeklyCompletionPercentage.toFixed(1)}%
-                      </dd>
-                    </div>
-                  </dl>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </div>
       </div>
     </div>
