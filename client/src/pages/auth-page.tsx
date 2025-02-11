@@ -41,7 +41,10 @@ export default function AuthPage() {
       {/* Hero Section - Visible on both mobile and desktop */}
       <div className="w-full bg-[#1e293b] text-white">
         <div className="max-w-md mx-auto text-center px-4 py-6">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3 font-roboto">The Round Table: Kingsford Edition</h1>
+          <h1 className="mb-3 font-roboto">
+            <span className="text-3xl sm:text-4xl font-bold block">The Round Table:</span>
+            <span className="text-xl sm:text-2xl font-light italic mt-1 block">Kingsford Edition</span>
+          </h1>
           <p className="text-sm sm:text-base mb-4">Test your wine knowledge, compete with your team, and win weekly prizes!</p>
           <div className="rounded-lg shadow-xl overflow-hidden max-h-64 sm:max-h-72">
             <img
