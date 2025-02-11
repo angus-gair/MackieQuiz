@@ -69,17 +69,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
-      // Clear session storage and local storage
+      const res = await apiRequest("POST", "/api/logout");
+      if (!res.ok) {
+        throw new Error("Logout failed");
+      }
       window.sessionStorage.clear();
       window.localStorage.clear();
     },
     onSuccess: () => {
-      // Clear all queries from the cache
       queryClient.clear();
       queryClient.removeQueries();
-      // Redirect to auth page after logout
-      window.location.href = "/auth";
+      setTimeout(() => {
+        window.location.href = "/auth";
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
