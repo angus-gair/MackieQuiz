@@ -35,10 +35,6 @@ export default function AdminPage() {
     options: ["", "", "", ""],
   });
 
-  const { data: weeks } = useQuery<Date[]>({
-    queryKey: ["/api/questions/weeks"],
-  });
-
   // Get current week and next 3 weeks
   const currentWeek = startOfWeek(new Date());
   const futureWeeks = Array.from({ length: 4 }, (_, i) =>
@@ -46,7 +42,7 @@ export default function AdminPage() {
   );
 
   // Get questions for each week
-  const weeklyQuestions = useQuery<Record<string, Question[]>>({
+  const weeklyQuestions = useQuery({
     queryKey: ["/api/questions/weekly"],
     queryFn: async () => {
       const questionsMap: Record<string, Question[]> = {};
