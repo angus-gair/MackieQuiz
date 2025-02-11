@@ -141,16 +141,19 @@ export function setupAuth(app: Express) {
     res.status(200).json(req.user);
   });
 
-  app.post("/api/logout", (req, res, next) => {
+  app.post("/api/logout", (req, res) => {
     const userId = req.user?.id;
     log(`Logout attempt for user: ${userId}`);
     req.logout((err) => {
       if (err) {
-        log(`Logout error for user ${userId}: ${err}`);
-        return next(err);
+        return res.status(500).json({ error: err.message });
       }
-      log(`Logout successful for user: ${userId}`);
-      res.sendStatus(200);
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        res.sendStatus(200);
+      });
     });
   });
 
