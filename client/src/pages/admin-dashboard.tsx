@@ -29,7 +29,7 @@ export default function AdminDashboardPage() {
               Back
             </Button>
           </Link>
-          <h1 className="text-lg font-bold">Admin Dashboard</h1>
+          <h1 className="text-lg font-bold text-primary">Admin Dashboard</h1>
         </div>
 
         <div className="space-y-3">

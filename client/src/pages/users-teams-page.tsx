@@ -140,14 +140,14 @@ export default function UsersTeamsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-8">
+        <div className="flex items-center mb-6">
           <Link href="/">
-            <Button variant="ghost" className="mr-3">
+            <Button variant="ghost" size="sm" className="h-8 mr-3">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </Link>
-          <h1 className="text-2xl font-semibold">Users & Teams</h1>
+          <h1 className="text-lg font-bold text-primary">Users & Teams</h1>
         </div>
 
         <Card>
