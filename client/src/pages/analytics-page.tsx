@@ -72,9 +72,9 @@ export default function AnalyticsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <div>
-                    <p className="text-xs text-muted-foreground">Weekly Score</p>
+                    <p className="text-xs text-muted-foreground">Score</p>
                     <p className="text-lg font-bold">{stat.totalScore}</p>
                   </div>
                   <div>
@@ -89,12 +89,12 @@ export default function AnalyticsPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Avg Score</p>
-                    <p className="text-sm">{stat.averageScore.toFixed(1)}</p>
+                    <p className="text-xs text-muted-foreground">Avg</p>
+                    <p className="text-lg">{stat.averageScore.toFixed(1)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Members</p>
-                    <p className="text-sm">{stat.members}</p>
+                    <p className="text-lg">{stat.members}</p>
                   </div>
                 </div>
               </CardContent>
