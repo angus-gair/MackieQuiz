@@ -38,7 +38,14 @@ export default function TeamAllocationPage() {
         setShowConfetti(true);
 
         apiRequest("POST", "/api/assign-team", { team: finalTeam })
+          .then(() => {
+            // Only show confetti after successful team assignment
+            setShowConfetti(true);
+            // Return to avoid the catch block
+            return;
+          })
           .catch((error) => {
+            console.error('Team assignment error:', error);
             toast({
               title: "Error",
               description: "Failed to assign team. Please try again.",
@@ -46,6 +53,7 @@ export default function TeamAllocationPage() {
             });
             setSpinning(false);
             setSelectedTeam(null);
+            setShowConfetti(false);
           });
       } else {
         const progress = elapsed / duration;
