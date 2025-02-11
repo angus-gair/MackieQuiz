@@ -22,18 +22,9 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-3">
       <div className="max-w-4xl mx-auto">
-        <div className={cn(
-          "mb-4",
-          isMobile ? "flex flex-col gap-2" : "flex items-center"
-        )}>
-          <Link href="/" className={isMobile ? "w-full" : ""}>
-            <Button 
-              variant="ghost" 
-              className={cn(
-                "button-hover",
-                isMobile ? "w-full justify-center" : "mr-3"
-              )}
-            >
+        <div className="flex items-center mb-4">
+          <Link href="/">
+            <Button variant="ghost" className="mr-3">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
