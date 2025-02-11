@@ -6,7 +6,7 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import AdminDashboardPage from "@/pages/admin-dashboard";
-import AdminQuestionsPage from "@/pages/admin-page";
+import AdminQuestionsPage from "@/pages/admin-questions-page";
 import AdminArchivedPage from "@/pages/admin-archived-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
 import UsersTeamsPage from "@/pages/users-teams-page";
