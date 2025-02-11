@@ -89,13 +89,17 @@ export default function AdminQuestionsPage() {
     const categoriesSet = new Set(PREDEFINED_CATEGORIES);
 
     // Add categories from existing questions
-    Object.values(weeklyQuestions || {}).forEach(weekQuestions => {
-      weekQuestions.forEach(question => {
-        if (question.category) {
-          categoriesSet.add(question.category);
+    if (weeklyQuestions) {
+      Object.values(weeklyQuestions).forEach(questions => {
+        if (Array.isArray(questions)) {
+          questions.forEach(question => {
+            if (question?.category) {
+              categoriesSet.add(question.category);
+            }
+          });
         }
       });
-    });
+    }
 
     return Array.from(categoriesSet).sort();
   }, [weeklyQuestions]);
