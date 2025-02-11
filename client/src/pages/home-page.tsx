@@ -171,21 +171,48 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-between px-3 h-12">
-          <h1 className="text-lg font-semibold">Daily Quiz</h1>
-          <Button 
-            variant="outline" 
-            onClick={handleReset}
-            size="icon"
-            className="rounded-full"
-          >
-            <RotateCcw className="h-4 w-4" />
-            <span className="sr-only">Retake Quiz</span>
-          </Button>
+        <div className="flex items-center justify-between px-3 h-14">
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold">Daily Quiz</h1>
+            <Button 
+              variant="outline" 
+              onClick={handleReset}
+              size="icon"
+              className="rounded-full"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span className="sr-only">Retake Quiz</span>
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/leaderboard">
+              <Button variant="ghost" size="sm" className="h-9">
+                <Trophy className="h-4 w-4 mr-2" />
+                Leaderboard
+              </Button>
+            </Link>
+            {user?.isAdmin && (
+              <Link href="/admin">
+                <Button variant="ghost" size="sm" className="h-9">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Admin
+                </Button>
+              </Link>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleLogout}
+              className="h-9"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pt-12 pb-14">
+      <main className="flex-1 overflow-y-auto pt-14 pb-14">
         <div className="p-3">
           <div className="max-w-4xl mx-auto">
             <div className={cn(
@@ -195,45 +222,6 @@ export default function HomePage() {
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-primary">Welcome, {user?.username}!</h1>
                 <p className="text-muted-foreground">Team: {user?.team}</p>
-              </div>
-              <div className={cn(
-                "flex gap-2",
-                isMobile ? "flex-col w-full" : ""
-              )}>
-                <Link href="/leaderboard" className={isMobile ? "w-full" : ""}>
-                  <Button variant="outline" className={cn(
-                    "button-hover",
-                    isMobile ? "w-full justify-center" : ""
-                  )}>
-                    <Trophy className="mr-2 h-4 w-4" />
-                    Leaderboard
-                  </Button>
-                </Link>
-                <Button 
-                  variant="outline" 
-                  onClick={handleLogout} 
-                  className={cn(
-                    "button-hover",
-                    isMobile ? "w-full justify-center" : ""
-                  )}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </Button>
-                {user?.isAdmin && (
-                  <Link href="/admin" className={isMobile ? "w-full" : ""}>
-                    <Button 
-                      variant="outline" 
-                      className={cn(
-                        "button-hover",
-                        isMobile ? "w-full justify-center" : ""
-                      )}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Admin
-                    </Button>
-                  </Link>
-                )}
               </div>
             </div>
 
