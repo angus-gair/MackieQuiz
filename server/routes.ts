@@ -27,9 +27,9 @@ export function registerRoutes(app: Express): Server {
     res.sendStatus(200);
   });
 
-  app.get("/api/questions/daily", async (req, res) => {
+  app.get("/api/questions/weekly", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    const questions = await storage.getDailyQuestions();
+    const questions = await storage.getWeeklyQuestions();
     res.json(questions);
   });
 

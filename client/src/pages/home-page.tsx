@@ -25,8 +25,16 @@ export default function HomePage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const isMobile = useIsMobile();
 
+  useEffect(() => {
+    // Reset zoom level and scroll position on mount
+    window.scrollTo(0, 0);
+    if (document.documentElement.style.zoom) {
+      document.documentElement.style.zoom = "100%";
+    }
+  }, []);
+
   const { data: questions } = useQuery<Question[]>({
-    queryKey: ["/api/questions/daily"],
+    queryKey: ["/api/questions/weekly"],
   });
 
   const { data: answers } = useQuery<Answer[]>({
@@ -105,7 +113,7 @@ export default function HomePage() {
     setQuizKey(prev => prev + 1);
     setCurrentQuestionIndex(0);
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["/api/questions/daily"] }),
+      queryClient.invalidateQueries({ queryKey: ["/api/questions/weekly"] }),
       queryClient.invalidateQueries({ queryKey: ["/api/answers"] })
     ]);
   };
@@ -171,14 +179,14 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-between px-3 h-14">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-4 h-14">
+          <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold">Weekly Quiz</h1>
             <Button 
               variant="outline" 
               onClick={handleReset}
               size="icon"
-              className="rounded-full"
+              className="h-8 w-8 rounded-full"
             >
               <RotateCcw className="h-4 w-4" />
               <span className="sr-only">Retake Quiz</span>
@@ -186,16 +194,16 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-2">
             <Link href="/leaderboard">
-              <Button variant="ghost" size="sm" className="h-9">
-                <Trophy className="h-4 w-4 mr-2" />
-                Leaderboard
+              <Button variant="ghost" size="sm" className="h-8 gap-2">
+                <Trophy className="h-4 w-4" />
+                <span className={cn("", { "hidden": isMobile })}>Leaderboard</span>
               </Button>
             </Link>
             {user?.isAdmin && (
               <Link href="/admin">
-                <Button variant="ghost" size="sm" className="h-9">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Admin
+                <Button variant="ghost" size="sm" className="h-8 gap-2">
+                  <Plus className="h-4 w-4" />
+                  <span className={cn("", { "hidden": isMobile })}>Admin</span>
                 </Button>
               </Link>
             )}
@@ -203,17 +211,17 @@ export default function HomePage() {
               variant="ghost" 
               size="sm"
               onClick={handleLogout}
-              className="h-9"
+              className="h-8 gap-2"
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
+              <LogOut className="h-4 w-4" />
+              <span className={cn("", { "hidden": isMobile })}>Logout</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pt-14 pb-14">
-        <div className="p-3">
+      <main className="flex-1 overflow-y-auto pt-16 pb-14">
+        <div className="p-4">
           <div className="max-w-4xl mx-auto">
             <div className={cn(
               "mb-4",
@@ -225,18 +233,29 @@ export default function HomePage() {
               </div>
             </div>
 
-            <Card className="mb-4 card">
+            <Card className="mb-4">
               <CardHeader className="py-2">
-                <CardTitle className="flex items-center">
+                <CardTitle className="flex items-center text-lg">
                   <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
-                  Your Progress
+                  Progress
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Progress value={progress} className="mb-2 progress-bar" />
-                <p className="text-sm text-muted-foreground slide-up">
-                  {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
-                </p>
+                <div className={cn(
+                  "relative w-full",
+                  isMobile && "px-2 py-1"
+                )}>
+                  <Progress 
+                    value={progress} 
+                    className={cn(
+                      "progress-bar h-3 rounded-full",
+                      isMobile && "bg-muted/50"
+                    )} 
+                  />
+                  <p className="text-sm text-muted-foreground mt-2 slide-up">
+                    {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
+                  </p>
+                </div>
               </CardContent>
             </Card>
 

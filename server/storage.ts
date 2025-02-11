@@ -45,6 +45,7 @@ export interface IStorage {
   getActiveWeeks(): Promise<Date[]>;
   getArchivedQuestions(): Promise<Question[]>;
   archiveQuestion(id: number): Promise<void>;
+  getWeeklyQuestions(): Promise<Question[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -383,6 +384,10 @@ export class DatabaseStorage implements IStorage {
       .update(questions)
       .set({ isArchived: true })
       .where(eq(questions.id, id));
+  }
+  async getWeeklyQuestions(): Promise<Question[]> {
+    const allQuestions = await this.getQuestions();
+    return this.shuffleArray(allQuestions).slice(0, 3);
   }
 }
 
