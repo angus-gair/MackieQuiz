@@ -37,11 +37,11 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#2563eb] to-[#1e40af]/20">
       {/* Hero Section - Visible on both mobile and desktop */}
-      <div className="w-full bg-primary text-white p-6 sm:p-8">
-        <div className="max-w-md mx-auto text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3">The Round Table: Kingsford Edition</h1>
+      <div className="w-full bg-primary text-white">
+        <div className="max-w-md mx-auto text-center px-4 py-6">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 font-roboto">The Round Table: Kingsford Edition</h1>
           <p className="text-sm sm:text-base mb-4">Test your wine knowledge, compete with your team, and win weekly prizes!</p>
           <div className="rounded-lg shadow-xl overflow-hidden max-h-48 sm:max-h-56">
             <img
@@ -54,7 +54,7 @@ export default function AuthPage() {
       </div>
 
       {/* Auth Form Section */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <div className="flex-1 flex items-start justify-center p-4">
         <Card className="w-full max-w-sm border-0 sm:border">
           <CardContent className="pt-4">
             <Tabs defaultValue="login">
