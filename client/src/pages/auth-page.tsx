@@ -39,11 +39,11 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       {/* Hero Section - Visible on both mobile and desktop */}
-      <div className="w-full bg-primary text-white">
+      <div className="w-full bg-[#1e293b] text-white">
         <div className="max-w-md mx-auto text-center px-4 py-6">
-          <h1 className="text-xl sm:text-2xl font-bold mb-2 font-roboto">The Round Table: Kingsford Edition</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3 font-roboto">The Round Table: Kingsford Edition</h1>
           <p className="text-sm sm:text-base mb-4">Test your wine knowledge, compete with your team, and win weekly prizes!</p>
-          <div className="rounded-lg shadow-xl overflow-hidden max-h-48 sm:max-h-56">
+          <div className="rounded-lg shadow-xl overflow-hidden max-h-64 sm:max-h-72">
             <img
               src="/wine.jpg"
               alt="Wine cellar"
