@@ -5,7 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
-import AdminPage from "@/pages/admin-page";
+import AdminDashboardPage from "@/pages/admin-dashboard";
+import AdminQuestionsPage from "@/pages/admin-page";
 import AdminArchivedPage from "@/pages/admin-archived-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
 import UsersTeamsPage from "@/pages/users-teams-page";
@@ -26,8 +27,9 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/users" component={UsersViewPage} />
       <ProtectedRoute path="/team-allocation" component={TeamAllocationPage} />
-      <AdminRoute path="/admin" component={AdminPage} />
-      <AdminRoute path="/admin/archived" component={AdminArchivedPage} />
+      <AdminRoute path="/admin" component={AdminDashboardPage} />
+      <AdminRoute path="/admin/questions" component={AdminQuestionsPage} />
+      <AdminRoute path="/admin/questions/archived" component={AdminArchivedPage} />
       <AdminRoute path="/admin/users" component={UsersTeamsPage} />
       <AdminRoute path="/admin/analytics" component={AnalyticsPage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />

@@ -1,4 +1,4 @@
-import { Home, Users, BarChart3, Settings } from "lucide-react";
+import { Home, Users, BarChart3, Settings, Cog } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -59,7 +59,7 @@ export function BottomNav() {
               (location === "/admin" || location === "/settings") && "text-primary"
             )}
           >
-            <Settings className="h-5 w-5" />
+            <Cog className="h-5 w-5" />
             <span className="sr-only">{user?.isAdmin ? "Admin" : "Settings"}</span>
           </Button>
         </Link>

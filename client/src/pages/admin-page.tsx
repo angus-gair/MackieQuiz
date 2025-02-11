@@ -21,9 +21,8 @@ import {
 import {
   Plus,
   Archive,
-  ChevronDown
 } from "lucide-react";
-import { Link, Redirect } from "wouter";
+import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, InsertQuestion } from "@shared/schema";
 import { useState } from "react";
@@ -31,9 +30,9 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { BottomNav } from "@/components/bottom-nav";
 import { format, addWeeks, startOfWeek } from "date-fns";
 import { Loader2 } from 'lucide-react';
+import { AdminLayout } from "@/components/admin-layout";
 
 const CATEGORIES = [
   "Wine Regions",
@@ -48,7 +47,7 @@ const CATEGORIES = [
   "Wine Chemistry"
 ] as const;
 
-export default function AdminPage() {
+export default function AdminQuestionsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedQuestionSlot, setSelectedQuestionSlot] = useState<{weekOf: Date, slot: number} | null>(null);
@@ -114,30 +113,21 @@ export default function AdminPage() {
     },
   });
 
-  if (!user?.isAdmin) {
-    return <Redirect to="/" />;
-  }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-between px-3 h-12">
-          <h1 className="text-base sm:text-lg font-semibold">Quiz Admin</h1>
-          <Link href="/admin/archived">
-            <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2">
+    <AdminLayout>
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold">Question Management</h1>
+          <Link href="/admin/questions/archived">
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Archive className="h-4 w-4" />
               View Archived
             </Button>
-            <Button variant="outline" size="icon" className="sm:hidden">
-              <Archive className="h-4 w-4" />
-            </Button>
           </Link>
         </div>
-      </header>
 
-      <main className="flex-1 overflow-y-auto pt-12 pb-16">
-        <div className="p-2 sm:p-3">
-          <Accordion type="single" collapsible className="space-y-2">
+        <Accordion type="single" collapsible className="space-y-2">
             {futureWeeks.map((week) => {
               const questions = weeklyQuestions.data?.[week.toISOString()] || [];
               const isCurrentWeek = week.getTime() === currentWeek.getTime();
@@ -362,10 +352,8 @@ export default function AdminPage() {
               );
             })}
           </Accordion>
-        </div>
-      </main>
-
-      <BottomNav />
-    </div>
+      </div>
+      <BottomNav/>
+    </AdminLayout>
   );
 }
