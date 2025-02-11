@@ -100,12 +100,15 @@ export default function AdminPage() {
     <div className="flex flex-col h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center justify-between px-3 h-12">
-          <h1 className="text-lg font-semibold">Quiz Admin</h1>
+          <h1 className="text-base sm:text-lg font-semibold">Quiz Admin</h1>
           <div className="flex items-center gap-2">
             <Link href="/admin/archived">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2">
                 <Archive className="h-4 w-4" />
                 View Archived
+              </Button>
+              <Button variant="outline" size="icon" className="sm:hidden">
+                <Archive className="h-4 w-4" />
               </Button>
             </Link>
             <Sheet>
@@ -114,7 +117,7 @@ export default function AdminPage() {
                   <Plus className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-[92%] sm:h-full">
+              <SheetContent side="bottom" className="h-[92%] sm:h-full sm:max-w-xl">
                 <SheetHeader>
                   <SheetTitle>Add New Question</SheetTitle>
                 </SheetHeader>
@@ -149,7 +152,7 @@ export default function AdminPage() {
                   }
 
                   createQuestionMutation.mutate(newQuestion as InsertQuestion);
-                }} className="space-y-6 overflow-y-auto pb-20">
+                }} className="space-y-4 sm:space-y-6 overflow-y-auto pb-20">
                   <div className="space-y-2">
                     <Label className="text-base">Question Text</Label>
                     <Textarea
@@ -223,24 +226,24 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pt-12 pb-14">
-        <div className="p-3 space-y-4">
+      <main className="flex-1 overflow-y-auto pt-12 pb-16">
+        <div className="p-2 sm:p-3 space-y-4">
           {futureWeeks.map((week) => {
             const questions = weeklyQuestions.data?.[week.toISOString()] || [];
             const isCurrentWeek = week.getTime() === currentWeek.getTime();
 
             return (
               <div key={week.toISOString()} className="space-y-2">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
                   {isCurrentWeek && "📍"} Week of {format(week, 'PPP')}
                   {isCurrentWeek && (
-                    <span className="text-sm font-normal text-muted-foreground">
+                    <span className="text-xs sm:text-sm font-normal text-muted-foreground">
                       (Current Week)
                     </span>
                   )}
                 </h2>
                 {questions.length === 0 ? (
-                  <Card className="p-3">
+                  <Card className="p-2 sm:p-3">
                     <p className="text-sm text-muted-foreground">
                       No questions added for this week yet.
                     </p>
@@ -248,9 +251,9 @@ export default function AdminPage() {
                 ) : (
                   questions.map((question) => (
                     <Card key={question.id} className="relative">
-                      <div className="p-3 space-y-2">
-                        <div className="flex items-start justify-between gap-3">
-                          <h3 className="text-base font-medium leading-tight flex-1">
+                      <div className="p-2 sm:p-3 space-y-2">
+                        <div className="flex items-start justify-between gap-2 sm:gap-3">
+                          <h3 className="text-sm sm:text-base font-medium leading-tight flex-1">
                             {question.question}
                           </h3>
                           <Button
@@ -263,10 +266,10 @@ export default function AdminPage() {
                             }}
                             className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1 -mr-1"
                           >
-                            <Archive className="h-5 w-5" />
+                            <Archive className="h-4 w-4 sm:h-5 sm:w-5" />
                           </Button>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           Category: {question.category}
                         </p>
                         <div className="space-y-1">
@@ -274,7 +277,7 @@ export default function AdminPage() {
                             <div
                               key={option}
                               className={cn(
-                                "text-sm px-2 py-1 rounded-md",
+                                "text-xs sm:text-sm px-2 py-1 rounded-md",
                                 option === question.correctAnswer
                                   ? "bg-primary/10 text-primary font-medium"
                                   : "bg-muted"

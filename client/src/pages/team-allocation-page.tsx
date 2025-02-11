@@ -148,19 +148,19 @@ export default function TeamAllocationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Team Assignment</CardTitle>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4 sm:p-6">
+      <Card className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto">
+        <CardHeader className="space-y-1 sm:space-y-2">
+          <CardTitle className="text-xl sm:text-2xl text-center">Team Assignment</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6">
           <div className="text-center">
             {spinning ? (
               <motion.div
                 animate={{
                   scale: [1, 1.1, 1],
                   rotateX: [0, -180, -360],
-                  y: [-20, 20, -20]
+                  y: [-10, 10, -10]
                 }}
                 transition={{
                   duration: 1.0,
@@ -170,18 +170,18 @@ export default function TeamAllocationPage() {
                 className="inline-block"
               >
                 <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                  <span className="text-2xl font-bold text-primary">
+                  <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
+                  <span className="text-lg sm:text-2xl font-bold text-primary">
                     {selectedTeam || "Selecting team..."}
                   </span>
                 </div>
               </motion.div>
             ) : selectedTeam ? (
               <div className="space-y-4">
-                <p className="text-lg">
+                <p className="text-base sm:text-lg">
                   Congratulations! You've been assigned to:
                 </p>
-                <p className="text-2xl font-bold text-primary">
+                <p className="text-xl sm:text-2xl font-bold text-primary">
                   {selectedTeam}
                 </p>
                 <Button 
