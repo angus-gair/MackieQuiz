@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-const TEAMS = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kensington Corkers"];
+const TEAMS = ["Pour Decisions", "Sip Happens", "Grape Minds", "Kingsford Corkers"];
 
 export default function TeamAllocationPage() {
   const { user } = useAuth();
