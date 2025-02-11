@@ -1,5 +1,11 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+interface RequestOptions {
+  method?: string;
+  body?: unknown;
+  headers?: Record<string, string>;
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -7,20 +13,22 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
-  method: string,
+export async function apiRequest<T>(
   url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
+  options: RequestOptions = {}
+): Promise<T> {
   const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    method: options.method || "GET",
+    headers: {
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...options.headers,
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
     credentials: "include",
   });
 
   await throwIfResNotOk(res);
-  return res;
+  return res.json();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
