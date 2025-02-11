@@ -20,43 +20,43 @@ export default function LeaderboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-3">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-4">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
+      <div className="max-w-md mx-auto">
+        <div className="flex items-center mb-6">
           <Link href="/">
-            <Button variant="ghost" className="mr-3">
+            <Button variant="ghost" size="sm" className="h-8 mr-3">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </Link>
-          <h1 className="text-xl sm:text-2xl font-bold text-primary">Weekly Leaderboard</h1>
+          <h1 className="text-lg font-bold text-primary">Weekly Leaderboard</h1>
         </div>
 
-        <div className="grid gap-2">
+        <div className="space-y-3">
           {users?.map((user, index) => {
             const Badge = BADGES[index]?.icon;
             const color = BADGES[index]?.color;
 
             return (
-              <Card key={user.id} className={`card ${index === 0 ? 'border-yellow-500/50' : ''}`}>
-                <CardHeader className="py-2">
+              <Card key={user.id} className={cn("overflow-hidden", index === 0 && "border-yellow-500/50")}>
+                <CardHeader className="py-3">
                   <CardTitle className="flex items-center justify-between text-base">
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2 min-w-0">
                       {Badge && (
-                        <Badge className={`h-5 w-5 mr-2 ${color}`} />
+                        <Badge className={cn("h-4 w-4 flex-shrink-0", color)} />
                       )}
-                      <span>{user.username}</span>
+                      <span className="truncate">{user.username}</span>
                     </div>
-                    <span className="text-lg font-bold">{user.weeklyScore} pts</span>
+                    <span className="text-base font-bold ml-2">{user.weeklyScore} pts</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-0.5">
-                    <p className="text-sm text-muted-foreground">
+                <CardContent className="py-2">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground truncate">
                       Team: {user.team}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Quizzes completed this week: {user.weeklyQuizzes}
+                      Quizzes: {user.weeklyQuizzes}
                     </p>
                   </div>
                 </CardContent>
