@@ -235,10 +235,15 @@ export default function HomePage() {
 
             <Card className="mb-4">
               <CardHeader className="py-2">
-                <CardTitle className="flex items-center text-lg">
-                  <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
-                  Progress
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center text-lg">
+                    <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
+                    Progress
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground slide-up">
+                    {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
+                  </p>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className={cn(
@@ -252,9 +257,6 @@ export default function HomePage() {
                       isMobile && "bg-muted/50"
                     )} 
                   />
-                  <p className="text-sm text-muted-foreground mt-2 slide-up">
-                    {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
-                  </p>
                 </div>
               </CardContent>
             </Card>
