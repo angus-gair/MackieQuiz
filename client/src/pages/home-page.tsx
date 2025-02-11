@@ -184,21 +184,26 @@ export default function HomePage() {
             <h1 className="text-lg font-semibold">Weekly Quiz</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Link href="/leaderboard">
+              <Button variant="ghost" size="sm" className="h-8 gap-2">
+                <Trophy className="h-4 w-4" />
+                <span className={cn("", { "hidden": isMobile })}>Leaderboard</span>
+              </Button>
+            </Link>
             <Link href={user?.isAdmin ? "/admin/users" : "/users"}>
               <Button variant="ghost" size="sm" className="h-8 gap-2">
                 <Users className="h-4 w-4" />
                 <span className={cn("", { "hidden": isMobile })}>Users</span>
               </Button>
             </Link>
-            {user?.isAdmin && (
+            {user?.isAdmin ? (
               <Link href="/admin">
                 <Button variant="ghost" size="sm" className="h-8 gap-2">
                   <Cog className="h-4 w-4" />
                   <span className={cn("", { "hidden": isMobile })}>Admin</span>
                 </Button>
               </Link>
-            )}
-            {!user?.isAdmin && (
+            ) : (
               <Link href="/settings">
                 <Button variant="ghost" size="sm" className="h-8 gap-2">
                   <Cog className="h-4 w-4" />

@@ -10,7 +10,7 @@ import { Redirect, Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Home, Users, LogOut } from "lucide-react";
+import { Home, Users, LogOut, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -60,16 +60,22 @@ export default function SettingsPage() {
             <h1 className="text-lg font-semibold">Settings</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/">
+            <Link href="/leaderboard">
               <Button variant="ghost" size="sm" className="h-8 gap-2">
-                <Home className="h-4 w-4" />
-                <span className={cn("", { "hidden": isMobile })}>Home</span>
+                <Trophy className="h-4 w-4" />
+                <span className={cn("", { "hidden": isMobile })}>Leaderboard</span>
               </Button>
             </Link>
             <Link href="/users">
               <Button variant="ghost" size="sm" className="h-8 gap-2">
                 <Users className="h-4 w-4" />
                 <span className={cn("", { "hidden": isMobile })}>Users</span>
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="h-8 gap-2">
+                <Home className="h-4 w-4" />
+                <span className={cn("", { "hidden": isMobile })}>Home</span>
               </Button>
             </Link>
             <Button 
