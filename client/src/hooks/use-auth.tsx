@@ -70,8 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/logout");
+      const text = await res.text();
       if (!res.ok) {
-        throw new Error("Logout failed");
+        throw new Error(text || "Logout failed");
       }
       window.sessionStorage.clear();
       window.localStorage.clear();
