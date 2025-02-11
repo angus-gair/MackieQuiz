@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { format, addWeeks, startOfWeek } from "date-fns";
+import { format, addWeeks, startOfWeek, parseISO, isEqual } from "date-fns";
 import { Loader2 } from 'lucide-react';
 
 const PREDEFINED_CATEGORIES = [
@@ -60,22 +60,13 @@ export default function AdminQuestionsPage() {
     addWeeks(currentWeek, i)
   );
 
-  // Simplified query - removing filters temporarily
   const { data: questions } = useQuery<Question[]>({
     queryKey: ["/api/questions"],
-    queryFn: async () => {
-      console.log("Fetching questions...");
-      const res = await apiRequest("GET", "/api/questions");
-      const data = await res.json();
-      console.log("Fetched questions:", data);
-      return data;
-    }
   });
 
   const allCategories = useMemo(() => {
     return PREDEFINED_CATEGORIES;
   }, []);
-
 
   const createQuestionMutation = useMutation({
     mutationFn: async (question: InsertQuestion) => {
@@ -123,13 +114,13 @@ export default function AdminQuestionsPage() {
     },
   });
 
-  const getQuestionsForWeek = (week: Date, questions: Question[]) => {
-    const weekString = format(week, 'yyyy-MM-dd');
-    return questions?.filter(q => {
-      const questionDate = new Date(q.weekOf);
-      const questionWeek = format(questionDate, 'yyyy-MM-dd');
-      return questionWeek === weekString && !q.isArchived;
-    }) || [];
+  const getQuestionsForWeek = (week: Date, questions: Question[] = []) => {
+    const weekStart = startOfWeek(week);
+    return questions.filter(q => {
+      if (!q.weekOf || q.isArchived) return false;
+      const questionWeekStart = startOfWeek(parseISO(q.weekOf));
+      return isEqual(weekStart, questionWeekStart);
+    });
   };
 
   return (
@@ -153,13 +144,9 @@ export default function AdminQuestionsPage() {
           </Link>
         </div>
 
-        <pre className="bg-muted p-4 rounded-lg mb-4">
-          {JSON.stringify(questions, null, 2)}
-        </pre>
-
         <Accordion type="single" collapsible className="space-y-2">
           {futureWeeks.map((week) => {
-            const questionsForWeek = getQuestionsForWeek(week, questions || []);
+            const weekQuestions = getQuestionsForWeek(week, questions);
             const isCurrentWeek = week.getTime() === currentWeek.getTime();
             const weekId = week.toISOString();
 
@@ -180,7 +167,7 @@ export default function AdminQuestionsPage() {
                 <AccordionContent className="px-3 pb-3">
                   <div className="space-y-2">
                     {[0, 1, 2].map((slot) => {
-                      const question = questionsForWeek[slot];
+                      const question = weekQuestions[slot];
 
                       if (question) {
                         return (

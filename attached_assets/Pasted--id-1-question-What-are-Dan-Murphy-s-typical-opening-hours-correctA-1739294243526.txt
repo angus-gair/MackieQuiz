@@ -1,0 +1,77 @@
+[
+  {
+    "id": 1,
+    "question": "What are Dan Murphy's typical opening hours?",
+    "correctAnswer": "9:00 AM – 9:00 PM (Weekdays & Saturdays), 10:00 AM – 7:00 PM (Sundays)",
+    "options": [
+      "6:00 AM – 10:00 PM",
+      "9:00 AM – 9:00 PM (Weekdays & Saturdays), 10:00 AM – 7:00 PM (Sundays)",
+      "10:00 AM – 5:00 PM every day",
+      "24/7"
+    ],
+    "category": "Operations",
+    "explanation": "Dan Murphy's opening hours vary by location, but generally, stores operate from 9:00 AM to 9:00 PM on weekdays and Saturdays and from 10:00 AM to 7:00 PM on Sundays. However, public holidays or specific store policies may affect these hours.",
+    "weekOf": "2025-02-10",
+    "isArchived": false
+  },
+  {
+    "id": 2,
+    "question": "How can you find your nearest Dan Murphy's store?",
+    "correctAnswer": "Use the 'Find a Store' tool on their website",
+    "options": [
+      "Call customer service and ask",
+      "Use the 'Find a Store' tool on their website",
+      "Google 'Dan Murphy's near me'",
+      "Walk around and look for one"
+    ],
+    "category": "Customer Service",
+    "explanation": "Dan Murphy's has a store locator tool on its website where you can enter your postcode or suburb to find the nearest store. This tool provides store addresses, trading hours, and any special services offered at each location.",
+    "weekOf": "2025-02-10",
+    "isArchived": false
+  },
+  {
+    "id": 3,
+    "question": "Does Dan Murphy's offer online ordering and delivery?",
+    "correctAnswer": "Yes, with same-day delivery and in-store pickup options",
+    "options": [
+      "No, only in-store purchases are available",
+      "Yes, but only for wine",
+      "Yes, with same-day delivery and in-store pickup options",
+      "Only for bulk orders"
+    ],
+    "category": "Services",
+    "explanation": "Dan Murphy's offers online ordering through their website, with options for home delivery and in-store pickup. Customers in metro areas can get same-day delivery, while 30-minute in-store pickup is available at selected locations.",
+    "weekOf": "2025-02-10",
+    "isArchived": false
+  },
+  {
+    "id": 9,
+    "question": "What temperature should red wine be served at?",
+    "correctAnswer": "16-18°C (Room Temperature)",
+    "options": [
+      "8-10°C (Fridge Temperature)",
+      "16-18°C (Room Temperature)",
+      "20-22°C (Warm)",
+      "25°C or above"
+    ],
+    "category": "Wine Service",
+    "explanation": "Red wine is best served at \"room temperature\" which is actually around 16-18°C, not warm room temperature.",
+    "weekOf": "2025-02-11",
+    "isArchived": false
+  },
+  {
+    "id": 6,
+    "question": "Chardonnay is such a versatile grape and can be made in so many styles. An 'unoaked' chardonnay will typically display which characteristics?",
+    "correctAnswer": "Citrus, apple, pear and stone fruit",
+    "options": [
+      "Butter, cream & hazelnut",
+      "Passion fruit, mango and lychee",
+      "Citrus, apple, pear and stone fruit",
+      "Cigar, pencil shavings & licorice "
+    ],
+    "category": "Wine Varietals",
+    "explanation": "An unoaked Chardonnay has clean flavours with primary flavours of citrus, stone fruit and apple and pear. They are clean and refreshing as opposed to an 'Oakes' Chardonnay which may display flavours such as nuts, cream, butter, vanilla ",
+    "weekOf": "2025-02-15",
+    "isArchived": false
+  }
+]
