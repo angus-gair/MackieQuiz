@@ -315,22 +315,24 @@ export default function AdminQuestionsPage() {
                                 <Label className="text-xs font-medium sm:text-sm">Correct Answer</Label>
                                 <Select
                                   value={newQuestion.correctAnswer}
-                                  onValueChange={(value) => setNewQuestion(prev => ({ ...prev, correctAnswer: value }))}
+                                  onValueChange={(value) => {
+                                    const selectedIndex = parseInt(value) - 1;
+                                    const selectedOption = newQuestion.options?.[selectedIndex] || '';
+                                    setNewQuestion(prev => ({ ...prev, correctAnswer: selectedOption }));
+                                  }}
                                 >
                                   <SelectTrigger className="h-8 sm:h-9 text-sm">
-                                    <SelectValue placeholder="Select the correct answer" />
+                                    <SelectValue placeholder="Select the correct option" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {newQuestion.options?.map((option, index) => (
-                                      option && (
-                                        <SelectItem 
-                                          key={index} 
-                                          value={option}
-                                          className="text-sm"
-                                        >
-                                          Option {index + 1}: {option}
-                                        </SelectItem>
-                                      )
+                                    {[1, 2, 3, 4].map((optionNum) => (
+                                      <SelectItem 
+                                        key={optionNum} 
+                                        value={optionNum.toString()}
+                                        className="text-sm"
+                                      >
+                                        Option {optionNum}
+                                      </SelectItem>
                                     ))}
                                   </SelectContent>
                                 </Select>
