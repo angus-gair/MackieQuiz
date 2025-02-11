@@ -15,7 +15,6 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { BottomNav } from "@/components/bottom-nav";
 
 type UserFormData = {
   username: string;
@@ -302,7 +301,6 @@ export default function UsersTeamsPage() {
           </Card>
         </div>
       </div>
-      <BottomNav />
     </div>
   );
 }

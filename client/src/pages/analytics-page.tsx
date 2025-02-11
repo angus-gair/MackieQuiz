@@ -5,7 +5,6 @@ import { BarChart3, Users, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { BottomNav } from "@/components/bottom-nav";
 
 type TeamStats = {
   teamName: string;
@@ -259,7 +258,6 @@ export default function AnalyticsPage() {
             ))}
           </div>
         </div>
-        <BottomNav />
       </div>
     </div>
   );

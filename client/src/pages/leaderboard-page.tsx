@@ -6,7 +6,6 @@ import { Link } from "wouter";
 import type { User } from "@shared/schema";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { BottomNav } from "@/components/bottom-nav";
 
 const BADGES = [
   { icon: Trophy, color: "text-yellow-500" },
@@ -75,7 +74,6 @@ export default function LeaderboardPage() {
           })}
         </div>
       </div>
-      <BottomNav />
     </div>
   );
 }

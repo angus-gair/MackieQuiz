@@ -5,7 +5,6 @@ import { Users, Building } from "lucide-react";
 import type { User } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { BottomNav } from "@/components/bottom-nav";
 
 export default function UsersViewPage() {
   const { user } = useAuth();
@@ -16,10 +15,11 @@ export default function UsersViewPage() {
   });
 
   const teamGroups = users?.reduce((groups: Record<string, User[]>, user) => {
-    if (!groups[user.team]) {
-      groups[user.team] = [];
+    const team = user.team || 'Unassigned';
+    if (!groups[team]) {
+      groups[team] = [];
     }
-    groups[user.team].push(user);
+    groups[team].push(user);
     return groups;
   }, {} as Record<string, User[]>);
 
@@ -77,7 +77,6 @@ export default function UsersViewPage() {
           </Card>
         </div>
       </div>
-      <BottomNav />
     </div>
   );
 }
