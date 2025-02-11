@@ -180,44 +180,33 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center justify-between px-4 h-14">
-          <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold">Weekly Quiz</h1>
-            <Button 
-              variant="outline" 
-              onClick={handleReset}
-              size="icon"
-              className="h-8 w-8 rounded-full"
-            >
-              <RotateCcw className="h-4 w-4" />
-              <span className="sr-only">Retake Quiz</span>
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/leaderboard">
-              <Button variant="ghost" size="sm" className="h-8 gap-2">
-                <Trophy className="h-4 w-4" />
-                <span className={cn("", { "hidden": isMobile })}>Leaderboard</span>
-              </Button>
-            </Link>
-            {user?.isAdmin && (
-              <Link href="/admin">
+            <div className="flex items-center gap-2">
+              <Link href="/leaderboard">
                 <Button variant="ghost" size="sm" className="h-8 gap-2">
-                  <Plus className="h-4 w-4" />
-                  <span className={cn("", { "hidden": isMobile })}>Admin</span>
+                  <Trophy className="h-4 w-4" />
+                  <span className={cn("", { "hidden": isMobile })}>Leaderboard</span>
                 </Button>
               </Link>
-            )}
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleLogout}
-              className="h-8 gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className={cn("", { "hidden": isMobile })}>Logout</span>
-            </Button>
+              {user?.isAdmin && (
+                <Link href="/admin">
+                  <Button variant="ghost" size="sm" className="h-8 gap-2">
+                    <Plus className="h-4 w-4" />
+                    <span className={cn("", { "hidden": isMobile })}>Admin</span>
+                  </Button>
+                </Link>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleLogout}
+                className="h-8 gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className={cn("", { "hidden": isMobile })}>Logout</span>
+              </Button>
+            </div>
           </div>
-        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto pt-16 pb-14">
@@ -245,10 +234,10 @@ export default function HomePage() {
                   </p>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className={cn(
                   "relative w-full",
-                  isMobile && "px-2 py-1"
+                  isMobile && "px-2"
                 )}>
                   <Progress 
                     value={progress} 
@@ -344,7 +333,7 @@ export default function HomePage() {
                             [currentQuestion.id]: value,
                           }))
                         }
-                        className="space-y-3"
+                        className="space-y-1"
                       >
                         {currentQuestion.options.map((option) => (
                           <div key={option} className="flex items-center space-x-2 card-answer rounded-md p-2">
