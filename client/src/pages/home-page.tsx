@@ -26,11 +26,8 @@ export default function HomePage() {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Reset zoom level and scroll position on mount
+    // Only reset scroll position on mount
     window.scrollTo(0, 0);
-    if (document.documentElement.style.zoom) {
-      document.documentElement.style.zoom = "100%";
-    }
   }, []);
 
   const { data: questions } = useQuery<Question[]>({
