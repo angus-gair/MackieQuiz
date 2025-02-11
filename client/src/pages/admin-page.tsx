@@ -309,12 +309,27 @@ export default function AdminQuestionsPage() {
 
                               <div className="space-y-1.5 sm:space-y-2">
                                 <Label className="text-xs font-medium sm:text-sm">Correct Answer</Label>
-                                <Input
-                                  value={newQuestion.correctAnswer || ""}
-                                  onChange={(e) => setNewQuestion(prev => ({ ...prev, correctAnswer: e.target.value }))}
-                                  placeholder="Must match one of the options above"
-                                  className="h-8 sm:h-9 text-sm"
-                                />
+                                <Select
+                                  value={newQuestion.correctAnswer}
+                                  onValueChange={(value) => setNewQuestion(prev => ({ ...prev, correctAnswer: value }))}
+                                >
+                                  <SelectTrigger className="h-8 sm:h-9 text-sm">
+                                    <SelectValue placeholder="Select the correct answer" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {newQuestion.options?.map((option, index) => (
+                                      option && (
+                                        <SelectItem 
+                                          key={index} 
+                                          value={option}
+                                          className="text-sm"
+                                        >
+                                          Option {index + 1}: {option}
+                                        </SelectItem>
+                                      )
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
 
                               <div className="space-y-1.5 sm:space-y-2">
