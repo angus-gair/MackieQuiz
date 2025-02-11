@@ -36,16 +36,13 @@ import { Loader2 } from 'lucide-react';
 import { AdminLayout } from "@/components/admin-layout";
 
 const CATEGORIES = [
-  "Wine Regions",
-  "Wine Making",
-  "Wine Service",
-  "Wine History",
-  "Wine Varietals",
-  "Food Pairing",
-  "Wine Storage",
-  "Wine Tasting",
-  "Wine Labels",
-  "Wine Chemistry"
+  "Store Ops",
+  "Specials",
+  "Wine",
+  "Beer",
+  "Spirits",
+  "Team - Member",
+  "Team - Manager"
 ] as const;
 
 export default function AdminQuestionsPage() {
