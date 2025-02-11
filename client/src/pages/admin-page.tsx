@@ -26,7 +26,7 @@ import {
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, InsertQuestion } from "@shared/schema";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -34,7 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, addWeeks, startOfWeek } from "date-fns";
 import { Loader2 } from 'lucide-react';
 
-const CATEGORIES = [
+const PREDEFINED_CATEGORIES = [
   "Operations",
   "Specials",
   "Wine Varietals",
@@ -44,7 +44,7 @@ const CATEGORIES = [
   "Team - Manager",
   "Customer Service",
   "Services",
-] as const;
+];
 
 export default function AdminQuestionsPage() {
   const { user } = useAuth();
@@ -61,23 +61,44 @@ export default function AdminQuestionsPage() {
   );
 
   // Get questions for each week
-  const { data: weeklyQuestions } = useQuery({
+  const { data: weeklyQuestions, isLoading } = useQuery({
     queryKey: ["/api/questions/weekly"],
     queryFn: async () => {
       const questionsMap: Record<string, Question[]> = {};
       await Promise.all(
         futureWeeks.map(async (week) => {
-          const response = await apiRequest(
-            "GET",
-            `/api/questions/weekly/${week.toISOString()}`
-          );
-          const questions = await response.json();
-          questionsMap[week.toISOString()] = questions;
+          try {
+            const response = await apiRequest(
+              "GET",
+              `/api/questions/weekly/${week.toISOString()}`
+            );
+            const questions = await response.json();
+            questionsMap[week.toISOString()] = questions;
+          } catch (error) {
+            console.error(`Error fetching questions for week ${week}:`, error);
+            questionsMap[week.toISOString()] = [];
+          }
         })
       );
       return questionsMap;
     },
   });
+
+  // Get all unique categories from existing questions
+  const allCategories = useMemo(() => {
+    const categoriesSet = new Set(PREDEFINED_CATEGORIES);
+
+    // Add categories from existing questions
+    Object.values(weeklyQuestions || {}).forEach(weekQuestions => {
+      weekQuestions.forEach(question => {
+        if (question.category) {
+          categoriesSet.add(question.category);
+        }
+      });
+    });
+
+    return Array.from(categoriesSet).sort();
+  }, [weeklyQuestions]);
 
   const createQuestionMutation = useMutation({
     mutationFn: async (question: InsertQuestion) => {
@@ -306,7 +327,7 @@ export default function AdminQuestionsPage() {
                                     <SelectValue placeholder="Select a category" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {CATEGORIES.map((category) => (
+                                    {allCategories.map((category) => (
                                       <SelectItem 
                                         key={category} 
                                         value={category}
