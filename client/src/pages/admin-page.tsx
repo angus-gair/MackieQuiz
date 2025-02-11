@@ -62,7 +62,7 @@ export default function AdminQuestionsPage() {
 
   // Get questions for each week
   const { data: weeklyQuestions, isLoading } = useQuery<Question[]>({
-    queryKey: ["/api/questions/weekly"],
+    queryKey: ["/api/questions"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/questions");
       return await res.json();
@@ -72,7 +72,6 @@ export default function AdminQuestionsPage() {
   // Debug log to see what questions we're getting
   console.log('Weekly Questions:', weeklyQuestions);
 
-  // Get all unique categories from existing questions
   const allCategories = useMemo(() => {
     return PREDEFINED_CATEGORIES;
   }, []);
@@ -87,7 +86,7 @@ export default function AdminQuestionsPage() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/questions/weekly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
       setNewQuestion({ options: ["", "", "", ""] });
       setSelectedQuestionSlot(null);
       toast({
@@ -102,7 +101,7 @@ export default function AdminQuestionsPage() {
       await apiRequest("POST", `/api/questions/${id}/archive`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/questions/weekly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
       toast({
         title: "Success",
         description: "Question archived successfully",
@@ -137,10 +136,13 @@ export default function AdminQuestionsPage() {
             console.log('Current week:', weekString);
             const questions = weeklyQuestions?.filter(q => {
               // Ensure we're comparing the dates in the same format
-              const questionWeek = q.weekOf;
+              const questionWeek = format(new Date(q.weekOf), 'yyyy-MM-dd');
               console.log('Question week:', questionWeek, 'Comparing with:', weekString);
               return questionWeek === weekString;
             }) || [];
+
+            console.log('Filtered questions for week', weekString, ':', questions);
+
             const isCurrentWeek = week.getTime() === currentWeek.getTime();
             const weekId = week.toISOString();
 
