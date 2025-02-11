@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +22,9 @@ import {
   Plus,
   Archive,
   ArrowLeft,
+  ScrollText,
+  Users,
+  Loader2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -32,7 +35,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { format, addWeeks, startOfWeek } from "date-fns";
-import { Loader2 } from 'lucide-react';
+
 
 const PREDEFINED_CATEGORIES = [
   "Operations",
@@ -54,13 +57,11 @@ export default function AdminQuestionsPage() {
     options: ["", "", "", ""],
   });
 
-  // Get current week and next 3 weeks
   const currentWeek = startOfWeek(new Date());
   const futureWeeks = Array.from({ length: 4 }, (_, i) =>
     addWeeks(currentWeek, i)
   );
 
-  // Get questions for each week
   const { data: weeklyQuestions, isLoading } = useQuery<Question[]>({
     queryKey: ["/api/questions"],
     queryFn: async () => {
@@ -69,21 +70,13 @@ export default function AdminQuestionsPage() {
     }
   });
 
-  // Debug log to see what questions we're getting
-  console.log('Weekly Questions:', weeklyQuestions);
-
   const allCategories = useMemo(() => {
     return PREDEFINED_CATEGORIES;
   }, []);
 
-  // Add logging to debug filtering
   const filteredWeeklyQuestions = useMemo(() => {
     if (!weeklyQuestions) return [];
-    console.log('All weekly questions:', weeklyQuestions);
-    return weeklyQuestions.filter(q => {
-      console.log('Filtering question:', q);
-      return !q.isArchived;
-    });
+    return weeklyQuestions.filter(q => !q.isArchived);
   }, [weeklyQuestions]);
 
   const createQuestionMutation = useMutation({
@@ -91,21 +84,15 @@ export default function AdminQuestionsPage() {
       if (!selectedQuestionSlot?.weekOf) {
         throw new Error('Week not selected');
       }
-      // Format the date correctly for the database
       const formattedDate = format(selectedQuestionSlot.weekOf, 'yyyy-MM-dd');
-      console.log('Creating question with date:', formattedDate);
-
       const questionWithWeek = {
         ...question,
         weekOf: formattedDate,
       };
-      console.log('Sending question data:', questionWithWeek);
-
       const res = await apiRequest("POST", "/api/questions", questionWithWeek);
       return await res.json();
     },
     onSuccess: (data) => {
-      console.log('Question created successfully:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
       setNewQuestion({ options: ["", "", "", ""] });
       setSelectedQuestionSlot(null);
@@ -115,7 +102,6 @@ export default function AdminQuestionsPage() {
       });
     },
     onError: (error: Error) => {
-      console.error('Error creating question:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -139,41 +125,28 @@ export default function AdminQuestionsPage() {
 
   const getQuestionsForWeek = (week: Date, questions: Question[]) => {
     const weekString = format(week, 'yyyy-MM-dd');
-    console.log('Getting questions for week:', weekString);
-
     return questions.filter(q => {
       const questionDate = new Date(q.weekOf);
       const questionWeek = format(questionDate, 'yyyy-MM-dd');
-      console.log('Comparing question date:', questionWeek, 'with week:', weekString);
       return questionWeek === weekString && !q.isArchived;
     });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="container py-8 space-y-8">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <Link href="/admin">
-              <Button variant="ghost" className="mr-3">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold">Question Management</h1>
-          </div>
-          <Link href="/admin/questions/archived">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <Archive className="h-4 w-4" />
-              View Archived
+          <Link href="/admin">
+            <Button variant="ghost" className="mr-3">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
             </Button>
           </Link>
+          <h1 className="text-2xl font-bold">Question Management</h1>
         </div>
-
         <Accordion type="single" collapsible className="space-y-2">
           {futureWeeks.map((week) => {
             const questions = getQuestionsForWeek(week, filteredWeeklyQuestions);
-            console.log('Filtered questions for week:', format(week, 'yyyy-MM-dd'), questions);
             const isCurrentWeek = week.getTime() === currentWeek.getTime();
             const weekId = week.toISOString();
 
