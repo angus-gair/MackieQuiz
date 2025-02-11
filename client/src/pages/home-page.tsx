@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, RotateCcw, ArrowLeft, ArrowRight, Plus } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, ArrowLeft, ArrowRight, Plus, Users, Cog } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -13,7 +13,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import confetti from 'canvas-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
-import { BottomNav } from "@/components/bottom-nav";
+
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -180,33 +180,43 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center justify-between px-4 h-14">
+          <div className="flex items-center gap-4">
             <h1 className="text-lg font-semibold">Weekly Quiz</h1>
-            <div className="flex items-center gap-2">
-              <Link href="/leaderboard">
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href={user?.isAdmin ? "/admin/users" : "/users"}>
+              <Button variant="ghost" size="sm" className="h-8 gap-2">
+                <Users className="h-4 w-4" />
+                <span className={cn("", { "hidden": isMobile })}>Users</span>
+              </Button>
+            </Link>
+            {user?.isAdmin && (
+              <Link href="/admin">
                 <Button variant="ghost" size="sm" className="h-8 gap-2">
-                  <Trophy className="h-4 w-4" />
-                  <span className={cn("", { "hidden": isMobile })}>Leaderboard</span>
+                  <Cog className="h-4 w-4" />
+                  <span className={cn("", { "hidden": isMobile })}>Admin</span>
                 </Button>
               </Link>
-              {user?.isAdmin && (
-                <Link href="/admin">
-                  <Button variant="ghost" size="sm" className="h-8 gap-2">
-                    <Plus className="h-4 w-4" />
-                    <span className={cn("", { "hidden": isMobile })}>Admin</span>
-                  </Button>
-                </Link>
-              )}
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleLogout}
-                className="h-8 gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className={cn("", { "hidden": isMobile })}>Logout</span>
-              </Button>
-            </div>
+            )}
+            {!user?.isAdmin && (
+              <Link href="/settings">
+                <Button variant="ghost" size="sm" className="h-8 gap-2">
+                  <Cog className="h-4 w-4" />
+                  <span className={cn("", { "hidden": isMobile })}>Settings</span>
+                </Button>
+              </Link>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleLogout}
+              className="h-8 gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className={cn("", { "hidden": isMobile })}>Logout</span>
+            </Button>
           </div>
+        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto pt-16 pb-14">
@@ -389,8 +399,6 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-
-      <BottomNav />
     </div>
   );
 }

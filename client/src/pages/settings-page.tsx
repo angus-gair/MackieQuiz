@@ -6,15 +6,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Redirect } from "wouter";
+import { Redirect, Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { BottomNav } from "@/components/bottom-nav";
 import { useToast } from "@/hooks/use-toast";
+import { Home, Users, LogOut } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
@@ -51,14 +54,37 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center justify-between px-4 h-14">
-          <h1 className="text-lg font-semibold">Settings</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-lg font-semibold">Settings</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="h-8 gap-2">
+                <Home className="h-4 w-4" />
+                <span className={cn("", { "hidden": isMobile })}>Home</span>
+              </Button>
+            </Link>
+            <Link href="/users">
+              <Button variant="ghost" size="sm" className="h-8 gap-2">
+                <Users className="h-4 w-4" />
+                <span className={cn("", { "hidden": isMobile })}>Users</span>
+              </Button>
+            </Link>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => logoutMutation.mutate()}
+              className="h-8 gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className={cn("", { "hidden": isMobile })}>Logout</span>
+            </Button>
+          </div>
         </div>
       </header>
 
-      {/* Main Content - Scrollable Area */}
       <main className="flex-1 overflow-y-auto pt-14 pb-16">
         <div className="p-4">
           <Card>
@@ -107,8 +133,6 @@ export default function SettingsPage() {
           </Card>
         </div>
       </main>
-
-      <BottomNav />
     </div>
   );
 }
