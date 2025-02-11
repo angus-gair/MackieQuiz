@@ -1,10 +1,12 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Users, Trophy } from "lucide-react";
+import { BarChart3, Users, Trophy, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Link } from 'wouter';
+import { Button } from "@/components/ui/button";
 
 type TeamStats = {
   teamName: string;
@@ -46,10 +48,13 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className={cn(
-          "mb-8",
-          isMobile ? "flex flex-col gap-4" : "flex items-center"
-        )}>
+        <div className="flex items-center mb-8">
+          <Link href="/admin">
+            <Button variant="ghost" className="mr-3">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </Link>
           <h1 className="text-2xl sm:text-3xl font-bold text-primary">Analytics Dashboard</h1>
         </div>
 
@@ -69,14 +74,14 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="teamName" />
                     <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                    <YAxis 
-                      yAxisId="right" 
-                      orientation="right" 
-                      stroke="#82ca9d" 
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#82ca9d"
                       domain={[0, 100]}
                       tickFormatter={(value) => `${value}%`}
                     />
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value: number, name: string) => {
                         if (name === "Completion Rate (%)") {
                           return [`${value}%`, name];
@@ -107,20 +112,20 @@ export default function AnalyticsPage() {
                   <LineChart data={dailyStats}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
-                    <YAxis 
-                      yAxisId="left" 
-                      orientation="left" 
+                    <YAxis
+                      yAxisId="left"
+                      orientation="left"
                       stroke="#8884d8"
                       allowDecimals={false}
                     />
-                    <YAxis 
-                      yAxisId="right" 
-                      orientation="right" 
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
                       stroke="#82ca9d"
                       domain={[0, 100]}
                       tickFormatter={(value) => `${value}%`}
                     />
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value: number, name: string) => {
                         if (name === "Completion Rate (%)") {
                           return [`${value}%`, name];
@@ -129,19 +134,19 @@ export default function AnalyticsPage() {
                       }}
                     />
                     <Legend />
-                    <Line 
-                      yAxisId="left" 
-                      type="monotone" 
-                      dataKey="completedQuizzes" 
-                      name="Completed Quizzes" 
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="completedQuizzes"
+                      name="Completed Quizzes"
                       stroke="#8884d8"
                       strokeWidth={2}
                     />
-                    <Line 
-                      yAxisId="right" 
-                      type="monotone" 
-                      dataKey="completionRate" 
-                      name="Completion Rate (%)" 
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="completionRate"
+                      name="Completion Rate (%)"
                       stroke="#82ca9d"
                       strokeWidth={2}
                     />
@@ -164,22 +169,22 @@ export default function AnalyticsPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={teamKnowledge}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="week" 
+                    <XAxis
+                      dataKey="week"
                       tickFormatter={(value) => {
                         const date = new Date(value);
-                        return date.toLocaleDateString('en-US', { 
+                        return date.toLocaleDateString('en-US', {
                           month: 'short',
                           year: '2-digit'
                         });
                       }}
-                      interval={12} 
+                      interval={12}
                     />
-                    <YAxis 
-                      domain={[60, 90]} 
+                    <YAxis
+                      domain={[60, 90]}
                       tickFormatter={(value) => `${value}%`}
                     />
-                    <Tooltip 
+                    <Tooltip
                       labelFormatter={(label) => {
                         const date = new Date(label);
                         return date.toLocaleDateString('en-US', {
@@ -246,8 +251,8 @@ export default function AnalyticsPage() {
                       <dd className={cn(
                         "font-semibold",
                         stat.weeklyCompletionPercentage >= 80 ? "text-green-500" :
-                        stat.weeklyCompletionPercentage >= 50 ? "text-yellow-500" :
-                        "text-red-500"
+                          stat.weeklyCompletionPercentage >= 50 ? "text-yellow-500" :
+                            "text-red-500"
                       )}>
                         {stat.weeklyCompletionPercentage.toFixed(1)}%
                       </dd>

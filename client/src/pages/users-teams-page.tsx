@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Users, Building } from "lucide-react";
+import { UserPlus, Users, Building, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
 import { cn } from "@/lib/utils";
@@ -140,10 +140,13 @@ export default function UsersTeamsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className={cn(
-          "mb-8",
-          isMobile ? "flex flex-col gap-4" : "flex items-center justify-between"
-        )}>
+        <div className="flex items-center mb-8">
+          <Link href="/">
+            <Button variant="ghost" className="mr-3">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </Link>
           <h1 className="text-2xl sm:text-3xl font-bold text-primary">Users & Teams Management</h1>
         </div>
 

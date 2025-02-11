@@ -21,6 +21,7 @@ import {
 import {
   Plus,
   Archive,
+  ArrowLeft, // Added import
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -114,10 +115,18 @@ export default function AdminQuestionsPage() {
   });
 
   return (
-    <AdminLayout>
-      <div className="p-4">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Question Management</h1>
+          <div className="flex items-center">
+            <Link href="/admin">
+              <Button variant="ghost" className="mr-3">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <h1 className="text-2xl font-bold">Question Management</h1>
+          </div>
           <Link href="/admin/questions/archived">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Archive className="h-4 w-4" />
@@ -352,6 +361,6 @@ export default function AdminQuestionsPage() {
             })}
           </Accordion>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

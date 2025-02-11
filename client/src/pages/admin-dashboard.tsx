@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdminLayout } from "@/components/admin-layout";
-import { PlusCircle, BarChart2, Activity } from "lucide-react";
+import { PlusCircle, BarChart2, Activity, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
@@ -27,9 +26,17 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <AdminLayout>
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="mr-3">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+        </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {modules.map((module) => (
             <Card key={module.href}>
@@ -53,6 +60,6 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }
