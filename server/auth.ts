@@ -144,21 +144,17 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res) => {
     const userId = req.user?.id;
     log(`Logout attempt for user: ${userId}`);
-
-    if (req.session) {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
       req.session.destroy((err) => {
         if (err) {
-          log(`Session destruction error: ${err}`);
-          return res.status(500).json({ error: "Logout failed" });
+          return res.status(500).json({ error: err.message });
         }
-        req.logout(() => {
-          res.clearCookie('connect.sid');
-          res.status(200).json({ message: "Logged out successfully" });
-        });
+        res.sendStatus(200);
       });
-    } else {
-      res.status(200).json({ message: "Already logged out" });
-    }
+    });
   });
 
   app.post("/api/assign-team", async (req, res) => {

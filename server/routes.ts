@@ -3,7 +3,6 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
-import { log } from "./vite";
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -141,19 +140,6 @@ export function registerRoutes(app: Express): Server {
 
     const result = await storage.assignTeam(req.user.id, team);
     res.json(result);
-  });
-
-  app.post("/api/logs/error", (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.sendStatus(401);
-    }
-
-    const { message, context, stack, timestamp } = req.body;
-
-    // Log the error with additional context
-    log(`Client Error [${context || 'unknown'}]: ${message}${stack ? '\nStack: ' + stack : ''}`, 'error');
-
-    res.status(200).json({ message: "Error logged successfully" });
   });
 
   const httpServer = createServer(app);
