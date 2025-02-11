@@ -148,19 +148,19 @@ export default function TeamAllocationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4 sm:p-6">
-      <Card className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto">
-        <CardHeader className="space-y-1 sm:space-y-2">
-          <CardTitle className="text-xl sm:text-2xl text-center">Team Assignment</CardTitle>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center mobile-p-2">
+      <Card className="w-full max-w-[280px] sm:max-w-sm">
+        <CardHeader className="mobile-space-y-1 pb-3">
+          <CardTitle className="text-lg sm:text-xl">Team Assignment</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 sm:space-y-6">
+        <CardContent className="mobile-space-y-2">
           <div className="text-center">
             {spinning ? (
               <motion.div
                 animate={{
-                  scale: [1, 1.1, 1],
+                  scale: [1, 1.05, 1],
                   rotateX: [0, -180, -360],
-                  y: [-10, 10, -10]
+                  y: [-5, 5, -5]
                 }}
                 transition={{
                   duration: 1.0,
@@ -170,22 +170,23 @@ export default function TeamAllocationPage() {
                 className="inline-block"
               >
                 <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
-                  <span className="text-lg sm:text-2xl font-bold text-primary">
+                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  <span className="text-base sm:text-lg font-bold text-primary">
                     {selectedTeam || "Selecting team..."}
                   </span>
                 </div>
               </motion.div>
             ) : selectedTeam ? (
-              <div className="space-y-4">
-                <p className="text-base sm:text-lg">
+              <div className="mobile-space-y-2">
+                <p className="text-sm sm:text-base">
                   Congratulations! You've been assigned to:
                 </p>
-                <p className="text-xl sm:text-2xl font-bold text-primary">
+                <p className="text-lg sm:text-xl font-bold text-primary">
                   {selectedTeam}
                 </p>
                 <Button 
-                  className="w-full mt-4"
+                  className="w-full mt-3"
+                  size="sm"
                   onClick={handleContinue}
                 >
                   Continue to Quiz
@@ -194,6 +195,7 @@ export default function TeamAllocationPage() {
             ) : (
               <Button 
                 className="w-full"
+                size="sm"
                 onClick={startSpinning}
               >
                 Assign Team

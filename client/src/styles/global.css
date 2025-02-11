@@ -20,31 +20,99 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.011em;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-weight: 500;
+@media (min-width: 640px) {
+  body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
 }
 
-/* Layout Adjustments */
+/* Mobile-First Layout Adjustments */
 .compact-layout {
-  --header-height: 48px;
-  --content-padding: 12px;
+  --header-height: 44px;
+  --content-padding: 8px;
   --card-padding: 12px;
-  --gap-small: 8px;
-  --gap-medium: 12px;
-  --gap-large: 16px;
+  --gap-small: 4px;
+  --gap-medium: 8px;
+  --gap-large: 12px;
+}
+
+@media (min-width: 640px) {
+  .compact-layout {
+    --header-height: 48px;
+    --content-padding: 16px;
+    --card-padding: 16px;
+    --gap-small: 8px;
+    --gap-medium: 12px;
+    --gap-large: 16px;
+  }
 }
 
 /* Card Styles */
 .card {
+  padding: var(--card-padding);
+  margin-bottom: var(--gap-medium);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Animations - Keeping them minimal for better performance */
+.quiz-card {
+  animation: slideIn 0.2s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Utility Classes for Spacing */
+.mobile-space-y-1 > * + * {
+  margin-top: 0.25rem;
+}
+
+.mobile-space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.mobile-p-2 {
+  padding: 0.5rem;
+}
+
+.mobile-p-3 {
+  padding: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .mobile-space-y-1 > * + * {
+    margin-top: 0.5rem;
+  }
+
+  .mobile-space-y-2 > * + * {
+    margin-top: 1rem;
+  }
+
+  .mobile-p-2 {
+    padding: 0.75rem;
+  }
+
+  .mobile-p-3 {
+    padding: 1rem;
+  }
 }
 
 /* Button Hover Effects */
@@ -61,21 +129,6 @@ h1, h2, h3, h4, h5, h6 {
   transition: width 0.3s ease;
 }
 
-/* Quiz Card Animations */
-.quiz-card {
-  animation: slideIn 0.3s ease forwards;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* Slide Up Animation */
 .slide-up {
