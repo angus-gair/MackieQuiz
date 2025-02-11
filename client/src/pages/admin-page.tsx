@@ -68,9 +68,10 @@ export default function AdminQuestionsPage() {
       await Promise.all(
         futureWeeks.map(async (week) => {
           try {
+            const formattedDate = format(week, 'yyyy-MM-dd');
             const response = await apiRequest(
               "GET",
-              `/api/questions/weekly/${week.toISOString()}`
+              `/api/questions/weekly/${formattedDate}`
             );
             const questions = await response.json();
             questionsMap[week.toISOString()] = questions;
