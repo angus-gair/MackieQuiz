@@ -113,7 +113,6 @@ export default function AdminQuestionsPage() {
     },
   });
 
-
   return (
     <AdminLayout>
       <div className="p-4">
@@ -353,7 +352,6 @@ export default function AdminQuestionsPage() {
             })}
           </Accordion>
       </div>
-      <BottomNav/>
     </AdminLayout>
   );
 }
