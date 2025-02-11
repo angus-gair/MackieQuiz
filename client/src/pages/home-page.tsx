@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, ArrowLeft, ArrowRight, Plus, Users, Cog } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, ArrowLeft, ArrowRight, Users, Cog } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -26,7 +26,6 @@ export default function HomePage() {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Only reset scroll position on mount
     window.scrollTo(0, 0);
   }, []);
 
@@ -176,132 +175,110 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between h-14 px-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-lg font-semibold">Weekly Quiz</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/leaderboard">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3">
-                  <Trophy className="h-4 w-4" />
-                  <span className="hidden sm:inline-block sm:ml-2">Leaderboard</span>
-                </Button>
-              </Link>
-              <Link href={user?.isAdmin ? "/admin/users" : "/users"}>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3">
+        <div className="px-4 flex items-center justify-between h-14">
+          <h1 className="text-lg font-semibold">Weekly Quiz</h1>
+          <div className="flex items-center gap-1">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setLocation("/leaderboard")}
+              className="h-8 w-8 p-0"
+            >
+              <Trophy className="h-4 w-4" />
+              <span className="sr-only">Leaderboard</span>
+            </Button>
+            {user?.isAdmin ? (
+              <>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setLocation("/admin/users")}>
                   <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline-block sm:ml-2">Users</span>
+                  <span className="sr-only">Users</span>
                 </Button>
-              </Link>
-              {user?.isAdmin ? (
-                <Link href="/admin">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3">
-                    <Cog className="h-4 w-4" />
-                    <span className="hidden sm:inline-block sm:ml-2">Admin</span>
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/settings">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3">
-                    <Cog className="h-4 w-4" />
-                    <span className="hidden sm:inline-block sm:ml-2">Settings</span>
-                  </Button>
-                </Link>
-              )}
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleLogout}
-                className="h-8 w-8 p-0 sm:w-auto sm:px-3"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline-block sm:ml-2">Logout</span>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setLocation("/admin")}>
+                  <Cog className="h-4 w-4" />
+                  <span className="sr-only">Admin</span>
+                </Button>
+              </>
+            ) : (
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setLocation("/settings")}>
+                <Cog className="h-4 w-4" />
+                <span className="sr-only">Settings</span>
               </Button>
-            </div>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleLogout}
+              className="h-8 w-8 p-0"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="sr-only">Logout</span>
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto flex-1 pt-16 pb-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-primary">Welcome, {user?.username}!</h1>
-            <p className="text-muted-foreground">Team: {user?.team}</p>
+      <main className="pt-16 pb-8 px-4">
+        <div className="max-w-md mx-auto">
+          <div className="mb-4">
+            <h2 className="text-xl font-bold text-primary truncate">Welcome, {user?.username}!</h2>
+            <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
           </div>
 
-          <Card className="mb-6">
-            <CardHeader className="py-2">
+          <Card className="mb-4">
+            <CardHeader className="py-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center text-lg">
-                  <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
+                <CardTitle className="text-base flex items-center">
+                  <Trophy className="h-4 w-4 mr-2 text-yellow-500" />
                   Progress
                 </CardTitle>
-                <p className="text-sm text-muted-foreground slide-up">
-                  {submitted ? "Quiz completed!" : `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`}
-                </p>
+                <span className="text-sm text-muted-foreground">
+                  {submitted ? "Quiz completed!" : `${currentQuestionIndex + 1}/${questions?.length || 0}`}
+                </span>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="w-full">
-                <Progress 
-                  value={progress} 
-                  className="h-3 rounded-full" 
-                />
-              </div>
+              <Progress value={progress} className="h-2" />
             </CardContent>
           </Card>
 
           {submitted ? (
             <div className="space-y-4">
               {questions?.map((question, index) => (
-                <Card 
-                  key={question.id}
-                  className="quiz-card slide-down overflow-hidden"
-                  style={{ animationDelay: `${index * 150}ms` }}
-                >
-                  <CardHeader>
-                    <CardTitle className="text-base sm:text-lg flex items-start gap-2">
+                <Card key={question.id} className="overflow-hidden">
+                  <CardHeader className="py-3">
+                    <CardTitle className="text-sm flex items-start gap-2">
                       {answers?.find(a => a.questionId === question.id)?.correct ? 
-                        <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" /> :
-                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" /> :
+                        <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
                       }
                       <span>{question.question}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      <RadioGroup
-                        disabled
-                        value={selectedAnswers[question.id]}
-                        className="space-y-2"
-                      >
-                        {question.options.map((option) => (
-                          <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
-                            <RadioGroupItem 
-                              value={option} 
-                              checked={selectedAnswers[question.id] === option}
-                              className="radio-group-item"
-                            />
-                            <Label 
-                              className={cn(
-                                "radio-label text-sm sm:text-base",
-                                option === question.correctAnswer && "text-green-600 font-semibold",
-                                option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
-                              )}
-                            >
-                              {option}
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
+                    <RadioGroup
+                      disabled
+                      value={selectedAnswers[question.id]}
+                      className="space-y-2"
+                    >
+                      {question.options.map((option) => (
+                        <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
+                          <RadioGroupItem value={option} />
+                          <Label className={cn(
+                            "text-sm",
+                            option === question.correctAnswer && "text-green-600 font-medium",
+                            option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
+                          )}>
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
 
-                    <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-                      <p className="font-semibold mb-1 text-sm sm:text-base">
+                    <div className="mt-3 p-2 rounded-md bg-muted/30 text-sm">
+                      <p className="font-medium mb-1">
                         {answers?.find(a => a.questionId === question.id)?.correct ? "Correct!" : "Incorrect"}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground">
                         {question.explanation}
                       </p>
                     </div>
@@ -310,83 +287,80 @@ export default function HomePage() {
               ))}
 
               <Button 
-                className="w-full slide-up"
+                className="w-full"
                 onClick={() => setLocation("/leaderboard")}
-                style={{ animationDelay: '800ms' }}
               >
                 View Leaderboard
               </Button>
             </div>
-          ) : (
-            currentQuestion && (
-              <div key={quizKey} className="space-y-4">
-                <Card className="quiz-card">
-                  <CardHeader>
-                    <CardTitle className="text-base sm:text-lg">
-                      {currentQuestion.question}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <RadioGroup
-                      value={selectedAnswers[currentQuestion.id]}
-                      onValueChange={(value) =>
-                        setSelectedAnswers(prev => ({
-                          ...prev,
-                          [currentQuestion.id]: value,
-                        }))
-                      }
-                      className="space-y-2"
-                    >
-                      {currentQuestion.options.map((option) => (
-                        <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
-                          <RadioGroupItem 
-                            value={option} 
-                            id={`${currentQuestion.id}-${option}`}
-                            className="radio-group-item"
-                          />
-                          <Label 
-                            htmlFor={`${currentQuestion.id}-${option}`}
-                            className="radio-label cursor-pointer text-sm sm:text-base"
-                          >
-                            {option}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-
-                    <div className="flex justify-between mt-6">
-                      <Button
-                        variant="outline"
-                        onClick={handlePrevious}
-                        disabled={currentQuestionIndex === 0}
-                        className="h-9"
+          ) : currentQuestion && (
+            <Card key={quizKey}>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base">
+                  {currentQuestion.question}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup
+                  value={selectedAnswers[currentQuestion.id]}
+                  onValueChange={(value) =>
+                    setSelectedAnswers(prev => ({
+                      ...prev,
+                      [currentQuestion.id]: value,
+                    }))
+                  }
+                  className="space-y-2"
+                >
+                  {currentQuestion.options.map((option) => (
+                    <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
+                      <RadioGroupItem 
+                        value={option} 
+                        id={`${currentQuestion.id}-${option}`}
+                      />
+                      <Label 
+                        htmlFor={`${currentQuestion.id}-${option}`}
+                        className="text-sm cursor-pointer"
                       >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Previous
-                      </Button>
-                      {isLastQuestion ? (
-                        <Button
-                          onClick={handleSubmit}
-                          disabled={!canGoNext}
-                          className="h-9"
-                        >
-                          Submit Quiz
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={handleNext}
-                          disabled={!canGoNext}
-                          className="h-9"
-                        >
-                          Next
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      )}
+                        {option}
+                      </Label>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )
+                  ))}
+                </RadioGroup>
+
+                <div className="flex justify-between mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={handlePrevious}
+                    disabled={currentQuestionIndex === 0}
+                    size="sm"
+                    className="h-8"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    <span className="text-sm">Previous</span>
+                  </Button>
+                  {isLastQuestion ? (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!canGoNext}
+                      size="sm"
+                      className="h-8"
+                    >
+                      Submit Quiz
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleNext}
+                      disabled={!canGoNext}
+                      size="sm"
+                      className="h-8"
+                    >
+                      <span className="text-sm">Next</span>
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </main>
