@@ -123,6 +123,16 @@ export function registerRoutes(app: Express): Server {
     res.json(stats);
   });
 
+  app.post("/api/assign-team", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const { team } = req.body;
+    if (!team) return res.sendStatus(400);
+
+    const result = await storage.assignTeam(req.user.id, team);
+    res.json(result);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

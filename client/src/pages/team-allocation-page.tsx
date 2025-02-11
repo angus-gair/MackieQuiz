@@ -107,7 +107,10 @@ export default function TeamAllocationPage() {
     }
   }, [user, setLocation]);
 
-  if (!user || user.teamAssigned) return null;
+  // Change this to return an empty div instead of null
+  if (!user || user.teamAssigned) {
+    return <div className="hidden" />;
+  }
 
   const handleContinue = async () => {
     try {

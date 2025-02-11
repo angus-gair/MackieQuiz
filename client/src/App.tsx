@@ -12,6 +12,7 @@ import UsersTeamsPage from "@/pages/users-teams-page";
 import UsersViewPage from "@/pages/users-view-page";
 import AnalyticsPage from "@/pages/analytics-page";
 import SettingsPage from "@/pages/settings-page";
+import TeamAllocationPage from "@/pages/team-allocation-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
@@ -24,6 +25,7 @@ function Router() {
       <ProtectedRoute path="/" component={HomePage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/users" component={UsersViewPage} />
+      <ProtectedRoute path="/team-allocation" component={TeamAllocationPage} />
       <AdminRoute path="/admin" component={AdminPage} />
       <AdminRoute path="/admin/archived" component={AdminArchivedPage} />
       <AdminRoute path="/admin/users" component={UsersTeamsPage} />
