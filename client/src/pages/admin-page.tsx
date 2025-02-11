@@ -61,49 +61,21 @@ export default function AdminQuestionsPage() {
   );
 
   // Get questions for each week
-  const { data: weeklyQuestions, isLoading } = useQuery({
+  const { data: weeklyQuestions, isLoading } = useQuery<Question[]>({
     queryKey: ["/api/questions/weekly"],
     queryFn: async () => {
-      const questionsMap: Record<string, Question[]> = {};
-      await Promise.all(
-        futureWeeks.map(async (week) => {
-          try {
-            const formattedDate = format(week, 'yyyy-MM-dd');
-            const response = await apiRequest(
-              "GET",
-              `/api/questions/weekly/${formattedDate}`
-            );
-            const questions = await response.json();
-            questionsMap[week.toISOString()] = questions;
-          } catch (error) {
-            console.error(`Error fetching questions for week ${week}:`, error);
-            questionsMap[week.toISOString()] = [];
-          }
-        })
-      );
-      return questionsMap;
-    },
+      const res = await apiRequest("GET", "/api/questions");
+      return await res.json();
+    }
   });
+
+  // Debug log to see what questions we're getting
+  console.log('Weekly Questions:', weeklyQuestions);
 
   // Get all unique categories from existing questions
   const allCategories = useMemo(() => {
-    const categoriesSet = new Set(PREDEFINED_CATEGORIES);
-
-    // Add categories from existing questions
-    if (weeklyQuestions) {
-      Object.values(weeklyQuestions).forEach(questions => {
-        if (Array.isArray(questions)) {
-          questions.forEach(question => {
-            if (question?.category) {
-              categoriesSet.add(question.category);
-            }
-          });
-        }
-      });
-    }
-
-    return Array.from(categoriesSet).sort();
-  }, [weeklyQuestions]);
+    return PREDEFINED_CATEGORIES;
+  }, []);
 
   const createQuestionMutation = useMutation({
     mutationFn: async (question: InsertQuestion) => {
@@ -161,7 +133,14 @@ export default function AdminQuestionsPage() {
 
         <Accordion type="single" collapsible className="space-y-2">
           {futureWeeks.map((week) => {
-            const questions = weeklyQuestions?.[week.toISOString()] || [];
+            const weekString = format(week, 'yyyy-MM-dd');
+            console.log('Current week:', weekString);
+            const questions = weeklyQuestions?.filter(q => {
+              // Ensure we're comparing the dates in the same format
+              const questionWeek = q.weekOf;
+              console.log('Question week:', questionWeek, 'Comparing with:', weekString);
+              return questionWeek === weekString;
+            }) || [];
             const isCurrentWeek = week.getTime() === currentWeek.getTime();
             const weekId = week.toISOString();
 

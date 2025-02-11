@@ -1,0 +1,379 @@
+
+> rest-express@1.0.0 dev
+> tsx server/index.ts
+
+3:37:21 PM [express] Server started successfully on 0.0.0.0:5000
+3:37:22 PM [express] Deserializing user: 48
+3:37:22 PM [express] Deserialization successful for user: 48
+3:37:22 PM [express] Deserializing user: 48
+3:37:22 PM [express] Deserializing user: 48
+3:37:23 PM [express] Deserialization successful for user: 48
+3:37:23 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserialization successful for user: 48
+3:37:24 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:25 PM [express] Deserializing user: 48
+3:37:25 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserializing user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:26 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:27 PM [express] Deserializing user: 48
+3:37:27 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:28 PM [express] Deserialization successful for user: 48
+3:37:28 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserialization successful for user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:29 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserializing user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:30 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserializing user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:31 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:32 PM [express] Deserializing user: 48
+3:37:32 PM [express] Deserialization successful for user: 48
+3:37:33 PM [express] Deserializing user: 48
+3:37:33 PM [express] Deserialization successful for user: 48
+3:37:33 PM [express] User check: Authenticated as 48
+3:37:33 PM [express] GET /api/user 304 in 116ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:33 PM [express] Deserializing user: 48
+3:37:33 PM [express] Deserializing user: 48
+3:37:33 PM [express] Deserializing user: 48
+3:37:33 PM [express] Deserialization successful for user: 48
+3:37:33 PM [express] User check: Authenticated as 48
+3:37:33 PM [express] Deserialization successful for user: 48
+3:37:33 PM [express] Deserialization successful for user: 48
+3:37:33 PM [express] GET /api/user 304 in 113ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:33 PM [express] GET /api/questions/weekly 200 in 146ms :: [{"id":2,"question":"How can you find…
+3:37:33 PM [express] GET /api/answers 304 in 148ms :: [{"id":91,"userId":48,"questionId":1,"answer":…
+3:37:34 PM [express] Deserializing user: 48
+3:37:34 PM [express] Deserializing user: 48
+3:37:34 PM [express] Deserialization successful for user: 48
+3:37:34 PM [express] Deserialization successful for user: 48
+3:37:34 PM [express] GET /api/questions/weekly 200 in 148ms :: [{"id":2,"question":"How can you find…
+3:37:34 PM [express] GET /api/answers 304 in 149ms :: [{"id":91,"userId":48,"questionId":1,"answer":…
+3:37:38 PM [express] Deserializing user: 48
+3:37:38 PM [express] Deserialization successful for user: 48
+3:37:38 PM [express] User check: Authenticated as 48
+3:37:38 PM [express] GET /api/user 304 in 112ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:38 PM [express] Deserializing user: 48
+3:37:38 PM [express] Deserialization successful for user: 48
+3:37:38 PM [express] User check: Authenticated as 48
+3:37:39 PM [express] GET /api/user 304 in 111ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:43 PM [express] Deserializing user: 48
+3:37:44 PM [express] Deserialization successful for user: 48
+3:37:44 PM [express] User check: Authenticated as 48
+3:37:44 PM [express] GET /api/user 304 in 117ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:44 PM [express] Deserializing user: 48
+3:37:44 PM [express] Deserialization successful for user: 48
+3:37:44 PM [express] User check: Authenticated as 48
+3:37:44 PM [express] GET /api/user 304 in 112ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:49 PM [express] Deserializing user: 48
+3:37:49 PM [express] Deserialization successful for user: 48
+3:37:49 PM [express] User check: Authenticated as 48
+3:37:49 PM [express] GET /api/user 304 in 114ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:49 PM [express] Deserializing user: 48
+3:37:49 PM [express] Deserialization successful for user: 48
+3:37:49 PM [express] User check: Authenticated as 48
+3:37:49 PM [express] GET /api/user 304 in 113ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:53 PM [express] Deserializing user: 48
+3:37:53 PM [express] Deserialization successful for user: 48
+3:37:53 PM [express] GET /api/leaderboard 304 in 150ms :: [{"id":49,"username":"Belinda","password":…
+3:37:54 PM [express] Deserializing user: 48
+3:37:54 PM [express] Deserialization successful for user: 48
+3:37:54 PM [express] User check: Authenticated as 48
+3:37:54 PM [express] GET /api/user 304 in 114ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:54 PM [express] Deserializing user: 48
+3:37:55 PM [express] Deserialization successful for user: 48
+3:37:55 PM [express] User check: Authenticated as 48
+3:37:55 PM [express] GET /api/user 304 in 112ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:37:57 PM [express] Deserializing user: 48
+3:37:57 PM [express] Deserialization successful for user: 48
+3:37:57 PM [express] GET /api/users 304 in 149ms :: [{"id":14,"username":"russell","password":"e68d2…
+3:38:00 PM [express] Deserializing user: 48
+3:38:00 PM [express] Deserialization successful for user: 48
+3:38:00 PM [express] User check: Authenticated as 48
+3:38:00 PM [express] GET /api/user 304 in 113ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:38:00 PM [express] Deserializing user: 48
+3:38:00 PM [express] Deserialization successful for user: 48
+3:38:00 PM [express] User check: Authenticated as 48
+3:38:00 PM [express] GET /api/user 304 in 110ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:38:05 PM [express] Deserializing user: 48
+3:38:05 PM [express] Deserialization successful for user: 48
+3:38:05 PM [express] User check: Authenticated as 48
+3:38:05 PM [express] GET /api/user 304 in 112ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:38:05 PM [express] Deserializing user: 48
+3:38:05 PM [express] Deserialization successful for user: 48
+3:38:05 PM [express] User check: Authenticated as 48
+3:38:05 PM [express] GET /api/user 304 in 111ms :: {"id":48,"username":"fourteen","password":"4e4c03…
+3:38:08 PM [express] Deserializing user: 48
+3:38:08 PM [express] Deserialization successful for user: 48
+3:38:08 PM [express] Logout attempt for user: 48
+3:38:08 PM [express] POST /api/logout 200 in 186ms
+3:38:08 PM [express] User check: Not authenticated
+3:38:08 PM [express] GET /api/user 401 in 159ms
+3:38:11 PM [express] User check: Not authenticated
+3:38:11 PM [express] GET /api/user 401 in 37ms
+3:38:11 PM [express] User check: Not authenticated
+3:38:11 PM [express] GET /api/user 401 in 39ms
+3:38:16 PM [express] User check: Not authenticated
+3:38:16 PM [express] GET /api/user 401 in 36ms
+3:38:16 PM [express] User check: Not authenticated
+3:38:16 PM [express] GET /api/user 401 in 37ms
+3:38:21 PM [express] User check: Not authenticated
+3:38:21 PM [express] GET /api/user 401 in 36ms
+3:38:21 PM [express] User check: Not authenticated
+3:38:21 PM [express] GET /api/user 401 in 37ms
