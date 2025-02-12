@@ -18,7 +18,6 @@ import { HeaderNav } from "@/components/header-nav";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminQuestions from "@/pages/admin/questions";
 import AdminUsersTeams from "@/pages/admin/users-teams";
-import AdminUserAnalytics from "@/pages/admin/user-analytics";
 
 function Router() {
   return (
@@ -36,11 +35,10 @@ function Router() {
         <ProtectedRoute path="/profile" component={ProfilePage} />
         <ProtectedRoute path="/teams" component={TeamsPage} />
 
-        {/* Admin Routes */}
+        {/* Admin Routes - Simplified */}
         <AdminRoute path="/admin" component={AdminDashboard} />
         <AdminRoute path="/admin/questions" component={AdminQuestions} />
         <AdminRoute path="/admin/users" component={AdminUsersTeams} />
-        <AdminRoute path="/admin/user" component={AdminUserAnalytics} userAnalyticsOnly />
 
         <Route component={NotFound} />
       </Switch>
