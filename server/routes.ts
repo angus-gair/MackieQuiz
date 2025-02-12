@@ -90,6 +90,19 @@ export function registerRoutes(app: Express): Server {
     res.sendStatus(200);
   });
 
+  app.patch("/api/questions/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateQuestion(id, req.body);
+      res.json(result);
+    } catch (error) {
+      console.error("Question Update Error:", error);
+      res.status(500).json({ error: "Failed to update question" });
+    }
+  });
+
   app.post("/api/answers", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
