@@ -12,6 +12,7 @@ import LeaderboardPage from "@/pages/shared/leaderboard";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
+import { HeaderNav } from "@/components/header-nav";
 
 // Admin imports
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -21,26 +22,29 @@ import AdminUserAnalytics from "@/pages/admin/user-analytics";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/auth" component={AuthPage} />
+    <>
+      <HeaderNav />
+      <Switch>
+        <Route path="/auth" component={AuthPage} />
 
-      {/* Public Routes */}
-      <Route path="/leaderboard" component={LeaderboardPage} />
+        {/* Public Routes */}
+        <Route path="/leaderboard" component={LeaderboardPage} />
 
-      {/* Protected User Routes */}
-      <ProtectedRoute path="/" component={HomePage} />
-      <ProtectedRoute path="/settings" component={SettingsPage} />
-      <ProtectedRoute path="/profile" component={ProfilePage} />
-      <ProtectedRoute path="/teams" component={TeamsPage} />
+        {/* Protected User Routes */}
+        <ProtectedRoute path="/" component={HomePage} />
+        <ProtectedRoute path="/settings" component={SettingsPage} />
+        <ProtectedRoute path="/profile" component={ProfilePage} />
+        <ProtectedRoute path="/teams" component={TeamsPage} />
 
-      {/* Admin Routes */}
-      <AdminRoute path="/admin" component={AdminDashboard} />
-      <AdminRoute path="/admin/questions" component={AdminQuestions} />
-      <AdminRoute path="/admin/users" component={AdminUsersTeams} />
-      <AdminRoute path="/admin/user" component={AdminUserAnalytics} userAnalyticsOnly />
+        {/* Admin Routes */}
+        <AdminRoute path="/admin" component={AdminDashboard} />
+        <AdminRoute path="/admin/questions" component={AdminQuestions} />
+        <AdminRoute path="/admin/users" component={AdminUsersTeams} />
+        <AdminRoute path="/admin/user" component={AdminUserAnalytics} userAnalyticsOnly />
 
-      <Route component={NotFound} />
-    </Switch>
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 
