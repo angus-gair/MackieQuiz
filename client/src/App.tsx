@@ -7,6 +7,7 @@ import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import SettingsPage from "@/pages/settings-page";
 import ProfilePage from "@/pages/user/profile";
+import TeamsPage from "@/pages/teams-page";
 import LeaderboardPage from "@/pages/shared/leaderboard";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
@@ -15,10 +16,8 @@ import { AdminRoute } from "./lib/admin-route";
 // Admin imports
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminQuestions from "@/pages/admin/questions";
-import AdminArchived from "@/pages/admin/archived";
-import AdminAnalytics from "@/pages/admin/analytics";
-import AdminUserAnalytics from "@/pages/admin/user-analytics";
 import AdminUsersTeams from "@/pages/admin/users-teams";
+import AdminUserAnalytics from "@/pages/admin/user-analytics";
 
 function Router() {
   return (
@@ -32,13 +31,12 @@ function Router() {
       <ProtectedRoute path="/" component={HomePage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/teams" component={TeamsPage} />
 
       {/* Admin Routes */}
       <AdminRoute path="/admin" component={AdminDashboard} />
       <AdminRoute path="/admin/questions" component={AdminQuestions} />
-      <AdminRoute path="/admin/questions/archived" component={AdminArchived} />
       <AdminRoute path="/admin/users" component={AdminUsersTeams} />
-      <AdminRoute path="/admin/analytics" component={AdminAnalytics} />
       <AdminRoute path="/admin/user" component={AdminUserAnalytics} userAnalyticsOnly />
 
       <Route component={NotFound} />

@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, BarChart2, Users } from "lucide-react";
+import { PlusCircle, Users, BarChart2, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { AdminLayout } from "@/components/admin-layout";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -15,14 +15,14 @@ export default function AdminDashboard() {
       href: "/admin/questions"
     },
     {
-      icon: <BarChart2 className="h-4 w-4" />,
-      title: "Analytics Dashboard",
-      description: "View quiz performance and user statistics",
-      href: "/admin/analytics"
+      icon: <Users className="h-4 w-4" />,
+      title: "User Management",
+      description: "Manage user team assignments and compositions",
+      href: "/admin/users"
     },
     // Only show User Analytics module for user "gair"
     ...(user?.username === "gair" ? [{
-      icon: <Users className="h-4 w-4" />,
+      icon: <BarChart2 className="h-4 w-4" />,
       title: "User Analytics",
       description: "Monitor user interactions, sessions, and behavior",
       href: "/admin/user"
@@ -30,36 +30,40 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <AdminLayout>
-      <div className="container max-w-full px-4 py-4">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-lg font-bold text-primary mb-4">Admin Dashboard</h1>
-          <div className="space-y-2">
-            {modules.map((module) => (
-              <Card key={module.href}>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    {module.icon}
-                    <span>{module.title}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3">
-                  <p className="text-xs text-muted-foreground mb-3">
-                    {module.description}
-                  </p>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
+      <div className="max-w-md mx-auto">
+        <div className="flex items-center mb-4">
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="h-8 mr-2">
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
+          </Link>
+          <h1 className="text-lg font-bold text-primary">Admin Dashboard</h1>
+        </div>
+        <div className="space-y-2">
+          {modules.map((module) => (
+            <Card key={module.href}>
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  {module.icon}
+                  <span>{module.title}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3">
+                <p className="text-xs text-muted-foreground mb-3">
+                  {module.description}
+                </p>
+                <Button asChild className="w-full h-8 text-xs">
                   <Link href={module.href}>
-                    <a className="w-full">
-                      <button className="w-full h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90 rounded-md">
-                        Open {module.title}
-                      </button>
-                    </a>
+                    Open {module.title}
                   </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }
