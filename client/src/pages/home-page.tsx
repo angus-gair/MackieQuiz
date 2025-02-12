@@ -319,7 +319,7 @@ export default function HomePage() {
                       />
                       <Label 
                         htmlFor={`${currentQuestion.id}-${option}`}
-                        className="text-sm cursor-pointer text-muted-foreground/80"
+                        className="text-sm cursor-pointer text-muted-foreground"
                       >
                         {option}
                       </Label>
