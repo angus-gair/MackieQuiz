@@ -54,6 +54,12 @@ export default function TeamAllocationPage() {
           // Update the user query data to reflect the team assignment
           const updatedUser = await userResponse.json();
           queryClient.setQueryData(["/api/user"], updatedUser);
+
+          // After successful team assignment, automatically redirect to home
+          setTimeout(() => {
+            setLocation("/");
+          }, 3000); // Allow time for confetti animation
+
         } catch (error) {
           console.error('Team assignment error:', error);
           toast({
@@ -125,10 +131,6 @@ export default function TeamAllocationPage() {
     return <div className="hidden" />;
   }
 
-  const handleContinue = () => {
-    setLocation("/");
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center mobile-p-2">
       <Card className="w-full max-w-[280px] sm:max-w-sm">
@@ -166,13 +168,6 @@ export default function TeamAllocationPage() {
                 <p className="text-lg sm:text-xl font-bold text-primary">
                   {selectedTeam}
                 </p>
-                <Button 
-                  className="w-full mt-3"
-                  size="sm"
-                  onClick={handleContinue}
-                >
-                  Continue to Quiz
-                </Button>
               </div>
             ) : (
               <Button 
