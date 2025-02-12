@@ -183,7 +183,7 @@ export default function HomePage() {
               size="sm"
               onClick={handleReset}
               className={cn(
-                "h-8 w-8 p-0",
+                "h-8 w-8 p-0 rounded-full mr-3",
                 !submitted && "hidden"
               )}
             >
@@ -196,7 +196,7 @@ export default function HomePage() {
               onClick={() => setLocation("/leaderboard")}
               className={cn(
                 "h-8 w-8 p-0 relative",
-                submitted && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-yellow-500/20 after:animate-ping"
+                submitted && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-yellow-500/10 after:animate-ping"
               )}
             >
               <Trophy className={cn(
