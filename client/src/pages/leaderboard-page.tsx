@@ -36,9 +36,15 @@ export default function LeaderboardPage() {
     queryKey: ["/api/analytics/teams"],
   });
 
-  const sortedTeamStats = teamStats?.sort((a, b) =>
-    b.weeklyCompletionPercentage - a.weeklyCompletionPercentage
-  );
+  const sortedTeamStats = teamStats?.sort((a, b) => {
+    // First compare by completion rate
+    const completionDiff = b.weeklyCompletionPercentage - a.weeklyCompletionPercentage;
+    // If completion rates are equal, use average score as tiebreaker
+    if (completionDiff === 0) {
+      return b.averageScore - a.averageScore;
+    }
+    return completionDiff;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">

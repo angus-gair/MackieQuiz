@@ -210,6 +210,8 @@ export class DatabaseStorage implements IStorage {
     }>();
 
     for (const user of allUsers) {
+      if (!user.team) continue; // Skip users without teams
+
       const stats = teamStats.get(user.team) || { 
         totalScore: 0, 
         members: 0, 
@@ -228,7 +230,7 @@ export class DatabaseStorage implements IStorage {
       teamStats.set(user.team, stats);
     }
 
-    return Array.from(teamStats.entries()).map(([teamName, stats]) => ({
+    const results = Array.from(teamStats.entries()).map(([teamName, stats]) => ({
       teamName,
       totalScore: stats.totalScore,
       averageScore: stats.totalScore / stats.members,
@@ -236,6 +238,15 @@ export class DatabaseStorage implements IStorage {
       members: stats.members,
       weeklyCompletionPercentage: (stats.weeklyCompleted / stats.members) * 100
     }));
+
+    // Sort by completion percentage first, then by average score
+    return results.sort((a, b) => {
+      const completionDiff = b.weeklyCompletionPercentage - a.weeklyCompletionPercentage;
+      if (completionDiff === 0) {
+        return b.averageScore - a.averageScore;
+      }
+      return completionDiff;
+    });
   }
 
   async getDailyStats() {
