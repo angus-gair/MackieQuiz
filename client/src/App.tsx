@@ -17,7 +17,6 @@ import SettingsPage from "@/pages/settings-page";
 import TeamAllocationPage from "@/pages/team-allocation-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
-import { AdminRoute } from "./lib/admin-route";
 
 function Router() {
   return (
@@ -27,12 +26,12 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/users" component={UsersViewPage} />
       <ProtectedRoute path="/team-allocation" component={TeamAllocationPage} />
-      <AdminRoute path="/admin" component={AdminDashboardPage} />
-      <AdminRoute path="/admin/questions" component={AdminQuestionsPage} />
-      <AdminRoute path="/admin/questions/archived" component={AdminArchivedPage} />
-      <AdminRoute path="/admin/users" component={UsersTeamsPage} />
-      <AdminRoute path="/admin/analytics" component={AnalyticsPage} />
-      <AdminRoute path="/admin/user" component={UserAnalyticsPage} userAnalyticsOnly />
+      <ProtectedRoute path="/admin" component={AdminDashboardPage} />
+      <ProtectedRoute path="/admin/questions" component={AdminQuestionsPage} />
+      <ProtectedRoute path="/admin/questions/archived" component={AdminArchivedPage} />
+      <ProtectedRoute path="/admin/users" component={UsersTeamsPage} />
+      <ProtectedRoute path="/admin/analytics" component={AnalyticsPage} />
+      <ProtectedRoute path="/admin/user" component={UserAnalyticsPage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <Route component={NotFound} />
     </Switch>
