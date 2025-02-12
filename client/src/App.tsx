@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import SettingsPage from "@/pages/settings-page";
+import LeaderboardPage from "@/pages/shared/leaderboard";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
@@ -24,6 +25,9 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
 
       {/* Public Routes */}
+      <Route path="/leaderboard" component={LeaderboardPage} />
+
+      {/* Protected User Routes */}
       <ProtectedRoute path="/" component={HomePage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
 
