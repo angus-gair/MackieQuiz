@@ -36,7 +36,7 @@ export default function LeaderboardPage() {
     queryKey: ["/api/analytics/teams"],
   });
 
-  const sortedTeamStats = teamStats?.sort((a, b) => 
+  const sortedTeamStats = teamStats?.sort((a, b) =>
     b.weeklyCompletionPercentage - a.weeklyCompletionPercentage
   );
 
