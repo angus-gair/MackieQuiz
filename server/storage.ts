@@ -1,4 +1,4 @@
-import { users, questions, answers, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer } from "@shared/schema";
+import { users, questions, answers, userSessions, pageViews, authEvents, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte } from "drizzle-orm";
 import session from "express-session";
@@ -8,6 +8,7 @@ import { pool } from "./db";
 const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
+  // Existing methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -46,6 +47,33 @@ export interface IStorage {
   getArchivedQuestions(): Promise<Question[]>;
   archiveQuestion(id: number): Promise<void>;
   getWeeklyQuestions(): Promise<Question[]>;
+
+  // New analytics methods
+  createUserSession(session: InsertUserSession): Promise<UserSession>;
+  updateUserSession(id: number, endTime: Date, exitPage?: string): Promise<UserSession>;
+  recordPageView(pageView: InsertPageView): Promise<PageView>;
+  recordAuthEvent(event: InsertAuthEvent): Promise<AuthEvent>;
+
+  // Analytics queries
+  getSessionAnalytics(): Promise<{
+    totalSessions: number;
+    averageSessionDuration: number;
+    deviceBreakdown: { device: string; count: number }[];
+    browserBreakdown: { browser: string; count: number }[];
+    peakUsageHours: { hour: number; count: number }[];
+  }>;
+  getPageViewAnalytics(): Promise<{
+    mostVisitedPages: { path: string; views: number }[];
+    averageTimeOnPage: { path: string; avgTime: number }[];
+    bounceRate: number;
+    errorPages: { path: string; errors: number }[];
+  }>;
+  getAuthEventAnalytics(): Promise<{
+    totalLogins: number;
+    failedLogins: number;
+    locationBreakdown: { country: string; count: number }[];
+    failureReasons: { reason: string; count: number }[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -403,6 +431,164 @@ export class DatabaseStorage implements IStorage {
   async getWeeklyQuestions(): Promise<Question[]> {
     const allQuestions = await this.getQuestions();
     return this.shuffleArray(allQuestions).slice(0, 3);
+  }
+
+  async createUserSession(session: InsertUserSession): Promise<UserSession> {
+    const [newSession] = await db
+      .insert(userSessions)
+      .values(session)
+      .returning();
+    return newSession;
+  }
+
+  async updateUserSession(id: number, endTime: Date, exitPage?: string): Promise<UserSession> {
+    const [updatedSession] = await db
+      .update(userSessions)
+      .set({ endTime, exitPage })
+      .where(eq(userSessions.id, id))
+      .returning();
+    return updatedSession;
+  }
+
+  async recordPageView(pageView: InsertPageView): Promise<PageView> {
+    const [newPageView] = await db
+      .insert(pageViews)
+      .values(pageView)
+      .returning();
+    return newPageView;
+  }
+
+  async recordAuthEvent(event: InsertAuthEvent): Promise<AuthEvent> {
+    const [newEvent] = await db
+      .insert(authEvents)
+      .values(event)
+      .returning();
+    return newEvent;
+  }
+
+  async getSessionAnalytics() {
+    const sessions = await db.select().from(userSessions);
+    const totalSessions = sessions.length;
+
+    // Calculate average session duration
+    const durationsInMinutes = sessions
+      .filter(s => s.endTime)
+      .map(s => {
+        const duration = new Date(s.endTime!).getTime() - new Date(s.startTime).getTime();
+        return duration / (1000 * 60); // Convert to minutes
+      });
+    const averageSessionDuration = durationsInMinutes.reduce((a, b) => a + b, 0) / durationsInMinutes.length;
+
+    // Get device breakdown
+    const deviceCounts = new Map<string, number>();
+    sessions.forEach(s => {
+      deviceCounts.set(s.device, (deviceCounts.get(s.device) || 0) + 1);
+    });
+
+    // Get browser breakdown
+    const browserCounts = new Map<string, number>();
+    sessions.forEach(s => {
+      browserCounts.set(s.browser, (browserCounts.get(s.browser) || 0) + 1);
+    });
+
+    // Calculate peak usage hours
+    const hourCounts = new Map<number, number>();
+    sessions.forEach(s => {
+      const hour = new Date(s.startTime).getHours();
+      hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
+    });
+
+    return {
+      totalSessions,
+      averageSessionDuration,
+      deviceBreakdown: Array.from(deviceCounts.entries()).map(([device, count]) => ({ device, count })),
+      browserBreakdown: Array.from(browserCounts.entries()).map(([browser, count]) => ({ browser, count })),
+      peakUsageHours: Array.from(hourCounts.entries()).map(([hour, count]) => ({ hour, count })),
+    };
+  }
+
+  async getPageViewAnalytics() {
+    const views = await db.select().from(pageViews);
+
+    // Calculate most visited pages
+    const pageCounts = new Map<string, number>();
+    views.forEach(v => {
+      pageCounts.set(v.path, (pageCounts.get(v.path) || 0) + 1);
+    });
+
+    // Calculate average time on page
+    const pageTimeTotals = new Map<string, { total: number; count: number }>();
+    views.forEach(v => {
+      if (v.timeSpent) {
+        const current = pageTimeTotals.get(v.path) || { total: 0, count: 0 };
+        pageTimeTotals.set(v.path, {
+          total: current.total + v.timeSpent,
+          count: current.count + 1
+        });
+      }
+    });
+
+    // Calculate error pages
+    const errorCounts = new Map<string, number>();
+    views.filter(v => v.isError).forEach(v => {
+      errorCounts.set(v.path, (errorCounts.get(v.path) || 0) + 1);
+    });
+
+    // Calculate bounce rate (sessions with only one page view)
+    const sessionPageCounts = new Map<number, number>();
+    views.forEach(v => {
+      sessionPageCounts.set(v.sessionId, (sessionPageCounts.get(v.sessionId) || 0) + 1);
+    });
+    const bounceSessions = Array.from(sessionPageCounts.values()).filter(count => count === 1).length;
+    const bounceRate = (bounceSessions / sessionPageCounts.size) * 100;
+
+    return {
+      mostVisitedPages: Array.from(pageCounts.entries())
+        .map(([path, views]) => ({ path, views }))
+        .sort((a, b) => b.views - a.views),
+      averageTimeOnPage: Array.from(pageTimeTotals.entries())
+        .map(([path, { total, count }]) => ({ 
+          path, 
+          avgTime: total / count 
+        })),
+      bounceRate,
+      errorPages: Array.from(errorCounts.entries())
+        .map(([path, errors]) => ({ path, errors }))
+        .sort((a, b) => b.errors - a.errors),
+    };
+  }
+
+  async getAuthEventAnalytics() {
+    const events = await db.select().from(authEvents);
+
+    const totalLogins = events.filter(e => e.eventType === 'login').length;
+    const failedLogins = events.filter(e => e.eventType === 'login_failed').length;
+
+    // Calculate location breakdown
+    const locationCounts = new Map<string, number>();
+    events.forEach(e => {
+      const location = e.geoLocation as { country: string } | null;
+      if (location?.country) {
+        locationCounts.set(location.country, (locationCounts.get(location.country) || 0) + 1);
+      }
+    });
+
+    // Calculate failure reasons
+    const failureReasonCounts = new Map<string, number>();
+    events.filter(e => e.failureReason).forEach(e => {
+      failureReasonCounts.set(e.failureReason!, (failureReasonCounts.get(e.failureReason!) || 0) + 1);
+    });
+
+    return {
+      totalLogins,
+      failedLogins,
+      locationBreakdown: Array.from(locationCounts.entries())
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count),
+      failureReasons: Array.from(failureReasonCounts.entries())
+        .map(([reason, count]) => ({ reason, count }))
+        .sort((a, b) => b.count - a.count),
+    };
   }
 }
 
