@@ -52,163 +52,31 @@ body {
   }
 }
 
-/* Enhanced Card Styles */
+/* Card Styles */
 .card {
   padding: var(--card-padding);
   margin-bottom: var(--gap-medium);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  will-change: transform, box-shadow;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.card:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-/* Quiz Card Animation */
+/* Animations - Keeping them minimal for better performance */
 .quiz-card {
-  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  will-change: transform, opacity;
+  animation: slideIn 0.2s ease forwards;
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Enhanced Button Hover Effects */
-.button-hover {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, box-shadow;
-}
-
-.button-hover:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.button-hover:active {
-  transform: translateY(1px);
-}
-
-/* Progress Bar Animation */
-.progress-bar {
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: width;
-}
-
-/* Enhanced Radio Group Styles */
-.radio-group-item {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: background-color, transform;
-}
-
-.radio-group-item:hover {
-  transform: translateX(2px);
-}
-
-.radio-label {
-  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Card Answer Hover Effect */
-.card-answer {
-  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: background-color, transform;
-}
-
-.card-answer:hover {
-  background-color: var(--background-color);
-  transform: translateX(4px);
-}
-
-/* Explanation Panel Animation */
-.explanation-panel {
-  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  will-change: opacity;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Navigation Item Hover Effect */
-.nav-item {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, background-color;
-}
-
-.nav-item:hover {
-  transform: translateX(2px);
-  background-color: rgba(0, 0, 0, 0.03);
-}
-
-/* Icon Spin Animation */
-.icon-spin {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-}
-
-.icon-spin:hover {
-  transform: rotate(180deg);
-}
-
-/* Subtle Pulse Animation */
-.pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: .7;
-  }
-}
-
-/* Scale Animation */
-.scale {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-}
-
-.scale:hover {
-  transform: scale(1.05);
-}
-
-/* Success Animation */
-.success-animation {
-  animation: successPop 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes successPop {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
   }
 }
 
@@ -244,5 +112,85 @@ body {
 
   .mobile-p-3 {
     padding: 1rem;
+  }
+}
+
+/* Button Hover Effects */
+.button-hover {
+  transition: all 0.2s ease;
+}
+
+.button-hover:hover {
+  transform: translateY(-1px);
+}
+
+/* Progress Bar */
+.progress-bar {
+  transition: width 0.3s ease;
+}
+
+
+/* Slide Up Animation */
+.slide-up {
+  animation: slideUp 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide Down Animation */
+.slide-down {
+  animation: slideDown 0.3s ease forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Radio Group Styles */
+.radio-group-item {
+  transition: all 0.2s ease;
+}
+
+.radio-label {
+  transition: color 0.2s ease;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Card Answer Styles */
+.card-answer {
+  transition: background-color 0.2s ease;
+}
+
+.card-answer:hover {
+  background-color: var(--background-color);
+}
+
+/* Explanation Panel */
+.explanation-panel {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

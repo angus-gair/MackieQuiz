@@ -42,7 +42,7 @@ export function ProtectedRoute({
     }
   } else {
     // For all other protected routes, if no team assigned, redirect to team allocation
-    if (!user.teamAssigned && path !== "/team-allocation") {
+    if (!user.teamAssigned) {
       return (
         <Route path={path}>
           <Redirect to="/team-allocation" />

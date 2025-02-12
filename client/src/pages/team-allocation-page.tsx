@@ -51,9 +51,6 @@ export default function TeamAllocationPage() {
 
           // If we get here, everything worked
           setShowConfetti(true);
-          // Update the user query data to reflect the team assignment
-          const updatedUser = await userResponse.json();
-          queryClient.setQueryData(["/api/user"], updatedUser);
         } catch (error) {
           console.error('Team assignment error:', error);
           toast({
@@ -79,10 +76,10 @@ export default function TeamAllocationPage() {
   };
 
   useEffect(() => {
-    if (!user?.teamAssigned && !spinning && !selectedTeam && !showConfetti) {
+    if (!user?.teamAssigned && !spinning && !selectedTeam) {
       startSpinning();
     }
-  }, [user, spinning, selectedTeam, showConfetti]);
+  }, [user, spinning, selectedTeam]);
 
   useEffect(() => {
     if (showConfetti) {
@@ -120,13 +117,34 @@ export default function TeamAllocationPage() {
     }
   }, [showConfetti]);
 
+  useEffect(() => {
+    if (user?.teamAssigned) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
+
   // Change this to return an empty div instead of null
   if (!user || user.teamAssigned) {
     return <div className="hidden" />;
   }
 
-  const handleContinue = () => {
-    setLocation("/");
+  const handleContinue = async () => {
+    try {
+      const res = await apiRequest("GET", "/api/user");
+      if (!res.ok) {
+        throw new Error('Failed to verify user session');
+      }
+      const updatedUser = await res.json();
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      setLocation("/");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load user data. Please try logging in again.",
+        variant: "destructive",
+      });
+      setLocation("/auth");
+    }
   };
 
   return (
