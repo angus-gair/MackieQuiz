@@ -85,10 +85,12 @@ export default function TeamAllocationPage() {
   };
 
   useEffect(() => {
-    if (!user?.teamAssigned && !spinning && !selectedTeam) {
+    const hasSpun = sessionStorage.getItem('hasSpun');
+    if (!user?.teamAssigned && !spinning && !selectedTeam && !showConfetti && !hasSpun) {
+      sessionStorage.setItem('hasSpun', 'true');
       startSpinning();
     }
-  }, [user, spinning, selectedTeam]);
+  }, [user, spinning, selectedTeam, showConfetti]);
 
   useEffect(() => {
     if (showConfetti) {
