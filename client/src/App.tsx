@@ -32,7 +32,7 @@ function Router() {
       <AdminRoute path="/admin/questions/archived" component={AdminArchivedPage} />
       <AdminRoute path="/admin/users" component={UsersTeamsPage} />
       <AdminRoute path="/admin/analytics" component={AnalyticsPage} />
-      <AdminRoute path="/admin/user" component={UserAnalyticsPage} />
+      <AdminRoute path="/admin/user" component={UserAnalyticsPage} userAnalyticsOnly />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <Route component={NotFound} />
     </Switch>

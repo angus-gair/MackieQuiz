@@ -5,9 +5,11 @@ import { Redirect, Route } from "wouter";
 export function AdminRoute({
   path,
   component: Component,
+  userAnalyticsOnly = false
 }: {
   path: string;
   component: () => React.JSX.Element;
+  userAnalyticsOnly?: boolean;
 }) {
   const { user, isLoading } = useAuth();
 
@@ -21,6 +23,16 @@ export function AdminRoute({
     );
   }
 
+  // For /admin/user page, only allow user "gair"
+  if (userAnalyticsOnly && user?.username !== "gair") {
+    return (
+      <Route path={path}>
+        <Redirect to="/" />
+      </Route>
+    );
+  }
+
+  // For other admin pages, check isAdmin
   if (!user?.isAdmin) {
     return (
       <Route path={path}>
