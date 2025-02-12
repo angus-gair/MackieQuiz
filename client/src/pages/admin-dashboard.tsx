@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, BarChart2, ArrowLeft } from "lucide-react";
+import { PlusCircle, BarChart2, Users, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
@@ -16,6 +16,12 @@ export default function AdminDashboardPage() {
       title: "Analytics Dashboard",
       description: "View quiz performance and user statistics",
       href: "/admin/analytics"
+    },
+    {
+      icon: <Users className="h-5 w-5" />,
+      title: "User Analytics",
+      description: "Monitor user interactions, sessions, and behavior",
+      href: "/admin/user"
     }
   ];
 
