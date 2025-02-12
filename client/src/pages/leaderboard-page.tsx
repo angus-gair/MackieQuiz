@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Trophy, Medal, Award } from "lucide-react";
+import { ArrowLeft, Trophy, Medal, Award, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 const BADGES = [
   { icon: Trophy, color: "text-yellow-500" },
@@ -13,11 +16,30 @@ const BADGES = [
   { icon: Award, color: "text-amber-600" },
 ];
 
+type TeamStats = {
+  teamName: string;
+  totalScore: number;
+  averageScore: number;
+  completedQuizzes: number;
+  members: number;
+  weeklyCompletionPercentage: number;
+};
+
 export default function LeaderboardPage() {
   const isMobile = useIsMobile();
+  const [showTeams, setShowTeams] = useState(false);
+
   const { data: users } = useQuery<User[]>({
     queryKey: ["/api/leaderboard"],
   });
+
+  const { data: teamStats } = useQuery<TeamStats[]>({
+    queryKey: ["/api/analytics/teams"],
+  });
+
+  const sortedTeamStats = teamStats?.sort((a, b) => 
+    b.weeklyCompletionPercentage - a.weeklyCompletionPercentage
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
@@ -32,37 +54,79 @@ export default function LeaderboardPage() {
           <h1 className="text-lg font-bold text-primary">Weekly Leaderboard</h1>
         </div>
 
-        <div className="space-y-3">
-          {users?.map((user, index) => {
-            const Badge = BADGES[index]?.icon;
-            const color = BADGES[index]?.color;
+        <div className="flex items-center space-x-2 mb-6">
+          <Label htmlFor="leaderboard-type" className="text-sm">Show Team Rankings</Label>
+          <Switch
+            id="leaderboard-type"
+            checked={showTeams}
+            onCheckedChange={setShowTeams}
+          />
+        </div>
 
-            return (
-              <Card key={user.id} className={cn("overflow-hidden", index === 0 && "border-yellow-500/50")}>
-                <CardHeader className="py-3">
-                  <CardTitle className="flex items-center justify-between text-base">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {Badge && (
-                        <Badge className={cn("h-4 w-4 flex-shrink-0", color)} />
-                      )}
-                      <span className="truncate">{user.username}</span>
+        <div className="space-y-3">
+          {showTeams ? (
+            sortedTeamStats?.map((team, index) => {
+              const Badge = BADGES[index]?.icon;
+              const color = BADGES[index]?.color;
+
+              return (
+                <Card key={team.teamName} className={cn("overflow-hidden", index === 0 && "border-yellow-500/50")}>
+                  <CardHeader className="py-3">
+                    <CardTitle className="flex items-center justify-between text-base">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {Badge && (
+                          <Badge className={cn("h-4 w-4 flex-shrink-0", color)} />
+                        )}
+                        <span className="truncate">{team.teamName}</span>
+                      </div>
+                      <span className="text-base font-bold ml-2">{Math.round(team.weeklyCompletionPercentage)}%</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="py-2">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">
+                        Members: {team.members}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Total Score: {team.totalScore}
+                      </p>
                     </div>
-                    <span className="text-base font-bold ml-2">{user.weeklyScore} pts</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="py-2">
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground truncate">
-                      Team: {user.team}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Quizzes: {user.weeklyQuizzes}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  </CardContent>
+                </Card>
+              );
+            })
+          ) : (
+            users?.map((user, index) => {
+              const Badge = BADGES[index]?.icon;
+              const color = BADGES[index]?.color;
+
+              return (
+                <Card key={user.id} className={cn("overflow-hidden", index === 0 && "border-yellow-500/50")}>
+                  <CardHeader className="py-3">
+                    <CardTitle className="flex items-center justify-between text-base">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {Badge && (
+                          <Badge className={cn("h-4 w-4 flex-shrink-0", color)} />
+                        )}
+                        <span className="truncate">{user.username}</span>
+                      </div>
+                      <span className="text-base font-bold ml-2">{user.weeklyScore} pts</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="py-2">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground truncate">
+                        Team: {user.team}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Quizzes: {user.weeklyQuizzes}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
