@@ -90,6 +90,7 @@ export default function AdminQuestionsPage() {
       toast({
         title: "Success",
         description: "Question created successfully",
+        duration: 2000, // 2 seconds instead of default 4 seconds
       });
     },
     onError: (error: Error) => {
