@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import confetti from 'canvas-confetti';
@@ -17,10 +17,7 @@ export default function TeamAllocationPage() {
   const [spinning, setSpinning] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
   const { toast } = useToast();
-  const spinIntervalRef = useRef<NodeJS.Timeout>();
-  const redirectTimeoutRef = useRef<NodeJS.Timeout>();
 
   const startSpinning = () => {
     if (spinning) return;
@@ -28,34 +25,35 @@ export default function TeamAllocationPage() {
     setSpinning(true);
     const duration = 8000 + Math.random() * 4000; // Random duration between 8-12 seconds
     const startTime = Date.now();
+    let spinInterval: NodeJS.Timeout;
 
     const animate = async () => {
       const elapsed = Date.now() - startTime;
 
       if (elapsed >= duration) {
-        if (spinIntervalRef.current) {
-          clearInterval(spinIntervalRef.current);
-        }
+        clearInterval(spinInterval);
         const finalTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
         setSelectedTeam(finalTeam);
         setSpinning(false);
 
         try {
+          // First verify we're still authenticated
           const userResponse = await apiRequest("GET", "/api/user");
           if (!userResponse.ok) {
             throw new Error('Authentication check failed');
           }
 
+          // Then make the team assignment request
           const response = await apiRequest("POST", "/api/assign-team", { team: finalTeam });
           if (!response.ok) {
             throw new Error(`Team assignment failed: ${response.status}`);
           }
 
+          // If we get here, everything worked
           setShowConfetti(true);
-          // Start automatic redirect after 6 seconds
-          redirectTimeoutRef.current = setTimeout(() => {
-            handleRedirect();
-          }, 6000);
+          // Update the user query data to reflect the team assignment
+          const updatedUser = await userResponse.json();
+          queryClient.setQueryData(["/api/user"], updatedUser);
         } catch (error) {
           console.error('Team assignment error:', error);
           toast({
@@ -66,7 +64,7 @@ export default function TeamAllocationPage() {
           setSpinning(false);
           setSelectedTeam(null);
           setShowConfetti(false);
-          setLocation("/auth");
+          setLocation("/auth"); // Redirect to auth page on session error
         }
       } else {
         const progress = elapsed / duration;
@@ -76,50 +74,14 @@ export default function TeamAllocationPage() {
       }
     };
 
-    spinIntervalRef.current = setInterval(animate, 400);
-  };
-
-  const handleRedirect = async () => {
-    if (isRedirecting) return;
-
-    setIsRedirecting(true);
-    // Clear any pending automatic redirect
-    if (redirectTimeoutRef.current) {
-      clearTimeout(redirectTimeoutRef.current);
-    }
-
-    try {
-      const res = await apiRequest("GET", "/api/user");
-      if (!res.ok) {
-        throw new Error('Failed to verify user session');
-      }
-      const updatedUser = await res.json();
-      queryClient.setQueryData(["/api/user"], updatedUser);
-      setLocation("/");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load user data. Please try logging in again.",
-        variant: "destructive",
-      });
-      setLocation("/auth");
-    }
+    spinInterval = setInterval(animate, 400);
+    return () => clearInterval(spinInterval);
   };
 
   useEffect(() => {
     if (!user?.teamAssigned && !spinning && !selectedTeam) {
       startSpinning();
     }
-
-    return () => {
-      // Cleanup all intervals and timeouts on unmount
-      if (spinIntervalRef.current) {
-        clearInterval(spinIntervalRef.current);
-      }
-      if (redirectTimeoutRef.current) {
-        clearTimeout(redirectTimeoutRef.current);
-      }
-    };
   }, [user, spinning, selectedTeam]);
 
   useEffect(() => {
@@ -163,6 +125,10 @@ export default function TeamAllocationPage() {
     return <div className="hidden" />;
   }
 
+  const handleContinue = () => {
+    setLocation("/");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center mobile-p-2">
       <Card className="w-full max-w-[280px] sm:max-w-sm">
@@ -203,17 +169,9 @@ export default function TeamAllocationPage() {
                 <Button 
                   className="w-full mt-3"
                   size="sm"
-                  onClick={handleRedirect}
-                  disabled={isRedirecting}
+                  onClick={handleContinue}
                 >
-                  {isRedirecting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Continue to Quiz'
-                  )}
+                  Continue to Quiz
                 </Button>
               </div>
             ) : (

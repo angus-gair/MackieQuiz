@@ -3,9 +3,56 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
+import { UAParser } from "ua-parser-js";
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
+
+  // Middleware to capture analytics for all routes
+  app.use(async (req, res, next) => {
+    const startTime = Date.now();
+    const ua = new UAParser(req.headers["user-agent"]);
+
+    // Create or update session
+    if (req.isAuthenticated()) {
+      const session = await storage.createUserSession({
+        userId: req.user.id,
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"] || "",
+        device: ua.getDevice().type || "desktop",
+        browser: ua.getBrowser().name || "unknown",
+        referrer: req.headers.referer || null,
+      });
+
+      // Store session ID for page view tracking
+      req.analyticsSessionId = session.id;
+    }
+
+    // Continue with request
+    res.on("finish", async () => {
+      if (req.analyticsSessionId) {
+        const timeSpent = Date.now() - startTime;
+
+        // Record page view
+        await storage.recordPageView({
+          sessionId: req.analyticsSessionId,
+          userId: req.user.id,
+          path: req.path,
+          timeSpent,
+          isError: res.statusCode >= 400,
+        });
+
+        // Update session end time and exit page
+        await storage.updateUserSession(
+          req.analyticsSessionId,
+          new Date(),
+          req.path
+        );
+      }
+    });
+
+    next();
+  });
 
   app.get("/api/users", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
@@ -90,6 +137,19 @@ export function registerRoutes(app: Express): Server {
     res.sendStatus(200);
   });
 
+  app.patch("/api/questions/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateQuestion(id, req.body);
+      res.json(result);
+    } catch (error) {
+      console.error("Question Update Error:", error);
+      res.status(500).json({ error: "Failed to update question" });
+    }
+  });
+
   app.post("/api/answers", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
@@ -140,6 +200,25 @@ export function registerRoutes(app: Express): Server {
 
     const result = await storage.assignTeam(req.user.id, team);
     res.json(result);
+  });
+
+  // New analytics routes
+  app.get("/api/analytics/sessions", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const stats = await storage.getSessionAnalytics();
+    res.json(stats);
+  });
+
+  app.get("/api/analytics/pageviews", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const stats = await storage.getPageViewAnalytics();
+    res.json(stats);
+  });
+
+  app.get("/api/analytics/auth", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    const stats = await storage.getAuthEventAnalytics();
+    res.json(stats);
   });
 
   const httpServer = createServer(app);

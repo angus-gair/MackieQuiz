@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, ArrowLeft, ArrowRight, Users, Cog } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, RefreshCw, ArrowRight, ArrowLeft, Users, Cog } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -176,30 +176,48 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="px-4 flex items-center justify-between h-14">
-          <h1 className="text-lg font-semibold">Weekly Quiz</h1>
+          <h1 className="text-lg font-semibold scale">Weekly Quiz</h1>
           <div className="flex items-center gap-1">
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => setLocation("/leaderboard")}
-              className="h-8 w-8 p-0"
+              onClick={handleReset}
+              className={cn(
+                "h-8 w-8 p-0 rounded-full mr-6 icon-spin",
+                !submitted && "hidden"
+              )}
             >
-              <Trophy className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
+              <span className="sr-only">Reset Quiz</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setLocation("/leaderboard")}
+              className={cn(
+                "h-8 w-8 p-0 relative scale",
+                submitted && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-yellow-500/30 after:animate-ping"
+              )}
+            >
+              <Trophy className={cn(
+                "h-4 w-4",
+                submitted && "text-yellow-500 animate-bounce"
+              )} />
               <span className="sr-only">Leaderboard</span>
             </Button>
             {user?.isAdmin ? (
               <>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setLocation("/admin/users")}>
+                <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0 scale") } onClick={() => setLocation("/admin/users")}>
                   <Users className="h-4 w-4" />
                   <span className="sr-only">Users</span>
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setLocation("/admin")}>
+                <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0 scale")} onClick={() => setLocation("/admin")}>
                   <Cog className="h-4 w-4" />
                   <span className="sr-only">Admin</span>
                 </Button>
               </>
             ) : (
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setLocation("/settings")}>
+              <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0 scale")} onClick={() => setLocation("/settings")}>
                 <Cog className="h-4 w-4" />
                 <span className="sr-only">Settings</span>
               </Button>
@@ -208,7 +226,7 @@ export default function HomePage() {
               variant="ghost" 
               size="sm"
               onClick={handleLogout}
-              className="h-8 w-8 p-0"
+              className={cn("h-8 w-8 p-0 scale")}
             >
               <LogOut className="h-4 w-4" />
               <span className="sr-only">Logout</span>
@@ -217,18 +235,21 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="pt-16 pb-8 px-4">
+      <main className="pt-20 pb-24 px-4">
         <div className="max-w-md mx-auto">
-          <div className="mb-4">
-            <h2 className="text-xl font-bold text-primary truncate">Welcome, {user?.username}!</h2>
+          <div className="mb-4 quiz-card">
+            <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>
             <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
           </div>
 
-          <Card className="mb-4">
+          <Card className="mb-4 card">
             <CardHeader className="py-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center">
-                  <Trophy className="h-4 w-4 mr-2 text-yellow-500" />
+                  <Trophy className={cn(
+                    "h-4 w-4 mr-2",
+                    submitted ? "text-muted-foreground" : "text-yellow-500 pulse"
+                  )} />
                   Progress
                 </CardTitle>
                 <span className="text-sm text-muted-foreground">
@@ -237,19 +258,19 @@ export default function HomePage() {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <Progress value={progress} className="h-2" />
+              <Progress value={progress} className="h-2 progress-bar" />
             </CardContent>
           </Card>
 
           {submitted ? (
             <div className="space-y-4">
               {questions?.map((question, index) => (
-                <Card key={question.id} className="overflow-hidden">
+                <Card key={question.id} className="overflow-hidden card">
                   <CardHeader className="py-3">
                     <CardTitle className="text-sm flex items-start gap-2">
                       {answers?.find(a => a.questionId === question.id)?.correct ? 
-                        <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" /> :
-                        <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5 success-animation" /> :
+                        <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5 success-animation" />
                       }
                       <span>{question.question}</span>
                     </CardTitle>
@@ -261,10 +282,10 @@ export default function HomePage() {
                       className="space-y-2"
                     >
                       {question.options.map((option) => (
-                        <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
+                        <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30 card-answer">
                           <RadioGroupItem value={option} />
                           <Label className={cn(
-                            "text-sm",
+                            "text-sm radio-label",
                             option === question.correctAnswer && "text-green-600 font-medium",
                             option === selectedAnswers[question.id] && option !== question.correctAnswer && "text-red-600"
                           )}>
@@ -274,7 +295,7 @@ export default function HomePage() {
                       ))}
                     </RadioGroup>
 
-                    <div className="mt-3 p-2 rounded-md bg-muted/30 text-sm">
+                    <div className="mt-3 p-2 rounded-md bg-muted/30 text-sm explanation-panel">
                       <p className="font-medium mb-1">
                         {answers?.find(a => a.questionId === question.id)?.correct ? "Correct!" : "Incorrect"}
                       </p>
@@ -287,16 +308,16 @@ export default function HomePage() {
               ))}
 
               <Button 
-                className="w-full"
+                className="w-full button-hover"
                 onClick={() => setLocation("/leaderboard")}
               >
                 View Leaderboard
               </Button>
             </div>
           ) : currentQuestion && (
-            <Card key={quizKey}>
+            <Card key={quizKey} className="quiz-card">
               <CardHeader className="py-3">
-                <CardTitle className="text-base">
+                <CardTitle className="text-base font-medium leading-relaxed">
                   {currentQuestion.question}
                 </CardTitle>
               </CardHeader>
@@ -319,7 +340,7 @@ export default function HomePage() {
                       />
                       <Label 
                         htmlFor={`${currentQuestion.id}-${option}`}
-                        className="text-sm cursor-pointer"
+                        className="text-sm cursor-pointer text-[#3a474e]"
                       >
                         {option}
                       </Label>

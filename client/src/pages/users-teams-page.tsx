@@ -140,14 +140,14 @@ export default function UsersTeamsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-8">
+        <div className="flex items-center mb-6">
           <Link href="/">
-            <Button variant="ghost" className="mr-3">
+            <Button variant="ghost" size="sm" className="h-8 mr-3">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </Link>
-          <h1 className="text-2xl font-semibold">Users & Teams</h1>
+          <h1 className="text-lg font-bold text-primary">Users & Teams</h1>
         </div>
 
         <Card>
@@ -159,22 +159,26 @@ export default function UsersTeamsPage() {
               </div>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button onClick={() => {
-                    setEditingUser(null);
-                    form.reset({
-                      username: "",
-                      password: "",
-                      team: "",
-                      isAdmin: false,
-                    });
-                  }}>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Add User
+                  <Button
+                    size="sm"
+                    className="h-8"
+                    onClick={() => {
+                      setEditingUser(null);
+                      form.reset({
+                        username: "",
+                        password: "",
+                        team: "",
+                        isAdmin: false,
+                      });
+                    }}
+                  >
+                    <UserPlus className="h-4 w-4 mr-1.5" />
+                    <span className="text-sm">Add User</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+                    <DialogTitle>{editingUser ? "Edit User" : "Add New User"}</DialogTitle>
                   </DialogHeader>
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -240,7 +244,7 @@ export default function UsersTeamsPage() {
                         )}
                       />
                       <Button type="submit" className="w-full">
-                        {editingUser ? 'Update User' : 'Add User'}
+                        {editingUser ? "Update User" : "Add User"}
                       </Button>
                     </form>
                   </Form>
@@ -250,54 +254,55 @@ export default function UsersTeamsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {teamGroups && Object.entries(teamGroups).map(([team, users]) => (
-                <Card key={team} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center">
-                      <Building className="h-5 w-5 mr-2 text-muted-foreground" />
-                      Team: {team}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-4">
-                      {users.map((user) => (
-                        <div
-                          key={user.id}
-                          className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                        >
-                          <div>
-                            <p className="font-medium">{user.username}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {user.isAdmin ? "Admin" : "Team Member"}
-                            </p>
+              {teamGroups &&
+                Object.entries(teamGroups).map(([team, users]) => (
+                  <Card key={team} className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center">
+                        <Building className="h-5 w-5 mr-2 text-muted-foreground" />
+                        Team: {team}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4">
+                        {users.map((user) => (
+                          <div
+                            key={user.id}
+                            className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                          >
+                            <div>
+                              <p className="font-medium">{user.username}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {user.isAdmin ? "Admin" : "Team Member"}
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditingUser(user)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-red-500 hover:text-red-600"
+                                onClick={() => {
+                                  if (window.confirm("Are you sure you want to remove this user?")) {
+                                    removeUserMutation.mutate(user.id);
+                                  }
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setEditingUser(user)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-red-500 hover:text-red-600"
-                              onClick={() => {
-                                if (window.confirm("Are you sure you want to remove this user?")) {
-                                  removeUserMutation.mutate(user.id);
-                                }
-                              }}
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </CardContent>
         </Card>
