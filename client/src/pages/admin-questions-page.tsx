@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, addWeeks, startOfWeek, parseISO, isEqual } from "date-fns";
 
 const PREDEFINED_CATEGORIES = [
   "Operations",
