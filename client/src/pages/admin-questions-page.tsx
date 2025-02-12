@@ -22,6 +22,8 @@ import {
   Plus,
   Archive,
   ArrowLeft,
+  Pencil,
+  Loader2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -31,8 +33,7 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { format, addWeeks, startOfWeek, parseISO, isEqual } from "date-fns";
-import { Loader2 } from 'lucide-react';
+import { format } from "date-fns";
 
 const PREDEFINED_CATEGORIES = [
   "Operations",
@@ -50,6 +51,7 @@ export default function AdminQuestionsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
     options: ["", "", "", ""],
   });
@@ -98,6 +100,30 @@ export default function AdminQuestionsPage() {
     },
   });
 
+  const updateQuestionMutation = useMutation({
+    mutationFn: async (question: Question) => {
+      const res = await apiRequest("PATCH", `/api/questions/${question.id}`, question);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
+      setEditingQuestion(null);
+      setNewQuestion({ options: ["", "", "", ""] });
+      toast({
+        title: "Success",
+        description: "Question updated successfully",
+        duration: 2000,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const archiveQuestionMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest("POST", `/api/questions/${id}/archive`);
@@ -117,6 +143,17 @@ export default function AdminQuestionsPage() {
       if (!q.weekOf || q.isArchived) return false;
       const questionWeekStart = startOfWeek(parseISO(q.weekOf));
       return isEqual(weekStart, questionWeekStart);
+    });
+  };
+
+  const handleEditQuestion = (question: Question) => {
+    setEditingQuestion(question);
+    setNewQuestion({
+      question: question.question,
+      options: question.options,
+      correctAnswer: question.correctAnswer,
+      category: question.category,
+      explanation: question.explanation,
     });
   };
 
@@ -164,18 +201,28 @@ export default function AdminQuestionsPage() {
                             <h3 className="text-sm font-medium leading-tight flex-1">
                               {question.question}
                             </h3>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                if (window.confirm("Are you sure you want to archive this question?")) {
-                                  archiveQuestionMutation.mutate(question.id);
-                                }
-                              }}
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1 -mr-1"
-                            >
-                              <Archive className="h-4 w-4" />
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditQuestion(question)}
+                                className="text-primary hover:text-primary hover:bg-primary/10 -mt-1"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  if (window.confirm("Are you sure you want to archive this question?")) {
+                                    archiveQuestionMutation.mutate(question.id);
+                                  }
+                                }}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1 -mr-1"
+                              >
+                                <Archive className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             Category: {question.category}
@@ -199,7 +246,12 @@ export default function AdminQuestionsPage() {
                       </Card>
                     ))}
 
-                    <Sheet>
+                    <Sheet onOpenChange={(open) => {
+                      if (!open) {
+                        setEditingQuestion(null);
+                        setNewQuestion({ options: ["", "", "", ""] });
+                      }
+                    }}>
                       <SheetTrigger asChild>
                         <Button
                           variant="outline"
@@ -212,13 +264,13 @@ export default function AdminQuestionsPage() {
                           </span>
                         </Button>
                       </SheetTrigger>
-                      <SheetContent 
-                        side="bottom" 
+                      <SheetContent
+                        side="bottom"
                         className="h-[95%] px-4 pt-4 pb-0 sm:h-full sm:max-w-xl sm:px-6 sm:pt-6"
                       >
                         <SheetHeader className="space-y-1 sm:space-y-2.5">
                           <SheetTitle className="text-base sm:text-lg">
-                            Add Question for {format(week, 'MMM d')}
+                            {editingQuestion ? 'Edit Question' : `Add Question for ${format(week, 'MMM d')}`}
                           </SheetTitle>
                         </SheetHeader>
                         <Separator className="my-3 sm:my-4" />
@@ -251,7 +303,14 @@ export default function AdminQuestionsPage() {
                             return;
                           }
 
-                          createQuestionMutation.mutate(newQuestion as InsertQuestion);
+                          if (editingQuestion) {
+                            updateQuestionMutation.mutate({
+                              ...editingQuestion,
+                              ...newQuestion,
+                            } as Question);
+                          } else {
+                            createQuestionMutation.mutate(newQuestion as InsertQuestion);
+                          }
                         }} className="flex flex-col space-y-3 sm:space-y-4 overflow-y-auto">
                           <div className="space-y-1.5 sm:space-y-2">
                             <Label className="text-xs font-medium sm:text-sm">Question Text</Label>
@@ -285,8 +344,8 @@ export default function AdminQuestionsPage() {
                           <div className="space-y-1.5 sm:space-y-2">
                             <Label className="text-xs font-medium sm:text-sm">Correct Answer</Label>
                             <Select
-                              value={newQuestion.correctAnswer ? 
-                                (newQuestion.options?.indexOf(newQuestion.correctAnswer) + 1).toString() : 
+                              value={newQuestion.correctAnswer ?
+                                (newQuestion.options?.indexOf(newQuestion.correctAnswer) + 1).toString() :
                                 undefined}
                               onValueChange={(value) => {
                                 const selectedIndex = parseInt(value) - 1;
@@ -299,8 +358,8 @@ export default function AdminQuestionsPage() {
                               </SelectTrigger>
                               <SelectContent>
                                 {[1, 2, 3, 4].map((optionNum) => (
-                                  <SelectItem 
-                                    key={optionNum} 
+                                  <SelectItem
+                                    key={optionNum}
                                     value={optionNum.toString()}
                                     className="text-sm"
                                   >
@@ -322,8 +381,8 @@ export default function AdminQuestionsPage() {
                               </SelectTrigger>
                               <SelectContent>
                                 {PREDEFINED_CATEGORIES.map((category) => (
-                                  <SelectItem 
-                                    key={category} 
+                                  <SelectItem
+                                    key={category}
                                     value={category}
                                     className="text-sm"
                                   >
@@ -349,15 +408,15 @@ export default function AdminQuestionsPage() {
                               <Button
                                 type="submit"
                                 className="w-full h-9 text-sm font-medium"
-                                disabled={createQuestionMutation.isPending}
+                                disabled={createQuestionMutation.isPending || updateQuestionMutation.isPending}
                               >
-                                {createQuestionMutation.isPending ? (
+                                {(createQuestionMutation.isPending || updateQuestionMutation.isPending) ? (
                                   <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Adding Question...
+                                    {editingQuestion ? 'Updating Question...' : 'Adding Question...'}
                                   </>
                                 ) : (
-                                  "Add Question"
+                                  editingQuestion ? 'Update Question' : 'Add Question'
                                 )}
                               </Button>
                             </div>
@@ -373,9 +432,9 @@ export default function AdminQuestionsPage() {
         </Accordion>
 
         <Link href="/admin/questions/archived" className="block">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="w-full flex items-center justify-center gap-2 h-9"
           >
             <Archive className="h-4 w-4" />
