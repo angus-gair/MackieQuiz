@@ -235,7 +235,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="pt-16 pb-8 px-4">
+      <main className="pt-20 pb-8 px-4">
         <div className="max-w-md mx-auto">
           <div className="mb-4">
             <h2 className="text-xl font-bold text-primary truncate">Welcome, {user?.username}!</h2>
