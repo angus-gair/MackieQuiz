@@ -56,7 +56,7 @@ export default function LeaderboardPage() {
         <div className="flex justify-center mb-6">
           <div className="inline-flex items-center justify-center rounded-lg bg-muted p-1 w-64">
             <Button
-              variant={showTeams ? "ghost" : "default"}
+              variant={!showTeams ? "default" : "ghost"}
               size="sm"
               onClick={() => setShowTeams(false)}
               className={cn(
