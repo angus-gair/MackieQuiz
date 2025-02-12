@@ -84,6 +84,12 @@ export default function LeaderboardPage() {
           </div>
         </div>
 
+        {showTeams && (
+          <p className="text-sm text-muted-foreground text-center mb-4">
+            Teams are ranked by weekly quiz completion rate
+          </p>
+        )}
+
         <div className="space-y-3">
           {showTeams ? (
             sortedTeamStats?.map((team, index) => {
@@ -100,17 +106,30 @@ export default function LeaderboardPage() {
                         )}
                         <span className="truncate">{team.teamName}</span>
                       </div>
-                      <span className="text-base font-bold ml-2">{Math.round(team.weeklyCompletionPercentage)}%</span>
+                      <span className={cn(
+                        "text-base font-bold ml-2",
+                        team.weeklyCompletionPercentage >= 80 ? "text-green-500" :
+                        team.weeklyCompletionPercentage >= 50 ? "text-yellow-500" :
+                        "text-red-500"
+                      )}>
+                        {Math.round(team.weeklyCompletionPercentage)}% completed
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="py-2">
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        Members: {team.members}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Total Score: {team.totalScore}
-                      </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Score</p>
+                        <p className="text-sm font-medium">{team.totalScore}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Avg Score</p>
+                        <p className="text-sm font-medium">{Math.round(team.averageScore)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Members</p>
+                        <p className="text-sm font-medium">{team.members}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
