@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Users, BarChart2, ArrowLeft } from "lucide-react";
+import { PlusCircle, Users, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -19,14 +19,7 @@ export default function AdminDashboard() {
       title: "User Management",
       description: "Manage user team assignments and compositions",
       href: "/admin/users"
-    },
-    // Only show User Analytics module for user "gair"
-    ...(user?.username === "gair" ? [{
-      icon: <BarChart2 className="h-4 w-4" />,
-      title: "User Analytics",
-      description: "Monitor user interactions, sessions, and behavior",
-      href: "/admin/user"
-    }] : [])
+    }
   ];
 
   return (
