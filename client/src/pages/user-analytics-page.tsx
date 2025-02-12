@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Users, Clock, ArrowLeft, Globe, Shield } from "lucide-react";
+import { BarChart3, Users, Clock, ArrowLeft, Globe, Shield, ArrowRightLeft } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Link } from 'wouter';
@@ -33,8 +33,16 @@ type AuthStats = {
   failureReasons: { reason: string; count: number }[];
 };
 
+type NavigationStats = {
+  externalReferrers: { source: string; count: number }[];
+  topExitPages: { path: string; count: number }[];
+  internalFlows: { from: string; to: string; count: number }[];
+  bounceRate: number;
+};
+
 export default function UserAnalyticsPage() {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const { data: sessionStats } = useQuery<SessionStats>({
     queryKey: ["/api/analytics/sessions"],
@@ -46,6 +54,10 @@ export default function UserAnalyticsPage() {
 
   const { data: authStats } = useQuery<AuthStats>({
     queryKey: ["/api/analytics/auth"],
+  });
+
+  const { data: navigationStats } = useQuery<NavigationStats>({
+    queryKey: ["/api/analytics/navigation"],
   });
 
   if (!user?.isAdmin) {
@@ -292,6 +304,79 @@ export default function UserAnalyticsPage() {
                 {authStats?.locationBreakdown && (
                   <GeographicHeatMap data={authStats.locationBreakdown} />
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Navigation Flow Analytics */}
+          <Card>
+            <CardHeader className="py-3">
+              <CardTitle className="text-xs flex items-center gap-1">
+                <ArrowRightLeft className="h-3 w-3" />
+                User Navigation Flow
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* External Referrers */}
+                <div>
+                  <h3 className="text-xs font-semibold mb-2">Top External Sources</h3>
+                  <div className="grid gap-1">
+                    {navigationStats?.externalReferrers.map((referrer) => (
+                      <div
+                        key={referrer.source}
+                        className="flex items-center justify-between p-1.5 bg-muted rounded-md"
+                      >
+                        <span className="text-[10px] truncate flex-1">
+                          {referrer.source || 'Direct Visit'}
+                        </span>
+                        <span className="text-[10px] font-medium ml-2">
+                          {referrer.count} visits
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Exit Pages */}
+                <div>
+                  <h3 className="text-xs font-semibold mb-2">Top Exit Pages</h3>
+                  <div className="grid gap-1">
+                    {navigationStats?.topExitPages.map((page) => (
+                      <div
+                        key={page.path}
+                        className="flex items-center justify-between p-1.5 bg-muted rounded-md"
+                      >
+                        <span className="text-[10px] truncate flex-1">{page.path}</span>
+                        <span className="text-[10px] font-medium ml-2">
+                          {page.count} exits
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Internal Navigation Flows */}
+                <div>
+                  <h3 className="text-xs font-semibold mb-2">Common Navigation Paths</h3>
+                  <div className="grid gap-1">
+                    {navigationStats?.internalFlows.map((flow, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-1.5 bg-muted rounded-md"
+                      >
+                        <div className="flex items-center gap-1 text-[10px] truncate flex-1">
+                          <span className="truncate">{flow.from}</span>
+                          <ArrowRightLeft className="h-2 w-2 flex-shrink-0" />
+                          <span className="truncate">{flow.to}</span>
+                        </div>
+                        <span className="text-[10px] font-medium ml-2">
+                          {flow.count} times
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
