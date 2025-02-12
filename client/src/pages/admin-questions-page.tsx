@@ -148,6 +148,8 @@ export default function AdminQuestionsPage() {
 
   const handleEditQuestion = (question: Question) => {
     setEditingQuestion(question);
+    // Set the selected week from the question's weekOf field
+    setSelectedWeek(parseISO(question.weekOf));
     setNewQuestion({
       question: question.question,
       options: question.options,
@@ -246,17 +248,20 @@ export default function AdminQuestionsPage() {
                       </Card>
                     ))}
 
-                    <Sheet onOpenChange={(open) => {
-                      if (!open) {
-                        setEditingQuestion(null);
-                        setNewQuestion({ options: ["", "", "", ""] });
-                      }
-                    }}>
+                    <Sheet 
+                      open={!!editingQuestion}
+                      onOpenChange={(open) => {
+                        if (!open) {
+                          setEditingQuestion(null);
+                          setNewQuestion({ options: ["", "", "", ""] });
+                        }
+                      }}
+                    >
                       <SheetTrigger asChild>
                         <Button
                           variant="outline"
                           className="w-full h-12 border-dashed flex items-center justify-center gap-2"
-                          onClick={() => setSelectedWeek(week)}
+                          onClick={() => !editingQuestion && setSelectedWeek(week)}
                         >
                           <Plus className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm text-muted-foreground">
