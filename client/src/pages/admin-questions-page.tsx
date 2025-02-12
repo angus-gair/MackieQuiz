@@ -26,7 +26,7 @@ import {
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, InsertQuestion } from "@shared/schema";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -49,7 +49,7 @@ const PREDEFINED_CATEGORIES = [
 export default function AdminQuestionsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedQuestionSlot, setSelectedQuestionSlot] = useState<{weekOf: Date, slot: number} | null>(null);
+  const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
     options: ["", "", "", ""],
   });
@@ -64,16 +64,12 @@ export default function AdminQuestionsPage() {
     queryKey: ["/api/questions"],
   });
 
-  const allCategories = useMemo(() => {
-    return PREDEFINED_CATEGORIES;
-  }, []);
-
   const createQuestionMutation = useMutation({
     mutationFn: async (question: InsertQuestion) => {
-      if (!selectedQuestionSlot?.weekOf) {
+      if (!selectedWeek) {
         throw new Error('Week not selected');
       }
-      const formattedDate = format(selectedQuestionSlot.weekOf, 'yyyy-MM-dd');
+      const formattedDate = format(selectedWeek, 'yyyy-MM-dd');
 
       const questionWithWeek = {
         ...question,
@@ -86,7 +82,7 @@ export default function AdminQuestionsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
       setNewQuestion({ options: ["", "", "", ""] });
-      setSelectedQuestionSlot(null);
+      setSelectedWeek(null);
       toast({
         title: "Success",
         description: "Question created successfully",
@@ -161,222 +157,214 @@ export default function AdminQuestionsPage() {
                 </AccordionTrigger>
                 <AccordionContent className="px-3 pb-3">
                   <div className="space-y-2">
-                    {[0, 1, 2].map((slot) => {
-                      const question = weekQuestions[slot];
-
-                      if (question) {
-                        return (
-                          <Card key={question.id} className="relative">
-                            <div className="p-2 sm:p-3 space-y-2">
-                              <div className="flex items-start justify-between gap-2">
-                                <h3 className="text-sm font-medium leading-tight flex-1">
-                                  {question.question}
-                                </h3>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => {
-                                    if (window.confirm("Are you sure you want to archive this question?")) {
-                                      archiveQuestionMutation.mutate(question.id);
-                                    }
-                                  }}
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1 -mr-1"
-                                >
-                                  <Archive className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                Category: {question.category}
-                              </p>
-                              <div className="space-y-1">
-                                {question.options.map((option) => (
-                                  <div
-                                    key={option}
-                                    className={cn(
-                                      "text-xs px-2 py-1 rounded-md",
-                                      option === question.correctAnswer
-                                        ? "bg-primary/10 text-primary font-medium"
-                                        : "bg-muted"
-                                    )}
-                                  >
-                                    {option}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </Card>
-                        );
-                      }
-
-                      return (
-                        <Sheet key={`${weekId}-${slot}`}>
-                          <SheetTrigger asChild>
+                    {weekQuestions.map((question) => (
+                      <Card key={question.id} className="relative">
+                        <div className="p-2 sm:p-3 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-sm font-medium leading-tight flex-1">
+                              {question.question}
+                            </h3>
                             <Button
-                              variant="outline"
-                              className="w-full h-20 border-dashed flex-col gap-1.5"
-                              onClick={() => setSelectedQuestionSlot({ weekOf: week, slot })}
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to archive this question?")) {
+                                  archiveQuestionMutation.mutate(question.id);
+                                }
+                              }}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1 -mr-1"
                             >
-                              <Plus className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">
-                                Question {slot + 1}
-                              </span>
+                              <Archive className="h-4 w-4" />
                             </Button>
-                          </SheetTrigger>
-                          <SheetContent 
-                            side="bottom" 
-                            className="h-[95%] px-4 pt-4 pb-0 sm:h-full sm:max-w-xl sm:px-6 sm:pt-6"
-                          >
-                            <SheetHeader className="space-y-1 sm:space-y-2.5">
-                              <SheetTitle className="text-base sm:text-lg">
-                                Add Question {slot + 1} for {format(week, 'MMM d')}
-                              </SheetTitle>
-                            </SheetHeader>
-                            <Separator className="my-3 sm:my-4" />
-                            <form onSubmit={(e) => {
-                              e.preventDefault();
-                              if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
-                                toast({
-                                  title: "Error",
-                                  description: "Please fill in all fields",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-
-                              if (newQuestion.options?.some(option => !option)) {
-                                toast({
-                                  title: "Error",
-                                  description: "Please fill in all options",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-
-                              if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
-                                toast({
-                                  title: "Error",
-                                  description: "Correct answer must be one of the options",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-
-                              createQuestionMutation.mutate(newQuestion as InsertQuestion);
-                            }} className="flex flex-col space-y-3 sm:space-y-4 overflow-y-auto">
-                              <div className="space-y-1.5 sm:space-y-2">
-                                <Label className="text-xs font-medium sm:text-sm">Question Text</Label>
-                                <Textarea
-                                  value={newQuestion.question || ""}
-                                  onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
-                                  placeholder="Enter the question text"
-                                  className="min-h-[60px] sm:min-h-[80px] text-sm resize-none"
-                                />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Category: {question.category}
+                          </p>
+                          <div className="space-y-1">
+                            {question.options.map((option) => (
+                              <div
+                                key={option}
+                                className={cn(
+                                  "text-xs px-2 py-1 rounded-md",
+                                  option === question.correctAnswer
+                                    ? "bg-primary/10 text-primary font-medium"
+                                    : "bg-muted"
+                                )}
+                              >
+                                {option}
                               </div>
+                            ))}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
 
-                              <div className="space-y-1.5 sm:space-y-2">
-                                <Label className="text-xs font-medium sm:text-sm">Options</Label>
-                                <div className="grid gap-1.5 sm:gap-2">
-                                  {newQuestion.options?.map((option, index) => (
-                                    <Input
-                                      key={index}
-                                      value={option}
-                                      onChange={(e) => {
-                                        const newOptions = [...(newQuestion.options || [])];
-                                        newOptions[index] = e.target.value;
-                                        setNewQuestion(prev => ({ ...prev, options: newOptions }));
-                                      }}
-                                      placeholder={`Option ${index + 1}`}
-                                      className="h-8 sm:h-9 text-sm"
-                                    />
-                                  ))}
-                                </div>
-                              </div>
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-12 border-dashed flex items-center justify-center gap-2"
+                          onClick={() => setSelectedWeek(week)}
+                        >
+                          <Plus className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            Add Question
+                          </span>
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent 
+                        side="bottom" 
+                        className="h-[95%] px-4 pt-4 pb-0 sm:h-full sm:max-w-xl sm:px-6 sm:pt-6"
+                      >
+                        <SheetHeader className="space-y-1 sm:space-y-2.5">
+                          <SheetTitle className="text-base sm:text-lg">
+                            Add Question for {format(week, 'MMM d')}
+                          </SheetTitle>
+                        </SheetHeader>
+                        <Separator className="my-3 sm:my-4" />
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
+                            toast({
+                              title: "Error",
+                              description: "Please fill in all fields",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
 
-                              <div className="space-y-1.5 sm:space-y-2">
-                                <Label className="text-xs font-medium sm:text-sm">Correct Answer</Label>
-                                <Select
-                                  value={newQuestion.correctAnswer ? 
-                                    (newQuestion.options?.indexOf(newQuestion.correctAnswer) + 1).toString() : 
-                                    undefined}
-                                  onValueChange={(value) => {
-                                    const selectedIndex = parseInt(value) - 1;
-                                    const selectedOption = newQuestion.options?.[selectedIndex] || '';
-                                    setNewQuestion(prev => ({ ...prev, correctAnswer: selectedOption }));
+                          if (newQuestion.options?.some(option => !option)) {
+                            toast({
+                              title: "Error",
+                              description: "Please fill in all options",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+
+                          if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
+                            toast({
+                              title: "Error",
+                              description: "Correct answer must be one of the options",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+
+                          createQuestionMutation.mutate(newQuestion as InsertQuestion);
+                        }} className="flex flex-col space-y-3 sm:space-y-4 overflow-y-auto">
+                          <div className="space-y-1.5 sm:space-y-2">
+                            <Label className="text-xs font-medium sm:text-sm">Question Text</Label>
+                            <Textarea
+                              value={newQuestion.question || ""}
+                              onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
+                              placeholder="Enter the question text"
+                              className="min-h-[60px] sm:min-h-[80px] text-sm resize-none"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5 sm:space-y-2">
+                            <Label className="text-xs font-medium sm:text-sm">Options</Label>
+                            <div className="grid gap-1.5 sm:gap-2">
+                              {newQuestion.options?.map((option, index) => (
+                                <Input
+                                  key={index}
+                                  value={option}
+                                  onChange={(e) => {
+                                    const newOptions = [...(newQuestion.options || [])];
+                                    newOptions[index] = e.target.value;
+                                    setNewQuestion(prev => ({ ...prev, options: newOptions }));
                                   }}
-                                >
-                                  <SelectTrigger className="h-8 sm:h-9 text-sm">
-                                    <SelectValue placeholder="Select the correct option" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {[1, 2, 3, 4].map((optionNum) => (
-                                      <SelectItem 
-                                        key={optionNum} 
-                                        value={optionNum.toString()}
-                                        className="text-sm"
-                                      >
-                                        Option {optionNum}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-                              <div className="space-y-1.5 sm:space-y-2">
-                                <Label className="text-xs font-medium sm:text-sm">Category</Label>
-                                <Select
-                                  value={newQuestion.category}
-                                  onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category: value }))}
-                                >
-                                  <SelectTrigger className="h-8 sm:h-9 text-sm">
-                                    <SelectValue placeholder="Select a category" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {allCategories.map((category) => (
-                                      <SelectItem 
-                                        key={category} 
-                                        value={category}
-                                        className="text-sm"
-                                      >
-                                        {category}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-                              <div className="space-y-1.5 sm:space-y-2">
-                                <Label className="text-xs font-medium sm:text-sm">Explanation</Label>
-                                <Textarea
-                                  value={newQuestion.explanation || ""}
-                                  onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
-                                  placeholder="Explain why this is the correct answer"
-                                  className="min-h-[60px] sm:min-h-[80px] text-sm resize-none"
+                                  placeholder={`Option ${index + 1}`}
+                                  className="h-8 sm:h-9 text-sm"
                                 />
-                              </div>
+                              ))}
+                            </div>
+                          </div>
 
-                              <div className="sticky bottom-0 -mx-4 sm:-mx-6 mt-auto">
-                                <div className="px-4 py-3 sm:px-6 bg-background/80 backdrop-blur-sm border-t">
-                                  <Button
-                                    type="submit"
-                                    className="w-full h-9 text-sm font-medium"
-                                    disabled={createQuestionMutation.isPending}
+                          <div className="space-y-1.5 sm:space-y-2">
+                            <Label className="text-xs font-medium sm:text-sm">Correct Answer</Label>
+                            <Select
+                              value={newQuestion.correctAnswer ? 
+                                (newQuestion.options?.indexOf(newQuestion.correctAnswer) + 1).toString() : 
+                                undefined}
+                              onValueChange={(value) => {
+                                const selectedIndex = parseInt(value) - 1;
+                                const selectedOption = newQuestion.options?.[selectedIndex] || '';
+                                setNewQuestion(prev => ({ ...prev, correctAnswer: selectedOption }));
+                              }}
+                            >
+                              <SelectTrigger className="h-8 sm:h-9 text-sm">
+                                <SelectValue placeholder="Select the correct option" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[1, 2, 3, 4].map((optionNum) => (
+                                  <SelectItem 
+                                    key={optionNum} 
+                                    value={optionNum.toString()}
+                                    className="text-sm"
                                   >
-                                    {createQuestionMutation.isPending ? (
-                                      <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Adding Question...
-                                      </>
-                                    ) : (
-                                      "Add Question"
-                                    )}
-                                  </Button>
-                                </div>
-                              </div>
-                            </form>
-                          </SheetContent>
-                        </Sheet>
-                      );
-                    })}
+                                    Option {optionNum}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-1.5 sm:space-y-2">
+                            <Label className="text-xs font-medium sm:text-sm">Category</Label>
+                            <Select
+                              value={newQuestion.category}
+                              onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category: value }))}
+                            >
+                              <SelectTrigger className="h-8 sm:h-9 text-sm">
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {PREDEFINED_CATEGORIES.map((category) => (
+                                  <SelectItem 
+                                    key={category} 
+                                    value={category}
+                                    className="text-sm"
+                                  >
+                                    {category}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-1.5 sm:space-y-2">
+                            <Label className="text-xs font-medium sm:text-sm">Explanation</Label>
+                            <Textarea
+                              value={newQuestion.explanation || ""}
+                              onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
+                              placeholder="Explain why this is the correct answer"
+                              className="min-h-[60px] sm:min-h-[80px] text-sm resize-none"
+                            />
+                          </div>
+
+                          <div className="sticky bottom-0 -mx-4 sm:-mx-6 mt-auto">
+                            <div className="px-4 py-3 sm:px-6 bg-background/80 backdrop-blur-sm border-t">
+                              <Button
+                                type="submit"
+                                className="w-full h-9 text-sm font-medium"
+                                disabled={createQuestionMutation.isPending}
+                              >
+                                {createQuestionMutation.isPending ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Adding Question...
+                                  </>
+                                ) : (
+                                  "Add Question"
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </form>
+                      </SheetContent>
+                    </Sheet>
                   </div>
                 </AccordionContent>
               </AccordionItem>
