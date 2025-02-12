@@ -55,12 +55,12 @@ export default function LeaderboardPage() {
         </div>
 
         <div className="flex items-center space-x-2 mb-6">
-          <Label htmlFor="leaderboard-type" className="text-sm">Show Team Rankings</Label>
           <Switch
             id="leaderboard-type"
             checked={showTeams}
             onCheckedChange={setShowTeams}
           />
+          <Label htmlFor="leaderboard-type" className="text-sm">Show Team Rankings</Label>
         </div>
 
         <div className="space-y-3">
