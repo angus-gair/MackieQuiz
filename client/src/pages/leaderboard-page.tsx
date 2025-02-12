@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Trophy, Medal, Award, Users } from "lucide-react";
+import { ArrowLeft, Trophy, Medal, Award, Users, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
-import type { User } from "@shared/schema";
+import type { User as UserType } from "@shared/schema";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -29,7 +28,7 @@ export default function LeaderboardPage() {
   const isMobile = useIsMobile();
   const [showTeams, setShowTeams] = useState(false);
 
-  const { data: users } = useQuery<User[]>({
+  const { data: users } = useQuery<UserType[]>({
     queryKey: ["/api/leaderboard"],
   });
 
@@ -54,13 +53,33 @@ export default function LeaderboardPage() {
           <h1 className="text-lg font-bold text-primary">Weekly Leaderboard</h1>
         </div>
 
-        <div className="flex items-center space-x-2 mb-6">
-          <Switch
-            id="leaderboard-type"
-            checked={showTeams}
-            onCheckedChange={setShowTeams}
-          />
-          <Label htmlFor="leaderboard-type" className="text-sm">Show Team Rankings</Label>
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex items-center justify-center rounded-lg bg-muted p-1 w-64">
+            <Button
+              variant={showTeams ? "ghost" : "default"}
+              size="sm"
+              onClick={() => setShowTeams(false)}
+              className={cn(
+                "w-full relative flex items-center justify-center gap-2",
+                !showTeams && "bg-background shadow-sm"
+              )}
+            >
+              <User className="h-4 w-4" />
+              <span>Individual</span>
+            </Button>
+            <Button
+              variant={showTeams ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setShowTeams(true)}
+              className={cn(
+                "w-full relative flex items-center justify-center gap-2",
+                showTeams && "bg-background shadow-sm"
+              )}
+            >
+              <Users className="h-4 w-4" />
+              <span>Team</span>
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-3">
