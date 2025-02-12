@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, RefreshCw, ArrowRight, Users, Cog } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, RefreshCw, ArrowRight, ArrowLeft, Users, Cog } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
