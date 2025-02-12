@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import confetti from 'canvas-confetti';
@@ -17,7 +17,10 @@ export default function TeamAllocationPage() {
   const [spinning, setSpinning] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { toast } = useToast();
+  const spinIntervalRef = useRef<NodeJS.Timeout>();
+  const redirectTimeoutRef = useRef<NodeJS.Timeout>();
 
   const startSpinning = () => {
     if (spinning) return;
@@ -25,32 +28,34 @@ export default function TeamAllocationPage() {
     setSpinning(true);
     const duration = 8000 + Math.random() * 4000; // Random duration between 8-12 seconds
     const startTime = Date.now();
-    let spinInterval: NodeJS.Timeout;
 
     const animate = async () => {
       const elapsed = Date.now() - startTime;
 
       if (elapsed >= duration) {
-        clearInterval(spinInterval);
+        if (spinIntervalRef.current) {
+          clearInterval(spinIntervalRef.current);
+        }
         const finalTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
         setSelectedTeam(finalTeam);
         setSpinning(false);
 
         try {
-          // First verify we're still authenticated
           const userResponse = await apiRequest("GET", "/api/user");
           if (!userResponse.ok) {
             throw new Error('Authentication check failed');
           }
 
-          // Then make the team assignment request
           const response = await apiRequest("POST", "/api/assign-team", { team: finalTeam });
           if (!response.ok) {
             throw new Error(`Team assignment failed: ${response.status}`);
           }
 
-          // If we get here, everything worked
           setShowConfetti(true);
+          // Start automatic redirect after 6 seconds
+          redirectTimeoutRef.current = setTimeout(() => {
+            handleRedirect();
+          }, 6000);
         } catch (error) {
           console.error('Team assignment error:', error);
           toast({
@@ -61,7 +66,7 @@ export default function TeamAllocationPage() {
           setSpinning(false);
           setSelectedTeam(null);
           setShowConfetti(false);
-          setLocation("/auth"); // Redirect to auth page on session error
+          setLocation("/auth");
         }
       } else {
         const progress = elapsed / duration;
@@ -71,14 +76,50 @@ export default function TeamAllocationPage() {
       }
     };
 
-    spinInterval = setInterval(animate, 400);
-    return () => clearInterval(spinInterval);
+    spinIntervalRef.current = setInterval(animate, 400);
+  };
+
+  const handleRedirect = async () => {
+    if (isRedirecting) return;
+
+    setIsRedirecting(true);
+    // Clear any pending automatic redirect
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+    }
+
+    try {
+      const res = await apiRequest("GET", "/api/user");
+      if (!res.ok) {
+        throw new Error('Failed to verify user session');
+      }
+      const updatedUser = await res.json();
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      setLocation("/");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load user data. Please try logging in again.",
+        variant: "destructive",
+      });
+      setLocation("/auth");
+    }
   };
 
   useEffect(() => {
     if (!user?.teamAssigned && !spinning && !selectedTeam) {
       startSpinning();
     }
+
+    return () => {
+      // Cleanup all intervals and timeouts on unmount
+      if (spinIntervalRef.current) {
+        clearInterval(spinIntervalRef.current);
+      }
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
   }, [user, spinning, selectedTeam]);
 
   useEffect(() => {
@@ -117,35 +158,10 @@ export default function TeamAllocationPage() {
     }
   }, [showConfetti]);
 
-  useEffect(() => {
-    if (user?.teamAssigned) {
-      setLocation("/");
-    }
-  }, [user, setLocation]);
-
   // Change this to return an empty div instead of null
   if (!user || user.teamAssigned) {
     return <div className="hidden" />;
   }
-
-  const handleContinue = async () => {
-    try {
-      const res = await apiRequest("GET", "/api/user");
-      if (!res.ok) {
-        throw new Error('Failed to verify user session');
-      }
-      const updatedUser = await res.json();
-      queryClient.setQueryData(["/api/user"], updatedUser);
-      setLocation("/");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load user data. Please try logging in again.",
-        variant: "destructive",
-      });
-      setLocation("/auth");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center mobile-p-2">
@@ -187,9 +203,17 @@ export default function TeamAllocationPage() {
                 <Button 
                   className="w-full mt-3"
                   size="sm"
-                  onClick={handleContinue}
+                  onClick={handleRedirect}
+                  disabled={isRedirecting}
                 >
-                  Continue to Quiz
+                  {isRedirecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Continue to Quiz'
+                  )}
                 </Button>
               </div>
             ) : (
