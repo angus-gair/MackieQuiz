@@ -61,7 +61,8 @@ export default function LeaderboardPage() {
               onClick={() => setShowTeams(false)}
               className={cn(
                 "w-full relative flex items-center justify-center gap-2",
-                !showTeams && "bg-background shadow-sm"
+                !showTeams && "bg-primary text-primary-foreground",
+                showTeams && "hover:bg-transparent"
               )}
             >
               <User className="h-4 w-4" />
@@ -73,7 +74,8 @@ export default function LeaderboardPage() {
               onClick={() => setShowTeams(true)}
               className={cn(
                 "w-full relative flex items-center justify-center gap-2",
-                showTeams && "bg-background shadow-sm"
+                showTeams && "bg-primary text-primary-foreground",
+                !showTeams && "hover:bg-transparent"
               )}
             >
               <Users className="h-4 w-4" />
