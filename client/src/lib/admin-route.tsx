@@ -1,45 +1,45 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { Redirect, Route } from "wouter";
+import { Route } from "wouter";
+
+type AdminRouteProps = {
+  path: string;
+  component: React.ComponentType;
+  userAnalyticsOnly?: boolean;
+};
 
 export function AdminRoute({
   path,
   component: Component,
   userAnalyticsOnly = false
-}: {
-  path: string;
-  component: () => React.JSX.Element;
-  userAnalyticsOnly?: boolean;
-}) {
+}: AdminRouteProps) {
   const { user, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <Route path={path}>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-border" />
-        </div>
-      </Route>
-    );
-  }
+  return (
+    <Route path={path}>
+      {() => {
+        if (isLoading) {
+          return (
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="h-8 w-8 animate-spin text-border" />
+            </div>
+          );
+        }
 
-  // For /admin/user page, only allow user "gair"
-  if (userAnalyticsOnly && user?.username !== "gair") {
-    return (
-      <Route path={path}>
-        <Redirect to="/" />
-      </Route>
-    );
-  }
+        // For /admin/user page, only allow user "gair"
+        if (userAnalyticsOnly && user?.username !== "gair") {
+          window.location.href = "/";
+          return null;
+        }
 
-  // For other admin pages, check isAdmin
-  if (!user?.isAdmin) {
-    return (
-      <Route path={path}>
-        <Redirect to="/" />
-      </Route>
-    );
-  }
+        // For other admin pages, check isAdmin
+        if (!user?.isAdmin) {
+          window.location.href = "/";
+          return null;
+        }
 
-  return <Component />;
+        return <Component />;
+      }}
+    </Route>
+  );
 }

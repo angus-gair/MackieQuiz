@@ -8,6 +8,7 @@ import AuthPage from "@/pages/auth-page";
 import SettingsPage from "@/pages/settings-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
+import { AdminRoute } from "./lib/admin-route";
 
 // Admin imports
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -27,12 +28,12 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
 
       {/* Admin Routes */}
-      <ProtectedRoute path="/admin" component={AdminDashboard} />
-      <ProtectedRoute path="/admin/questions" component={AdminQuestions} />
-      <ProtectedRoute path="/admin/questions/archived" component={AdminArchived} />
-      <ProtectedRoute path="/admin/users" component={AdminUsersTeams} />
-      <ProtectedRoute path="/admin/analytics" component={AdminAnalytics} />
-      <ProtectedRoute path="/admin/user" component={AdminUserAnalytics} />
+      <AdminRoute path="/admin" component={AdminDashboard} />
+      <AdminRoute path="/admin/questions" component={AdminQuestions} />
+      <AdminRoute path="/admin/questions/archived" component={AdminArchived} />
+      <AdminRoute path="/admin/users" component={AdminUsersTeams} />
+      <AdminRoute path="/admin/analytics" component={AdminAnalytics} />
+      <AdminRoute path="/admin/user" component={AdminUserAnalytics} userAnalyticsOnly />
 
       <Route component={NotFound} />
     </Switch>
