@@ -182,9 +182,15 @@ export default function HomePage() {
               variant="ghost" 
               size="sm"
               onClick={() => setLocation("/leaderboard")}
-              className="h-8 w-8 p-0"
+              className={cn(
+                "h-8 w-8 p-0 relative",
+                submitted && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-primary/20 after:animate-ping"
+              )}
             >
-              <Trophy className="h-4 w-4" />
+              <Trophy className={cn(
+                "h-4 w-4",
+                submitted && "text-primary animate-bounce"
+              )} />
               <span className="sr-only">Leaderboard</span>
             </Button>
             {user?.isAdmin ? (
