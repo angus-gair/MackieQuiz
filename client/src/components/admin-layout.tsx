@@ -1,7 +1,7 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { PlusCircle, BarChart2, Activity } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { PlusCircle, BarChart2, Activity, Users, Archive } from "lucide-react";
+import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -19,23 +19,35 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       href: "/admin/questions",
     },
     {
+      icon: <Archive className="h-4 w-4" />,
+      label: "Archived",
+      href: "/admin/questions/archived",
+    },
+    {
       icon: <BarChart2 className="h-4 w-4" />,
       label: "Analytics",
       href: "/admin/analytics",
     },
     {
-      icon: <Activity className="h-4 w-4" />,
-      label: "Site Metrics",
-      href: "/admin/metrics",
+      icon: <Users className="h-4 w-4" />,
+      label: "Users & Teams",
+      href: "/admin/users",
     },
+    ...(user.username === "gair" ? [
+      {
+        icon: <Activity className="h-4 w-4" />,
+        label: "User Analytics",
+        href: "/admin/user",
+      }
+    ] : []),
   ];
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-background">
         <Sidebar>
-          <SidebarHeader className="flex items-center justify-between">
-            <h2 className="px-2 text-lg font-semibold">Admin Dashboard</h2>
+          <SidebarHeader className="flex items-center justify-between border-b px-4 py-2">
+            <h2 className="text-lg font-semibold tracking-tight">Admin</h2>
             <SidebarTrigger />
           </SidebarHeader>
           <SidebarContent>
@@ -47,10 +59,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     isActive={location === item.href}
                     tooltip={item.label}
                   >
-                    <Link href={item.href} className="w-full">
+                    <a href={item.href} className="flex items-center gap-2 w-full px-2 py-1.5">
                       {item.icon}
                       <span>{item.label}</span>
-                    </Link>
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -58,7 +70,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </SidebarContent>
         </Sidebar>
         <main className="flex-1 overflow-auto">
-          {children}
+          <div className="container py-6">
+            {children}
+          </div>
         </main>
       </div>
     </SidebarProvider>

@@ -5,34 +5,35 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
-import AdminDashboardPage from "@/pages/admin-dashboard";
-import AdminQuestionsPage from "@/pages/admin-questions-page";
-import AdminArchivedPage from "@/pages/admin-archived-page";
-import LeaderboardPage from "@/pages/leaderboard-page";
-import UsersTeamsPage from "@/pages/users-teams-page";
-import UsersViewPage from "@/pages/users-view-page";
-import AnalyticsPage from "@/pages/analytics-page";
-import UserAnalyticsPage from "@/pages/user-analytics-page";
 import SettingsPage from "@/pages/settings-page";
-import TeamAllocationPage from "@/pages/team-allocation-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
+
+// Admin imports
+import AdminDashboard from "@/pages/admin/dashboard";
+import AdminQuestions from "@/pages/admin/questions";
+import AdminArchived from "@/pages/admin/archived";
+import AdminAnalytics from "@/pages/admin/analytics";
+import AdminUserAnalytics from "@/pages/admin/user-analytics";
+import AdminUsersTeams from "@/pages/admin/users-teams";
 
 function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
+
+      {/* Public Routes */}
       <ProtectedRoute path="/" component={HomePage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
-      <ProtectedRoute path="/users" component={UsersViewPage} />
-      <ProtectedRoute path="/team-allocation" component={TeamAllocationPage} />
-      <ProtectedRoute path="/admin" component={AdminDashboardPage} />
-      <ProtectedRoute path="/admin/questions" component={AdminQuestionsPage} />
-      <ProtectedRoute path="/admin/questions/archived" component={AdminArchivedPage} />
-      <ProtectedRoute path="/admin/users" component={UsersTeamsPage} />
-      <ProtectedRoute path="/admin/analytics" component={AnalyticsPage} />
-      <ProtectedRoute path="/admin/user" component={UserAnalyticsPage} />
-      <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
+
+      {/* Admin Routes */}
+      <ProtectedRoute path="/admin" component={AdminDashboard} />
+      <ProtectedRoute path="/admin/questions" component={AdminQuestions} />
+      <ProtectedRoute path="/admin/questions/archived" component={AdminArchived} />
+      <ProtectedRoute path="/admin/users" component={AdminUsersTeams} />
+      <ProtectedRoute path="/admin/analytics" component={AdminAnalytics} />
+      <ProtectedRoute path="/admin/user" component={AdminUserAnalytics} />
+
       <Route component={NotFound} />
     </Switch>
   );
