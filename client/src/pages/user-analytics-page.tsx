@@ -7,6 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Link } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Redirect } from 'wouter';
+import { GeographicHeatMap } from "@/components/GeographicHeatMap";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -157,13 +158,13 @@ export default function UserAnalyticsPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={sessionStats?.peakUsageHours}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
+                      <XAxis
                         dataKey="hour"
                         tickFormatter={(hour) => `${hour}h`}
                         tick={{ fontSize: 10 }}
                       />
                       <YAxis tick={{ fontSize: 10 }} />
-                      <Tooltip 
+                      <Tooltip
                         labelFormatter={(hour) => `${hour}:00`}
                       />
                       <Bar dataKey="count" fill="#8884d8" />
@@ -189,7 +190,7 @@ export default function UserAnalyticsPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={pageViewStats?.mostVisitedPages?.slice(0, 6)}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
+                      <XAxis
                         dataKey="path"
                         tick={{ fontSize: 10 }}
                         interval={0}
@@ -275,6 +276,22 @@ export default function UserAnalyticsPage() {
                     ))}
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+          {/* Geographic Distribution */}
+          <Card>
+            <CardHeader className="py-3">
+              <CardTitle className="text-xs flex items-center gap-1">
+                <Globe className="h-3 w-3" />
+                Geographic Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] sm:h-[400px]">
+                {authStats?.locationBreakdown && (
+                  <GeographicHeatMap data={authStats.locationBreakdown} />
+                )}
               </div>
             </CardContent>
           </Card>
