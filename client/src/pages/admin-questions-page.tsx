@@ -102,7 +102,20 @@ export default function AdminQuestionsPage() {
 
   const updateQuestionMutation = useMutation({
     mutationFn: async (question: Question) => {
-      const res = await apiRequest("PATCH", `/api/questions/${question.id}`, question);
+      // Strip out any additional properties that might cause validation issues
+      const updatePayload = {
+        question: question.question,
+        options: question.options,
+        correctAnswer: question.correctAnswer,
+        category: question.category,
+        explanation: question.explanation,
+        weekOf: question.weekOf,
+      };
+      const res = await apiRequest("PATCH", `/api/questions/${question.id}`, updatePayload);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to update question');
+      }
       return await res.json();
     },
     onSuccess: () => {
@@ -308,10 +321,13 @@ export default function AdminQuestionsPage() {
                             return;
                           }
 
+                          // When submitting the form for update
                           if (editingQuestion) {
                             updateQuestionMutation.mutate({
                               ...editingQuestion,
                               ...newQuestion,
+                              // Ensure weekOf is properly formatted
+                              weekOf: format(selectedWeek || new Date(), 'yyyy-MM-dd'),
                             } as Question);
                           } else {
                             createQuestionMutation.mutate(newQuestion as InsertQuestion);
