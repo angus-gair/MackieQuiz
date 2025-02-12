@@ -79,10 +79,10 @@ export default function TeamAllocationPage() {
   };
 
   useEffect(() => {
-    if (!user?.teamAssigned && !spinning && !selectedTeam) {
+    if (!user?.teamAssigned && !spinning && !selectedTeam && !showConfetti) {
       startSpinning();
     }
-  }, [user, spinning, selectedTeam]);
+  }, [user, spinning, selectedTeam, showConfetti]);
 
   useEffect(() => {
     if (showConfetti) {
