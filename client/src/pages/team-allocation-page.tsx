@@ -117,11 +117,7 @@ export default function TeamAllocationPage() {
     }
   }, [showConfetti]);
 
-  useEffect(() => {
-    if (user?.teamAssigned) {
-      setLocation("/");
-    }
-  }, [user, setLocation]);
+  // Remove automatic redirect
 
   // Change this to return an empty div instead of null
   if (!user || user.teamAssigned) {
