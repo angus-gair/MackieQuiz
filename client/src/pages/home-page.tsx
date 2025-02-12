@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, ArrowLeft, ArrowRight, Users, Cog } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, LogOut, RefreshCw, ArrowRight, Users, Cog } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -183,11 +183,11 @@ export default function HomePage() {
               size="sm"
               onClick={handleReset}
               className={cn(
-                "h-8 w-8 p-0 rounded-full mr-3",
+                "h-8 w-8 p-0 rounded-full mr-6",
                 !submitted && "hidden"
               )}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
               <span className="sr-only">Reset Quiz</span>
             </Button>
             <Button 
@@ -196,7 +196,7 @@ export default function HomePage() {
               onClick={() => setLocation("/leaderboard")}
               className={cn(
                 "h-8 w-8 p-0 relative",
-                submitted && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-yellow-500/10 after:animate-ping"
+                submitted && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-yellow-500/30 after:animate-ping"
               )}
             >
               <Trophy className={cn(
@@ -246,7 +246,10 @@ export default function HomePage() {
             <CardHeader className="py-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center">
-                  <Trophy className="h-4 w-4 mr-2 text-yellow-500" />
+                  <Trophy className={cn(
+                    "h-4 w-4 mr-2",
+                    submitted ? "text-muted-foreground" : "text-yellow-500"
+                  )} />
                   Progress
                 </CardTitle>
                 <span className="text-sm text-muted-foreground">
