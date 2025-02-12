@@ -113,10 +113,19 @@ export default function AdminQuestionsPage() {
       };
       const res = await apiRequest("PATCH", `/api/questions/${question.id}`, updatePayload);
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Failed to update question');
+        try {
+          const error = await res.json();
+          throw new Error(error.message || 'Failed to update question');
+        } catch (e) {
+          // If we can't parse the error as JSON, use the status text
+          throw new Error(`Failed to update question: ${res.statusText}`);
+        }
       }
-      return await res.json();
+      try {
+        return await res.json();
+      } catch (e) {
+        throw new Error('Invalid response from server');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
