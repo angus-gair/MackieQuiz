@@ -67,9 +67,9 @@ export default function WelcomePage() {
               <div className="flex items-start gap-4">
                 <Check className="h-8 w-8 text-primary" />
                 <div>
-                  <h3 className="font-semibold mb-1">Track Progress</h3>
+                  <h3 className="font-semibold mb-1">Get to Know Your Team</h3>
                   <p className="text-sm text-muted-foreground">
-                    Monitor your improvement and see how you stack up against others.
+                    Unlock fun personal facts about your coworkers and connect over common interests.
                   </p>
                 </div>
               </div>
