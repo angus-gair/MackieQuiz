@@ -17,6 +17,7 @@ const SettingsPage = lazy(() => import("@/pages/settings-page"));
 const ProfilePage = lazy(() => import("@/pages/user/profile"));
 const TeamsPage = lazy(() => import("@/pages/teams-page"));
 const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
+const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
@@ -46,6 +47,7 @@ function Router() {
           <ProtectedRoute path="/settings" component={SettingsPage} />
           <ProtectedRoute path="/profile" component={ProfilePage} />
           <ProtectedRoute path="/teams" component={TeamsPage} />
+          <ProtectedRoute path="/team-allocation" component={TeamAllocationPage} />
 
           {/* Admin Routes - Simplified */}
           <AdminRoute path="/admin" component={AdminDashboard} />
