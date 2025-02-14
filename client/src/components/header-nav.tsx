@@ -58,16 +58,10 @@ export function HeaderNav() {
                   showTrophyAnimation && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-yellow-500/30 after:animate-ping"
                 )}
               >
-                {showTrophyAnimation ? (
-                  <motion.div
-                    initial={{ scale: 1 }}
-                    className="animate-bounce"
-                  >
-                    <Trophy className="h-4 w-4 text-yellow-500" />
-                  </motion.div>
-                ) : (
-                  <Trophy className="h-4 w-4 text-muted-foreground" />
-                )}
+                <Trophy className={cn(
+                  "h-4 w-4",
+                  showTrophyAnimation ? "text-yellow-500 animate-bounce" : "text-muted-foreground"
+                )} />
                 <span className="sr-only">Leaderboard</span>
               </Button>
             </Link>
