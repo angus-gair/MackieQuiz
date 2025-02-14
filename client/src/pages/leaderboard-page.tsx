@@ -59,6 +59,7 @@ export default function LeaderboardPage() {
           <h1 className="text-lg font-bold text-primary">Weekly Leaderboard</h1>
         </div>
 
+        {/* Action Buttons */}
         <div className="flex justify-center mb-6">
           <div className="inline-flex items-center justify-center rounded-lg bg-muted p-1 w-64">
             <Button
@@ -90,17 +91,12 @@ export default function LeaderboardPage() {
           </div>
         </div>
 
-        {!showTeams && (
-          <p className="text-sm text-muted-foreground text-center mb-4">
-            Individuals are ranked by total points accumulated over multiple weeks through quiz completions
-          </p>
-        )}
-
-        {showTeams && (
-          <p className="text-sm text-muted-foreground text-center mb-4">
-            Teams are ranked by weekly quiz completion rate
-          </p>
-        )}
+        <p className="text-sm text-muted-foreground text-center mb-4">
+          {showTeams 
+            ? "Teams are ranked by weekly quiz completion rate"
+            : "Individuals are ranked by total points accumulated over multiple weeks through quiz completions"
+          }
+        </p>
 
         <div className="space-y-3">
           {showTeams ? (
