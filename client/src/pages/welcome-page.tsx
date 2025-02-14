@@ -199,12 +199,12 @@ export default function WelcomePage() {
                       <FormItem>
                         <FormLabel>Rating (1-5)</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            min="1" 
-                            max="5" 
+                          <Input
+                            type="number"
+                            min="1"
+                            max="5"
                             {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value))} 
+                            onChange={(e) => field.onChange(parseInt(e.target.value))}
                           />
                         </FormControl>
                         <FormDescription>How would you rate your experience?</FormDescription>
@@ -231,8 +231,8 @@ export default function WelcomePage() {
                     )}
                   />
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full"
                     disabled={feedbackMutation.isPending}
                   >
@@ -245,7 +245,7 @@ export default function WelcomePage() {
         </div>
 
         {/* Maintainer Note */}
-        <div className="text-center mt-12 text-sm text-muted-foreground">
+        <div className="text-center mt-12 text-sm text-muted-foreground/75 italic">
           <p className="max-w-2xl mx-auto">
             This project is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please drop a note through the feedback form or reach out directly—I'd love to chat!
           </p>
