@@ -90,6 +90,12 @@ export default function LeaderboardPage() {
           </div>
         </div>
 
+        {!showTeams && (
+          <p className="text-sm text-muted-foreground text-center mb-4">
+            Individuals are ranked by total points accumulated over multiple weeks through quiz completions
+          </p>
+        )}
+
         {showTeams && (
           <p className="text-sm text-muted-foreground text-center mb-4">
             Teams are ranked by weekly quiz completion rate
