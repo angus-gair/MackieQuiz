@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { Trophy, Settings, UserCircle } from "lucide-react";
+import { Trophy, Settings, UserCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 export function HeaderNav() {
   const [location] = useLocation();
@@ -19,6 +20,14 @@ export function HeaderNav() {
     return () => window.removeEventListener('quiz-complete', handleQuizComplete);
   }, []);
 
+  const handleReset = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["/api/questions/weekly"] }),
+      queryClient.invalidateQueries({ queryKey: ["/api/answers"] })
+    ]);
+    window.location.reload();
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container max-w-md mx-auto px-4">
@@ -27,63 +36,43 @@ export function HeaderNav() {
             <h1 className="text-lg font-semibold cursor-pointer">Weekly Quiz</h1>
           </Link>
           <nav className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleReset}
+              className={cn(
+                "h-8 w-8 p-0",
+                !showTrophyAnimation && "hidden"
+              )}
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span className="sr-only">Reset Quiz</span>
+            </Button>
             <Link href="/leaderboard">
               <Button 
                 variant="ghost" 
                 size="sm" 
                 className={cn(
                   "h-8 w-8 p-0 relative",
-                  location === '/leaderboard' && "text-primary"
+                  location === '/leaderboard' && "text-primary",
+                  showTrophyAnimation && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-yellow-500/30 after:animate-ping"
                 )}
               >
                 {showTrophyAnimation ? (
-                  <>
-                    {/* Multiple radiating circles for enhanced effect */}
-                    <motion.div
-                      className="absolute inset-0 rounded-full bg-amber-200/70"
-                      initial={{ scale: 0.1, opacity: 0 }}
-                      animate={{
-                        scale: [1, 2.5],
-                        opacity: [0.7, 0]
-                      }}
-                      transition={{
-                        duration: 2.5,
-                        ease: "easeOut",
-                        times: [0, 1],
-                        repeat: Infinity
-                      }}
-                    />
-                    <motion.div
-                      className="absolute inset-0 rounded-full bg-amber-200/70"
-                      initial={{ scale: 0.1, opacity: 0 }}
-                      animate={{
-                        scale: [1, 2.5],
-                        opacity: [0.7, 0]
-                      }}
-                      transition={{
-                        duration: 2.5,
-                        ease: "easeOut",
-                        times: [0, 1],
-                        repeat: Infinity,
-                        delay: 1.25 // Offset for second ring
-                      }}
-                    />
-                    {/* Trophy icon with gentle floating animation */}
-                    <motion.div
-                      initial={{ scale: 1, y: 0 }}
-                      animate={{
-                        y: [-4, 4, -4]
-                      }}
-                      transition={{
-                        duration: 3.0,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                      className="relative z-10"
-                    >
-                      <Trophy className="h-4 w-4 text-amber-400" />
-                    </motion.div>
-                  </>
+                  <motion.div
+                    initial={{ scale: 1 }}
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 10, -10, 0]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <Trophy className="h-4 w-4 text-yellow-500" />
+                  </motion.div>
                 ) : (
                   <Trophy className="h-4 w-4 text-muted-foreground" />
                 )}
