@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertFeedbackSchema } from "../../../shared/schema";
+import { insertFeedbackSchema, type InsertFeedback } from "../../../shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -26,7 +26,7 @@ export default function WelcomePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm({
+  const form = useForm<InsertFeedback>({
     resolver: zodResolver(insertFeedbackSchema),
     defaultValues: {
       userId: user?.id,
@@ -37,7 +37,7 @@ export default function WelcomePage() {
   });
 
   const feedbackMutation = useMutation({
-    mutationFn: async (values: typeof form.getValues()) => {
+    mutationFn: async (values: InsertFeedback) => {
       const response = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,7 +63,7 @@ export default function WelcomePage() {
     },
   });
 
-  const onSubmit = (values: typeof form.getValues()) => {
+  const onSubmit = (values: InsertFeedback) => {
     feedbackMutation.mutate(values);
   };
 
@@ -199,7 +199,13 @@ export default function WelcomePage() {
                       <FormItem>
                         <FormLabel>Rating (1-5)</FormLabel>
                         <FormControl>
-                          <Input type="number" min="1" max="5" {...field} />
+                          <Input 
+                            type="number" 
+                            min="1" 
+                            max="5" 
+                            {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value))} 
+                          />
                         </FormControl>
                         <FormDescription>How would you rate your experience?</FormDescription>
                         <FormMessage />
