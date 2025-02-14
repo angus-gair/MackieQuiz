@@ -15,7 +15,6 @@ export function HeaderNav() {
   useEffect(() => {
     const handleQuizComplete = () => {
       setShowTrophyAnimation(true);
-      setTimeout(() => setShowTrophyAnimation(false), 2000);
     };
     window.addEventListener('quiz-complete', handleQuizComplete);
     return () => window.removeEventListener('quiz-complete', handleQuizComplete);
@@ -68,11 +67,11 @@ export function HeaderNav() {
                       }}
                       className="relative z-10"
                     >
-                      <Trophy className="h-4 w-4 text-amber-400" />
+                      <Trophy className="h-4 w-4" />
                     </motion.div>
                   </>
                 ) : (
-                  <Trophy className="h-4 w-4 text-amber-400" />
+                  <Trophy className="h-4 w-4" />
                 )}
                 <span className="sr-only">Leaderboard</span>
               </Button>
