@@ -3,12 +3,14 @@ import { User } from "@shared/schema";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowLeft, UserPlus } from "lucide-react";
+import { ArrowLeft, UserPlus, LogOut } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function UsersTeamsPage() {
   const { toast } = useToast();
+  const { logoutMutation } = useAuth();
   const { data: users } = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
@@ -40,14 +42,25 @@ export default function UsersTeamsPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="h-14 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50">
         <div className="container h-full">
-          <div className="flex items-center h-full px-4">
-            <Link href="/admin">
-              <Button variant="ghost" className="mr-3">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold">Users & Teams</h1>
+          <div className="flex items-center justify-between h-full px-4">
+            <div className="flex items-center">
+              <Link href="/admin">
+                <Button variant="ghost" className="mr-3">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+              </Link>
+              <h1 className="text-2xl font-bold">Users & Teams</h1>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8"
+              onClick={() => logoutMutation.mutate()}
+            >
+              <LogOut className="h-4 w-4 mr-1.5" />
+              <span className="text-sm">Logout</span>
+            </Button>
           </div>
         </div>
       </div>
