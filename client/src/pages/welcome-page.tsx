@@ -243,6 +243,13 @@ export default function WelcomePage() {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Maintainer Note */}
+        <div className="text-center mt-12 text-sm text-muted-foreground">
+          <p className="max-w-2xl mx-auto">
+            This project is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please drop a note through the feedback form or reach out directly—I'd love to chat!
+          </p>
+        </div>
       </div>
     </div>
   );
