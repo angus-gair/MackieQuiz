@@ -127,7 +127,7 @@ export default function HomePage() {
 
     const quizzes = [];
     let currentQuiz = [];
-    for (const answer of todaysAnswers.sort((a, b) => 
+    for (const answer of todaysAnswers.sort((a, b) =>
       new Date(a.answeredAt).getTime() - new Date(b.answeredAt).getTime()
     )) {
       currentQuiz.push(answer);
@@ -175,12 +175,28 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <HeaderNav />
-      <main className="pt-20 pb-24 px-4">
-        <div className="max-w-md mx-auto">
-          <div className="mb-4 quiz-card">
-            <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>
-            <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
-          </div>
+      <main className="pt-16 pb-24 px-4">
+        <div className="max-w-md mx-auto space-y-4">
+          <Card className="quiz-card">
+            <CardContent className="pt-4">
+              <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>
+              <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
+            </CardContent>
+          </Card>
+
+          {!submitted && questions && (
+            <Card className="quiz-card">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium">Question Progress</p>
+                  <span className="text-sm text-muted-foreground">
+                    {currentQuestionIndex + 1}/{questions.length}
+                  </span>
+                </div>
+                <Progress value={progress} className="h-2" />
+              </CardContent>
+            </Card>
+          )}
 
           {submitted ? (
             <div className="space-y-4">
@@ -188,7 +204,7 @@ export default function HomePage() {
                 <Card key={question.id} className="overflow-hidden card">
                   <CardHeader className="py-3">
                     <CardTitle className="text-sm flex items-start gap-2">
-                      {answers?.find(a => a.questionId === question.id)?.correct ? 
+                      {answers?.find(a => a.questionId === question.id)?.correct ?
                         <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5 success-animation" /> :
                         <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5 success-animation" />
                       }
@@ -227,7 +243,7 @@ export default function HomePage() {
                 </Card>
               ))}
 
-              <Button 
+              <Button
                 className="w-full button-hover"
                 onClick={() => setLocation("/leaderboard")}
               >
@@ -254,11 +270,11 @@ export default function HomePage() {
                 >
                   {currentQuestion.options.map((option) => (
                     <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
-                      <RadioGroupItem 
-                        value={option} 
+                      <RadioGroupItem
+                        value={option}
                         id={`${currentQuestion.id}-${option}`}
                       />
-                      <Label 
+                      <Label
                         htmlFor={`${currentQuestion.id}-${option}`}
                         className="text-sm cursor-pointer text-[#3a474e]"
                       >
