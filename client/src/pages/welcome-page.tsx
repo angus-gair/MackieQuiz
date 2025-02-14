@@ -2,77 +2,95 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
+import { Check, Award, Users, BookOpen } from "lucide-react";
 
 export default function WelcomePage() {
   const { user } = useAuth();
 
   return (
-    <main className="container mx-auto px-4 py-8 text-center">
-      <h1 className="text-2xl font-semibold">Weekly Quiz</h1>
+    <div className="min-h-[calc(100vh-4rem)] pt-16 bg-gradient-to-b from-background to-muted/20">
+      <div className="container max-w-4xl px-4 py-8 mx-auto">
+        {/* Welcome Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2">Welcome, {user?.username}! 🎉</h1>
+          <p className="text-muted-foreground">
+            Ready to test your wine knowledge and compete with your team?
+          </p>
+        </div>
 
-      <section className="mt-6 mb-8">
-        <h2 className="text-xl font-bold mb-2">Welcome, {user?.username}! 🎉</h2>
-        <p className="text-gray-700">
-          Ready to expand your store knowledge and have a little fun along the way?
-          This quiz isn't just about wine—it covers everything from opening hours 
-          and current specials to new products and quirky facts about your coworkers!
-        </p>
-      </section>
+        {/* Features Grid */}
+        <div className="grid gap-4 md:grid-cols-2 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <BookOpen className="h-8 w-8 text-primary" />
+                <div>
+                  <h3 className="font-semibold mb-1">Test Your Knowledge</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Challenge yourself with our curated wine quizzes and learn something new every day.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Card 1: Test Your Knowledge */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-1">Test Your Knowledge</h3>
-            <p className="text-sm text-gray-700">
-              Dive into quizzes on store procedures, inventory, and fun tidbits about 
-              your teammates. Learn something new every day!
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <Users className="h-8 w-8 text-primary" />
+                <div>
+                  <h3 className="font-semibold mb-1">Team Competition</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Join forces with your team members and climb the leaderboard together.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Card 2: Team Competition */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-1">Team Competition</h3>
-            <p className="text-sm text-gray-700">
-              Join forces with your colleagues, climb the leaderboard together, and find 
-              out which teammate once performed in a circus!
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <Award className="h-8 w-8 text-primary" />
+                <div>
+                  <h3 className="font-semibold mb-1">Win Prizes</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Top performers have a chance to win exciting weekly prizes!
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Card 3: Win Prizes */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-1">Win Prizes</h3>
-            <p className="text-sm text-gray-700">
-              Top performers each week can earn bragging rights and exciting rewards. 
-              Who will claim the top spot this time?
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <Check className="h-8 w-8 text-primary" />
+                <div>
+                  <h3 className="font-semibold mb-1">Track Progress</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Monitor your improvement and see how you stack up against others.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Card 4: Get to Know Your Team */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-1">Get to Know Your Team</h3>
-            <p className="text-sm text-gray-700">
-              Unlock fun personal facts about your coworkers to bring the team closer 
-              and spark great conversations.
-            </p>
-          </CardContent>
-        </Card>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link href="/quiz">
+            <Button size="lg" className="w-full sm:w-auto">
+              Start Quiz
+            </Button>
+          </Link>
+          <Link href="/leaderboard">
+            <Button variant="outline" size="lg" className="w-full sm:w-auto">
+              View Leaderboard
+            </Button>
+          </Link>
+        </div>
       </div>
-
-      <div className="mt-6 flex items-center justify-center space-x-2">
-        <Link href="/quiz">
-          <Button className="bg-blue-900 text-white">Start Quiz</Button>
-        </Link>
-        <Link href="/leaderboard">
-          <Button variant="outline">View Leaderboard</Button>
-        </Link>
-      </div>
-    </main>
+    </div>
   );
 }
