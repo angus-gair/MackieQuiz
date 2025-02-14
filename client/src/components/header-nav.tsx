@@ -1,51 +1,75 @@
 import { Link, useLocation } from "wouter";
-import { Trophy, Users, UserCircle, LogOut, Settings } from "lucide-react";
+import { Trophy, Settings, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 
 export function HeaderNav() {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <nav className="border-b">
-      <div className="container flex h-14 max-w-screen-2xl items-center px-4">
-        <div className="flex flex-1 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {/* Navigation Links */}
-            <Link href="/leaderboard">
-              <Button variant="ghost" size="sm" className={location === '/leaderboard' ? 'bg-accent' : ''}>
-                <Trophy className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/teams">
-              <Button variant="ghost" size="sm" className={location === '/teams' ? 'bg-accent' : ''}>
-                <Users className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/profile">
-              <Button variant="ghost" size="sm" className={location === '/profile' ? 'bg-accent' : ''}>
-                <UserCircle className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {/* Admin Link - Only show for admins */}
-            {user?.isAdmin && (
-              <Link href="/admin">
-                <Button variant="ghost" size="sm" className={location.startsWith('/admin') ? 'bg-accent' : ''}>
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
-            )}
-            {/* Logout Button */}
-            <Button variant="ghost" size="sm" onClick={() => logout()}>
-              <LogOut className="h-4 w-4" />
+    <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="px-4 flex items-center justify-between h-14">
+        <h1 className="text-lg font-semibold">Weekly Quiz</h1>
+        <div className="flex items-center gap-1">
+          <Link href="/leaderboard">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={cn(
+                "h-8 w-8 p-0 scale",
+                location === '/leaderboard' && "text-primary"
+              )}
+            >
+              <Trophy className="h-4 w-4" />
+              <span className="sr-only">Leaderboard</span>
             </Button>
-          </div>
+          </Link>
+          <Link href="/profile">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={cn(
+                "h-8 w-8 p-0 scale",
+                location === '/profile' && "text-primary"
+              )}
+            >
+              <UserCircle className="h-4 w-4" />
+              <span className="sr-only">Profile</span>
+            </Button>
+          </Link>
+          {user?.isAdmin ? (
+            <Link href="/admin">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={cn(
+                  "h-8 w-8 p-0 scale",
+                  location.startsWith('/admin') && "text-primary"
+                )}
+              >
+                <Settings className="h-4 w-4" />
+                <span className="sr-only">Admin Settings</span>
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/settings">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={cn(
+                  "h-8 w-8 p-0 scale",
+                  location === '/settings' && "text-primary"
+                )}
+              >
+                <Settings className="h-4 w-4" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

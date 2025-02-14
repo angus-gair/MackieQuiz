@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, CheckCircle2, XCircle, LogOut, RefreshCw, ArrowRight, ArrowLeft, Users, Cog } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { CheckCircle2, XCircle, ArrowRight, ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import confetti from 'canvas-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
-
+import { HeaderNav } from "@/components/header-nav";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -174,93 +174,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="px-4 flex items-center justify-between h-14">
-          <h1 className="text-lg font-semibold scale">Weekly Quiz</h1>
-          <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleReset}
-              className={cn(
-                "h-8 w-8 p-0 rounded-full mr-6 icon-spin",
-                !submitted && "hidden"
-              )}
-            >
-              <RefreshCw className="h-4 w-4" />
-              <span className="sr-only">Reset Quiz</span>
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setLocation("/leaderboard")}
-              className={cn(
-                "h-8 w-8 p-0 relative scale",
-                submitted && "animate-pulse after:absolute after:inset-0 after:rounded-full after:ring-2 after:ring-yellow-500/30 after:animate-ping"
-              )}
-            >
-              <Trophy className={cn(
-                "h-4 w-4",
-                submitted && "text-yellow-500 animate-bounce"
-              )} />
-              <span className="sr-only">Leaderboard</span>
-            </Button>
-            {user?.isAdmin ? (
-              <>
-                <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0 scale") } onClick={() => setLocation("/admin/users")}>
-                  <Users className="h-4 w-4" />
-                  <span className="sr-only">Users</span>
-                </Button>
-                <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0 scale")} onClick={() => setLocation("/admin")}>
-                  <Cog className="h-4 w-4" />
-                  <span className="sr-only">Admin</span>
-                </Button>
-              </>
-            ) : (
-              <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0 scale")} onClick={() => setLocation("/settings")}>
-                <Cog className="h-4 w-4" />
-                <span className="sr-only">Settings</span>
-              </Button>
-            )}
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleLogout}
-              className={cn("h-8 w-8 p-0 scale")}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="sr-only">Logout</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
+      <HeaderNav />
       <main className="pt-20 pb-24 px-4">
         <div className="max-w-md mx-auto">
           <div className="mb-4 quiz-card">
             <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>
             <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
           </div>
-
-          <Card className="mb-4 card">
-            <CardHeader className="py-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center">
-                  <Trophy className={cn(
-                    "h-4 w-4 mr-2",
-                    submitted ? "text-muted-foreground" : "text-yellow-500 pulse"
-                  )} />
-                  Progress
-                </CardTitle>
-                <span className="text-sm text-muted-foreground">
-                  {submitted ? "Quiz completed!" : `${currentQuestionIndex + 1}/${questions?.length || 0}`}
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <Progress value={progress} className="h-2 progress-bar" />
-            </CardContent>
-          </Card>
 
           {submitted ? (
             <div className="space-y-4">
