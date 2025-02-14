@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Trophy, Settings, UserCircle, RefreshCw } from "lucide-react";
+import { Trophy, Settings, UserCircle, LogOut, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { queryClient } from "@/lib/queryClient";
 
 export function HeaderNav() {
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const [showTrophyAnimation, setShowTrophyAnimation] = useState(false);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function HeaderNav() {
                 !showTrophyAnimation && "hidden"
               )}
             >
-              <RefreshCw className="h-4 w-4" />
+              <RotateCw className="h-4 w-4" />
               <span className="sr-only">Reset Quiz</span>
             </Button>
             <Link href="/leaderboard">
@@ -78,6 +78,15 @@ export function HeaderNav() {
                 <span className="sr-only">Profile</span>
               </Button>
             </Link>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0"
+              onClick={() => logoutMutation.mutate()}
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="sr-only">Logout</span>
+            </Button>
             {user?.isAdmin ? (
               <Link href="/admin">
                 <Button 
