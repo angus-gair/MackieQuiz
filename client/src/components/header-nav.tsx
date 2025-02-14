@@ -11,7 +11,6 @@ export function HeaderNav() {
   const { user } = useAuth();
   const [showTrophyAnimation, setShowTrophyAnimation] = useState(false);
 
-  // Listen for quiz completion event
   useEffect(() => {
     const handleQuizComplete = () => {
       setShowTrophyAnimation(true);
@@ -39,7 +38,7 @@ export function HeaderNav() {
               >
                 {showTrophyAnimation ? (
                   <>
-                    {/* Radiating circle effect */}
+                    {/* Multiple radiating circles for enhanced effect */}
                     <motion.div
                       className="absolute inset-0 rounded-full bg-amber-200/70"
                       initial={{ scale: 0.1, opacity: 0 }}
@@ -48,20 +47,35 @@ export function HeaderNav() {
                         opacity: [0.7, 0]
                       }}
                       transition={{
-                        duration: 2,
+                        duration: 2.5,
                         ease: "easeOut",
                         times: [0, 1],
                         repeat: Infinity
                       }}
                     />
-                    {/* Trophy icon animation */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-amber-200/70"
+                      initial={{ scale: 0.1, opacity: 0 }}
+                      animate={{
+                        scale: [1, 2.5],
+                        opacity: [0.7, 0]
+                      }}
+                      transition={{
+                        duration: 2.5,
+                        ease: "easeOut",
+                        times: [0, 1],
+                        repeat: Infinity,
+                        delay: 1.25 // Offset for second ring
+                      }}
+                    />
+                    {/* Trophy icon with gentle floating animation */}
                     <motion.div
                       initial={{ scale: 1, y: 0 }}
                       animate={{
-                        y: [-5, 5, -5]
+                        y: [-4, 4, -4]
                       }}
                       transition={{
-                        duration: 2.0,
+                        duration: 3.0,
                         repeat: Infinity,
                         ease: "easeInOut"
                       }}
@@ -71,7 +85,7 @@ export function HeaderNav() {
                     </motion.div>
                   </>
                 ) : (
-                  <Trophy className="h-4 w-4" />
+                  <Trophy className="h-4 w-4 text-muted-foreground" />
                 )}
                 <span className="sr-only">Leaderboard</span>
               </Button>
