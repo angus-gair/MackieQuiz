@@ -18,6 +18,7 @@ const ProfilePage = lazy(() => import("@/pages/user/profile"));
 const TeamsPage = lazy(() => import("@/pages/teams-page"));
 const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
 const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
+const WelcomePage = lazy(() => import("@/pages/welcome-page"));
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
@@ -43,7 +44,8 @@ function Router() {
           <Route path="/leaderboard" component={LeaderboardPage} />
 
           {/* Protected User Routes */}
-          <ProtectedRoute path="/" component={HomePage} />
+          <ProtectedRoute path="/" component={WelcomePage} />
+          <ProtectedRoute path="/quiz" component={HomePage} />
           <ProtectedRoute path="/settings" component={SettingsPage} />
           <ProtectedRoute path="/profile" component={ProfilePage} />
           <ProtectedRoute path="/teams" component={TeamsPage} />
