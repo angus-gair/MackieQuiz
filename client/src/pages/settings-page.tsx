@@ -49,8 +49,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background to-muted/20 px-4 py-4">
+      <div className="max-w-md mx-auto pt-16">
         <div className="flex items-center mb-6">
           <Link href="/">
             <Button variant="ghost" size="sm" className="h-8 mr-3">
