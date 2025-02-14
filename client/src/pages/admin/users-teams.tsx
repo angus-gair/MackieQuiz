@@ -38,7 +38,7 @@ export default function UsersTeamsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50">
+      <div className="h-14 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50">
         <div className="container h-full">
           <div className="flex items-center h-full px-4">
             <Link href="/admin">
@@ -55,7 +55,7 @@ export default function UsersTeamsPage() {
       <div className="container pt-[72px] pb-8 px-4">
         <div className="max-w-3xl mx-auto">
           <Card>
-            <div className="px-6 py-4 flex items-center justify-between border-b">
+            <div className="px-6 py-4 flex items-center justify-between">
               <div className="text-lg font-semibold">
                 Users Overview
               </div>
@@ -68,9 +68,9 @@ export default function UsersTeamsPage() {
               </Button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="px-6 pb-6 space-y-6">
               {teamGroups && Object.entries(teamGroups).map(([team, members]) => (
-                <div key={team}>
+                <Card key={team} className="p-4">
                   <div className="text-sm font-medium text-muted-foreground mb-3">
                     Team: {team}
                   </div>
@@ -111,7 +111,7 @@ export default function UsersTeamsPage() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           </Card>
