@@ -41,17 +41,17 @@ export function HeaderNav() {
                   <>
                     {/* Radiating circle effect */}
                     <motion.div
-                      className="absolute inset-0 rounded-full bg-amber-200/20"
+                      className="absolute inset-0 rounded-full bg-amber-200/70"
                       initial={{ scale: 0.1, opacity: 0 }}
                       animate={{
                         scale: [1, 2.5],
-                        opacity: [0.8, 0]
+                        opacity: [0.7, 0]
                       }}
                       transition={{
-                        duration: 1,
+                        duration: 2,
                         ease: "easeOut",
                         times: [0, 1],
-                        repeat: 1
+                        repeat: Infinity
                       }}
                     />
                     {/* Trophy icon animation */}
@@ -61,13 +61,13 @@ export function HeaderNav() {
                         y: [-5, 5, -5]
                       }}
                       transition={{
-                        duration: 1.0,
+                        duration: 2.0,
                         repeat: Infinity,
                         ease: "easeInOut"
                       }}
                       className="relative z-10"
                     >
-                      <Trophy className="h-4 w-4" />
+                      <Trophy className="h-4 w-4 text-amber-400" />
                     </motion.div>
                   </>
                 ) : (
