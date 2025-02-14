@@ -76,7 +76,7 @@ export default function LeaderboardPage() {
 
             <TabsContent value="team" className="space-y-2">
               <p className="text-xs text-muted-foreground mb-2">
-                Teams are ranked by weekly quiz completion rate
+                XXX Teams are ranked by weekly quiz completion rate
               </p>
               {sortedTeams.map((team, index) => (
                 <Card key={team.teamName} className="overflow-hidden">
