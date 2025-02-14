@@ -250,4 +250,6 @@ body {
 main {
   flex: 1;
   padding-top: 3.5rem; /* 56px for header height */
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
