@@ -20,7 +20,8 @@
 
 ## 4. Gamification Enhancements
 - Achievement badges for milestones (already completed 10 quizzes, etc.)
-- Daily/weekly streaks tracking
+- --make sure there is a badge for completing their first quiz and then at 3, 5, 7 and 10
+- weekly streaks tracking
 - Power-ups (hint system, 50/50 option)
 - Custom team avatars and profile customization
 

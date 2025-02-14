@@ -69,7 +69,7 @@ export default function WelcomePage() {
                 <div>
                   <h3 className="font-semibold mb-1">Get to Know Your Team</h3>
                   <p className="text-sm text-muted-foreground">
-                    Unlock fun personal facts about your coworkers and connect over common interests.
+                    !!Unlock fun personal facts about your coworkers and connect over common interests.
                   </p>
                 </div>
               </div>
