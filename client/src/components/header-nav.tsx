@@ -57,16 +57,14 @@ export function HeaderNav() {
                     />
                     {/* Trophy icon animation */}
                     <motion.div
-                      initial={{ scale: 0.5, opacity: 0 }}
+                      initial={{ scale: 1, y: 0 }}
                       animate={{
-                        scale: [0.5, 1.2, 1],
-                        opacity: [0, 1, 1],
-                        rotate: [0, 15, -15, 0]
+                        y: [-5, 5, -5]
                       }}
                       transition={{
-                        duration: 0.6,
-                        ease: "easeOut",
-                        times: [0, 0.6, 0.8, 1]
+                        duration: 1.0,
+                        repeat: Infinity,
+                        ease: "easeInOut"
                       }}
                       className="relative z-10"
                     >
@@ -74,7 +72,7 @@ export function HeaderNav() {
                     </motion.div>
                   </>
                 ) : (
-                  <Trophy className="h-4 w-4" />
+                  <Trophy className="h-4 w-4 text-amber-400" />
                 )}
                 <span className="sr-only">Leaderboard</span>
               </Button>
