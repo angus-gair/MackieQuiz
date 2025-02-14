@@ -21,33 +21,33 @@ export function BottomNav() {
             )}
           >
             <Home className="h-5 w-5" />
-            <span className="sr-only">Quiz</span>
+            <span className="sr-only">Home</span>
           </Button>
         </Link>
-        <Link href={user?.isAdmin ? "/admin/users" : "/users"}>
+        <Link href="/teams">
           <Button 
             variant="ghost" 
             size="lg" 
             className={cn(
               "h-16 px-6",
-              (location === "/admin/users" || location === "/users") && "text-primary"
+              location === "/teams" && "text-primary"
             )}
           >
             <Users className="h-5 w-5" />
-            <span className="sr-only">Users</span>
+            <span className="sr-only">Teams</span>
           </Button>
         </Link>
-        <Link href={user?.isAdmin ? "/admin/analytics" : "/leaderboard"}>
+        <Link href="/leaderboard">
           <Button 
             variant="ghost" 
             size="lg" 
             className={cn(
               "h-16 px-6",
-              (location === "/admin/analytics" || location === "/leaderboard") && "text-primary"
+              location === "/leaderboard" && "text-primary"
             )}
           >
             <BarChart3 className="h-5 w-5" />
-            <span className="sr-only">{user?.isAdmin ? "Analytics" : "Leaderboard"}</span>
+            <span className="sr-only">Leaderboard</span>
           </Button>
         </Link>
         <Link href={user?.isAdmin ? "/admin" : "/settings"}>
