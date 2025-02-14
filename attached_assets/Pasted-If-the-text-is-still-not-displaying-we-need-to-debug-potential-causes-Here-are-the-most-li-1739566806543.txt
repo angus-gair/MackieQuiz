@@ -1,0 +1,119 @@
+If the text is **still not displaying**, we need to **debug potential causes**. Here are the most likely reasons and solutions:
+
+---
+
+## **1️⃣ Verify That `showTeams` Is Updating Correctly**
+If `showTeams` is not properly toggling, the description will not change.
+
+### **🔍 Debugging Step**
+Add a console log inside your `useState` update function:
+
+```tsx
+<Button
+  variant={!showTeams ? "default" : "ghost"}
+  size="sm"
+  onClick={() => {
+    setShowTeams(false);
+    console.log("Switched to Individual Rankings. showTeams:", showTeams);
+  }}
+>
+  <User className="h-4 w-4" />
+  <span>Individual</span>
+</Button>
+```
+```tsx
+<Button
+  variant={showTeams ? "default" : "ghost"}
+  size="sm"
+  onClick={() => {
+    setShowTeams(true);
+    console.log("Switched to Team Rankings. showTeams:", showTeams);
+  }}
+>
+  <Users className="h-4 w-4" />
+  <span>Team</span>
+</Button>
+```
+🚀 **Expected Output in Browser Console:**  
+- Clicking **Individual** should log:  
+  `"Switched to Individual Rankings. showTeams: false"`
+- Clicking **Team** should log:  
+  `"Switched to Team Rankings. showTeams: true"`
+
+✅ If the console logs **are correct**, move to step **2**.  
+❌ If the state is not updating, try this fix:  
+```tsx
+onClick={() => setShowTeams(prev => !prev)}
+```
+---
+
+## **2️⃣ Check If Tailwind's `text-muted-foreground` Class Is Hiding the Text**
+If `text-muted-foreground` is applying `opacity-0` or `text-transparent`, your text **exists but is invisible**.
+
+### **🔍 Debugging Step**
+1️⃣ **Temporarily remove the class and hardcode text color:**
+```tsx
+<div className="text-sm text-center mb-6 text-red-500">
+  {showTeams ? (
+    <p>Teams are ranked by weekly quiz completion rate</p>
+  ) : (
+    <p>Individuals are ranked by total points accumulated over multiple weeks through quiz completions</p>
+  )}
+</div>
+```
+🚀 **If text appears, Tailwind was hiding it**.  
+✅ Solution: Adjust your Tailwind class, maybe using `text-primary`.
+
+---
+
+## **3️⃣ Ensure Component Is Re-Rendering When `showTeams` Changes**
+If React is **not re-rendering** when `showTeams` updates, you might need to force an update.
+
+### **🔍 Debugging Step**
+1️⃣ **Add a unique `key` to force re-renders:**
+```tsx
+<div className="text-sm text-muted-foreground text-center mb-6" key={showTeams ? "teams" : "individual"}>
+  {showTeams ? (
+    <p>Teams are ranked by weekly quiz completion rate</p>
+  ) : (
+    <p>Individuals are ranked by total points accumulated over multiple weeks through quiz completions</p>
+  )}
+</div>
+```
+🚀 **If this works, React was not detecting the state change**.
+
+---
+
+## **4️⃣ Check If `useIsMobile` Is Causing Conflicts**
+The `useIsMobile()` hook **might be overriding styles or conditionally hiding elements**.
+
+### **🔍 Debugging Step**
+1️⃣ **Temporarily remove `useIsMobile` from the component**:
+```tsx
+const isMobile = false; // Force non-mobile mode
+```
+2️⃣ **Test the toggle again**.
+
+🚀 **If text appears, `useIsMobile` was interfering.**  
+✅ Solution: Modify mobile-specific styles.
+
+---
+
+## **Final Step: Console Log The Description Directly**
+If nothing works, **log the description before rendering**:
+```tsx
+console.log("Current Description:", showTeams ? "Teams are ranked by weekly quiz completion rate" : "Individuals are ranked by total points accumulated over multiple weeks through quiz completions");
+```
+🚀 **If the log is correct, the issue is CSS or Tailwind-related.**  
+🚨 **If the log does NOT update, `showTeams` is not changing**.
+
+---
+
+### **🎯 Summary**
+✔ **Step 1:** Check if `showTeams` is updating using `console.log`.  
+✔ **Step 2:** Remove `text-muted-foreground` and force text color (`text-red-500`).  
+✔ **Step 3:** Force re-render by adding a `key`.  
+✔ **Step 4:** Disable `useIsMobile()` and test behavior.  
+✔ **Step 5:** Log the actual description **before rendering**.  
+
+Try these, and let me know **which step fixes it!** 🚀
