@@ -7,11 +7,12 @@ import { Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type TeamStats = {
-  name: string;
-  score: number;
-  avgScore: number;
+  teamName: string;
+  totalScore: number;
+  averageScore: number;
+  completedQuizzes: number;
   members: number;
-  completionRate: number;
+  weeklyCompletionPercentage: number;
 };
 
 export default function LeaderboardPage() {
@@ -24,7 +25,7 @@ export default function LeaderboardPage() {
   });
 
   const sortedUsers = users?.sort((a, b) => (b.weeklyScore || 0) - (a.weeklyScore || 0)) || [];
-  const sortedTeams = teamStats?.sort((a, b) => b.completionRate - a.completionRate) || [];
+  const sortedTeams = teamStats?.sort((a, b) => b.weeklyCompletionPercentage - a.weeklyCompletionPercentage) || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -75,29 +76,29 @@ export default function LeaderboardPage() {
               Teams are ranked by weekly quiz completion rate
             </p>
             {sortedTeams.map((team, index) => (
-              <Card key={team.name} className="overflow-hidden">
+              <Card key={team.teamName} className="overflow-hidden">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         {index === 0 && <Trophy className="h-4 w-4 text-yellow-500" />}
-                        <span className="font-medium">{team.name}</span>
+                        <span className="font-medium">{team.teamName}</span>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-medium text-emerald-500">
-                        {team.completionRate}% completed
+                        {Math.round(team.weeklyCompletionPercentage)}% completed
                       </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-xs">
                     <div>
                       <div className="text-muted-foreground">Score</div>
-                      <div className="font-medium">{team.score}</div>
+                      <div className="font-medium">{team.totalScore}</div>
                     </div>
                     <div>
                       <div className="text-muted-foreground">Avg Score</div>
-                      <div className="font-medium">{team.avgScore}</div>
+                      <div className="font-medium">{Math.round(team.averageScore)}</div>
                     </div>
                     <div>
                       <div className="text-muted-foreground">Members</div>
