@@ -61,15 +61,7 @@ export function HeaderNav() {
                 {showTrophyAnimation ? (
                   <motion.div
                     initial={{ scale: 1 }}
-                    animate={{ 
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
+                    className="animate-bounce"
                   >
                     <Trophy className="h-4 w-4 text-yellow-500" />
                   </motion.div>
