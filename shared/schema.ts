@@ -13,6 +13,16 @@ export const users = pgTable("users", {
   teamAssigned: boolean("team_assigned").notNull().default(false),
 });
 
+export const feedback = pgTable("feedback", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  content: text("content").notNull(),
+  rating: integer("rating").notNull(),
+  category: text("category").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  status: text("status").notNull().default('pending'),
+});
+
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(),
@@ -83,6 +93,11 @@ export const insertAnswerSchema = createInsertSchema(answers);
 export const insertSessionSchema = createInsertSchema(userSessions);
 export const insertPageViewSchema = createInsertSchema(pageViews);
 export const insertAuthEventSchema = createInsertSchema(authEvents);
+export const insertFeedbackSchema = createInsertSchema(feedback).omit({ 
+  id: true,
+  createdAt: true,
+  status: true 
+});
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
@@ -96,3 +111,5 @@ export type AuthEvent = typeof authEvents.$inferSelect;
 export type InsertUserSession = z.infer<typeof insertSessionSchema>;
 export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 export type InsertAuthEvent = z.infer<typeof insertAuthEventSchema>;
+export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
+export type Feedback = typeof feedback.$inferSelect;

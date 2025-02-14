@@ -2,10 +2,70 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
-import { Check, Award, Users, BookOpen } from "lucide-react";
+import { Check, Award, Users, BookOpen, MessageSquare } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertFeedbackSchema } from "../../../shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function WelcomePage() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const form = useForm({
+    resolver: zodResolver(insertFeedbackSchema),
+    defaultValues: {
+      userId: user?.id,
+      content: "",
+      rating: 5,
+      category: "general"
+    }
+  });
+
+  const feedbackMutation = useMutation({
+    mutationFn: async (values: typeof form.getValues()) => {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      if (!response.ok) throw new Error("Failed to submit feedback");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Feedback Submitted",
+        description: "Thank you for your feedback!",
+      });
+      form.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/feedback"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (values: typeof form.getValues()) => {
+    feedbackMutation.mutate(values);
+  };
 
   return (
     <div className="min-h-[calc(100vh-4rem)] pt-16 bg-gradient-to-b from-background to-muted/20">
@@ -89,6 +149,93 @@ export default function WelcomePage() {
               View Leaderboard
             </Button>
           </Link>
+
+          {/* Feedback Dialog */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Provide Feedback
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Send Feedback</DialogTitle>
+                <DialogDescription>
+                  Share your thoughts with us to help improve the platform.
+                </DialogDescription>
+              </DialogHeader>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="general">General</SelectItem>
+                            <SelectItem value="quiz">Quiz Content</SelectItem>
+                            <SelectItem value="ui">User Interface</SelectItem>
+                            <SelectItem value="bug">Bug Report</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="rating"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Rating (1-5)</FormLabel>
+                        <FormControl>
+                          <Input type="number" min="1" max="5" {...field} />
+                        </FormControl>
+                        <FormDescription>How would you rate your experience?</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Your Feedback</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Tell us what you think..."
+                            className="min-h-[100px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={feedbackMutation.isPending}
+                  >
+                    {feedbackMutation.isPending ? "Submitting..." : "Submit Feedback"}
+                  </Button>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
