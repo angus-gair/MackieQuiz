@@ -8,7 +8,7 @@ export default function WelcomePage() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-[calc(100vh-4rem)] pt-16 bg-gradient-to-b from-background to-muted/20">
       <div className="container max-w-4xl px-4 py-8 mx-auto">
         {/* Welcome Header */}
         <div className="text-center mb-8">
