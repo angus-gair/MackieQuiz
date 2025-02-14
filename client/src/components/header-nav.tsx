@@ -3,10 +3,23 @@ import { Trophy, Settings, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 export function HeaderNav() {
   const [location] = useLocation();
   const { user } = useAuth();
+  const [showTrophyAnimation, setShowTrophyAnimation] = useState(false);
+
+  // Listen for quiz completion event
+  useEffect(() => {
+    const handleQuizComplete = () => {
+      setShowTrophyAnimation(true);
+      setTimeout(() => setShowTrophyAnimation(false), 2000);
+    };
+    window.addEventListener('quiz-complete', handleQuizComplete);
+    return () => window.removeEventListener('quiz-complete', handleQuizComplete);
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -25,7 +38,24 @@ export function HeaderNav() {
                   location === '/leaderboard' && "text-primary"
                 )}
               >
-                <Trophy className="h-4 w-4" />
+                {showTrophyAnimation ? (
+                  <motion.div
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{
+                      scale: [0.5, 1.2, 1],
+                      opacity: [0, 1, 1],
+                      rotate: [0, 20, -20, 0]
+                    }}
+                    transition={{
+                      duration: 0.5,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <Trophy className="h-4 w-4 text-primary" />
+                  </motion.div>
+                ) : (
+                  <Trophy className="h-4 w-4" />
+                )}
                 <span className="sr-only">Leaderboard</span>
               </Button>
             </Link>

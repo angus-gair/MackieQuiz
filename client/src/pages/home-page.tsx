@@ -98,8 +98,12 @@ export default function HomePage() {
         });
       }
     }
+
     setSubmitted(true);
     setShowConfetti(true);
+
+    // Dispatch quiz completion event to trigger trophy animation
+    window.dispatchEvent(new Event('quiz-complete'));
   };
 
   const handleReset = async () => {
