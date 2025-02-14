@@ -1,16 +1,20 @@
-import { useAuth } from "@/hooks/use-auth";
+import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Users, ArrowLeft, Trophy } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Link } from 'wouter';
+import { User as UserType } from "@shared/schema";
+import {
+  ArrowLeft,
+  Trophy,
+  Medal,
+  Award,
+  User as UserIcon,
+  Users as UsersIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Redirect } from 'wouter';
+import { Link } from "wouter";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HeaderNav } from "@/components/header-nav";
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
+// Types
 type TeamStats = {
   teamName: string;
   totalScore: number;
@@ -20,174 +24,257 @@ type TeamStats = {
   weeklyCompletionPercentage: number;
 };
 
-type TeamKnowledge = {
-  week: string;
-  knowledgeScore: number;
-  movingAverage: number;
-};
+// Top-3 badge configs
+const BADGES = [
+  { icon: Trophy, color: "text-yellow-500", label: "Gold" },
+  { icon: Medal, color: "text-gray-400", label: "Silver" },
+  { icon: Award, color: "text-amber-600", label: "Bronze" },
+];
 
-export default function AnalyticsPage() {
-  const { user } = useAuth();
-  const isMobile = useIsMobile();
+export default function LeaderboardPage() {
+  // Fetch Individuals
+  const {
+    data: users,
+    isLoading: isUsersLoading,
+    isError: isUsersError,
+  } = useQuery<UserType[]>({
+    queryKey: ["/api/users"],
+  });
 
-  const { data: teamStats } = useQuery<TeamStats[]>({
+  // Fetch Teams
+  const {
+    data: teamStats,
+    isLoading: isTeamsLoading,
+    isError: isTeamsError,
+  } = useQuery<TeamStats[]>({
     queryKey: ["/api/analytics/teams"],
   });
 
-  const { data: teamKnowledge } = useQuery<TeamKnowledge[]>({
-    queryKey: ["/api/analytics/team-knowledge"],
-  });
+  // Sort individuals by weekly score (descending)
+  const sortedUsers =
+    users?.sort((a, b) => (b.weeklyScore || 0) - (a.weeklyScore || 0)) || [];
 
-  if (!user?.isAdmin) {
-    return <Redirect to="/" />;
-  }
+  // Sort teams by weekly completion percentage (descending)
+  const sortedTeams =
+    teamStats?.sort(
+      (a, b) => b.weeklyCompletionPercentage - a.weeklyCompletionPercentage
+    ) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container max-w-full px-4 py-6 sm:px-6">
-        <div className="flex items-center mb-6">
-          <Link href="/admin">
-            <Button variant="ghost" className="mr-3">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-xl font-bold text-primary mb-1">Analytics Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Team Performance Metrics</p>
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background to-muted/20">
+      <HeaderNav />
+
+      <main className="pt-16 px-4 pb-24">
+        <div className="container max-w-md mx-auto">
+          {/* Back Button & Title */}
+          <div className="flex items-center mb-4">
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="h-8 mr-2">
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back
+              </Button>
+            </Link>
+            <h1 className="text-lg font-bold text-primary">Weekly Leaderboard</h1>
           </div>
-        </div>
 
-        {/* Team Statistics Grid - Mobile First */}
-        <div className="grid gap-4 mb-6">
-          {teamStats?.map((stat) => (
-            <Card key={stat.teamName} className="w-full">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Users className="h-4 w-4" />
-                  {stat.teamName}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Score</p>
-                    <p className="text-lg font-bold">{stat.totalScore}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Completion</p>
-                    <p className={cn(
-                      "text-lg font-bold",
-                      stat.weeklyCompletionPercentage >= 80 ? "text-green-500" :
-                      stat.weeklyCompletionPercentage >= 50 ? "text-yellow-500" :
-                      "text-red-500"
-                    )}>
-                      {stat.weeklyCompletionPercentage}%
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Avg</p>
-                    <p className="text-lg">{stat.averageScore.toFixed(1)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Members</p>
-                    <p className="text-lg">{stat.members}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          {/* Tabs / Toggle */}
+          <Tabs defaultValue="individual" className="w-full">
+            <TabsList
+              className="
+                grid w-full grid-cols-2 mb-4
+                rounded-md overflow-hidden
+                h-10
+              "
+            >
+              <TabsTrigger
+                value="individual"
+                className="
+                  flex items-center justify-center gap-2 px-3 text-sm font-medium
+                  [aria-selected='true']:bg-blue-900
+                  [aria-selected='true']:text-white
+                "
+              >
+                <UserIcon className="h-4 w-4" />
+                Individual
+              </TabsTrigger>
+              <TabsTrigger
+                value="team"
+                className="
+                  flex items-center justify-center gap-2 px-3 text-sm font-medium
+                  [aria-selected='true']:bg-blue-900
+                  [aria-selected='true']:text-white
+                "
+              >
+                <UsersIcon className="h-4 w-4" />
+                Team
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Performance Charts - Mobile Optimized */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Trophy className="h-4 w-4" />
-                Team Performance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] -mx-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={teamStats} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="teamName" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <Bar dataKey="weeklyCompletionPercentage" name="Completion %" fill="#82ca9d" />
-                    <Bar dataKey="totalScore" name="Score" fill="#8884d8" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+            {/* ---------------- INDIVIDUAL TAB ---------------- */}
+            <TabsContent value="individual" className="space-y-4">
+              {/* Two-line description */}
+              <p className="text-xs text-muted-foreground leading-tight">
+                Individuals are ranked by total score as determined by
+                the number of correct answers,<br />
+                accumulated over each week.
+              </p>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Weekly Trend
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] -mx-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={teamKnowledge} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="week"
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        return date.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric'
-                        });
-                      }}
-                      tick={{ fontSize: 12 }}
-                      interval={isMobile ? 6 : 2}
-                    />
-                    <YAxis
-                      domain={[60, 90]}
-                      tickFormatter={(value) => `${value}%`}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      labelFormatter={(label) => {
-                        const date = new Date(label);
-                        return date.toLocaleDateString('en-US', {
-                          month: 'long',
-                          day: 'numeric',
-                          year: 'numeric'
-                        });
-                      }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <Line
-                      type="monotone"
-                      dataKey="knowledgeScore"
-                      name="Weekly Score"
-                      stroke="#8884d8"
-                      strokeWidth={1}
-                      dot={false}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="movingAverage"
-                      name="4-Week Average"
-                      stroke="#82ca9d"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+              {/* Loading / Error / Empty */}
+              {isUsersLoading && (
+                <p className="text-center text-sm text-muted-foreground">
+                  Loading individual leaderboard...
+                </p>
+              )}
+              {isUsersError && (
+                <p className="text-center text-sm text-red-500">
+                  Error loading individual leaderboard
+                </p>
+              )}
+              {!isUsersLoading && !isUsersError && sortedUsers.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground">
+                  No users found.
+                </p>
+              )}
+
+              {/* Render Individuals */}
+              {sortedUsers.map((user, index) => {
+                const badge = BADGES[index]; // top-3 only
+                return (
+                  <Card
+                    key={user.id}
+                    className={`border rounded-lg overflow-hidden ${
+                      index === 0 ? "border-yellow-500" : "border-gray-300"
+                    }`}
+                  >
+                    <CardContent className="p-4">
+                      {/* Name / Score Row */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {badge && (
+                            <badge.icon
+                              className={`h-5 w-5 ${badge.color}`}
+                              aria-label={`${badge.label} badge`}
+                            />
+                          )}
+                          {/* Subtle rank */}
+                          <span className="text-xs text-muted-foreground">{`#${index + 1}`}</span>
+                          {/* Name in darker blue, larger font */}
+                          <span className="text-base font-semibold text-blue-800">
+                            {user.username}
+                          </span>
+                        </div>
+                        {/* Weekly Score */}
+                        <div className="text-base font-semibold text-emerald-600">
+                          {user.weeklyScore || 0} pts
+                        </div>
+                      </div>
+
+                      {/* One line with "Team: X" (left) and "Quizzes: Y" (right), 12px + dark color */}
+                      <div className="flex items-center justify-between text-[12px]">
+                        <span className="text-[rgb(12,10,9)]">
+                          Team:{" "}
+                          <span className="font-bold text-[rgb(12,10,9)]">
+                            {user.team || "—"}
+                          </span>
+                        </span>
+                        <span className="text-[rgb(12,10,9)]">
+                          Quizzes:{" "}
+                          <span className="font-bold text-[rgb(12,10,9)]">
+                            {user.weeklyQuizzes || 0}
+                          </span>
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </TabsContent>
+
+            {/* ---------------- TEAM TAB ---------------- */}
+            <TabsContent value="team" className="space-y-4">
+              {/* Two-line description */}
+              <p className="text-xs text-muted-foreground leading-tight">
+                Teams are ranked by weekly quiz completion rate.<br />
+                See how your group compares across each week.
+              </p>
+
+              {/* Loading / Error / Empty */}
+              {isTeamsLoading && (
+                <p className="text-center text-sm text-muted-foreground">
+                  Loading team leaderboard...
+                </p>
+              )}
+              {isTeamsError && (
+                <p className="text-center text-sm text-red-500">
+                  Error loading team leaderboard
+                </p>
+              )}
+              {!isTeamsLoading && !isTeamsError && sortedTeams.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground">
+                  No teams found.
+                </p>
+              )}
+
+              {/* Render Teams */}
+              {sortedTeams.map((team, index) => {
+                const badge = BADGES[index]; // top-3 only
+                return (
+                  <Card
+                    key={team.teamName}
+                    className={`border rounded-lg overflow-hidden ${
+                      index === 0 ? "border-yellow-500" : "border-gray-300"
+                    }`}
+                  >
+                    <CardContent className="p-4">
+                      {/* Team Name / % Completed */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {badge && (
+                            <badge.icon
+                              className={`h-5 w-5 ${badge.color}`}
+                              aria-label={`${badge.label} badge`}
+                            />
+                          )}
+                          <span className="text-xs text-muted-foreground">{`#${index + 1}`}</span>
+                          {/* Name in darker blue, larger font */}
+                          <span className="text-base font-semibold text-blue-800">
+                            {team.teamName}
+                          </span>
+                        </div>
+                        <div className="text-base font-semibold text-emerald-600">
+                          {Math.round(team.weeklyCompletionPercentage)}% completed
+                        </div>
+                      </div>
+
+                      {/* Stats Row: Score, Avg Score, Members */}
+                      <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
+                        <div>
+                          <div className="text-gray-600">Score</div>
+                          <div className="text-base font-semibold text-blue-800">
+                            {team.totalScore}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600">Avg Score</div>
+                          <div className="text-base font-semibold text-blue-800">
+                            {Math.round(team.averageScore)}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600">Members</div>
+                          <div className="text-base font-semibold text-blue-800">
+                            {team.members}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </TabsContent>
+          </Tabs>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
