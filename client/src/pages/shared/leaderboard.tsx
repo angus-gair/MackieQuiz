@@ -29,7 +29,7 @@ export default function LeaderboardPage() {
   const sortedTeams = teamStats?.sort((a, b) => b.weeklyCompletionPercentage - a.weeklyCompletionPercentage) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background to-muted/20">
       <HeaderNav />
       <main className="pt-16 px-4 pb-24">
         <div className="container max-w-md mx-auto">
