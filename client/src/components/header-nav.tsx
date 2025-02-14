@@ -34,25 +34,45 @@ export function HeaderNav() {
                 variant="ghost" 
                 size="sm" 
                 className={cn(
-                  "h-8 w-8 p-0",
+                  "h-8 w-8 p-0 relative",
                   location === '/leaderboard' && "text-primary"
                 )}
               >
                 {showTrophyAnimation ? (
-                  <motion.div
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{
-                      scale: [0.5, 1.2, 1],
-                      opacity: [0, 1, 1],
-                      rotate: [0, 20, -20, 0]
-                    }}
-                    transition={{
-                      duration: 0.5,
-                      ease: "easeInOut"
-                    }}
-                  >
-                    <Trophy className="h-4 w-4 text-primary" />
-                  </motion.div>
+                  <>
+                    {/* Radiating circle effect */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-amber-200/20"
+                      initial={{ scale: 0.1, opacity: 0 }}
+                      animate={{
+                        scale: [1, 2.5],
+                        opacity: [0.8, 0]
+                      }}
+                      transition={{
+                        duration: 1,
+                        ease: "easeOut",
+                        times: [0, 1],
+                        repeat: 1
+                      }}
+                    />
+                    {/* Trophy icon animation */}
+                    <motion.div
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{
+                        scale: [0.5, 1.2, 1],
+                        opacity: [0, 1, 1],
+                        rotate: [0, 15, -15, 0]
+                      }}
+                      transition={{
+                        duration: 0.6,
+                        ease: "easeOut",
+                        times: [0, 0.6, 0.8, 1]
+                      }}
+                      className="relative z-10"
+                    >
+                      <Trophy className="h-4 w-4 text-amber-400" />
+                    </motion.div>
+                  </>
                 ) : (
                   <Trophy className="h-4 w-4" />
                 )}
