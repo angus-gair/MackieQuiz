@@ -175,7 +175,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.get("/api/analytics/teams", async (req, res) => {
-    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    if (!req.isAuthenticated()) return res.sendStatus(401);
     const stats = await storage.getTeamStats();
     res.json(stats);
   });
