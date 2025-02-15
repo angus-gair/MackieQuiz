@@ -50,43 +50,43 @@ export default function LeaderboardPage() {
             onClick={() => setLocation("/")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            <span className="text-dynamic-sm">Back</span>
           </Button>
-          <h1 className="text-lg font-bold text-foreground">Weekly Leaderboard</h1>
+          <h1 className="text-dynamic-lg font-bold text-foreground">Weekly Leaderboard</h1>
         </div>
 
         {/* Toggle Buttons */}
         <div className="flex justify-center mb-4">
-          <div className="inline-flex items-center justify-center rounded-lg bg-muted p-2 w-full max-w-[25rem]"> {/*Added padding and max-width */}
+          <div className="inline-flex items-center justify-center rounded-lg bg-muted p-2 w-full max-w-[25rem]">
             <Button
               variant={!showTeams ? "default" : "ghost"}
               size="sm"
               onClick={() => setShowTeams(false)}
               className={cn(
-                "w-1/2", {/* Changed to 1/2 width */}
+                "w-1/2",
                 !showTeams && "bg-[#18365a] text-white hover:bg-[#18365a]/90"
               )}
             >
               <User className="h-4 w-4 mr-2" />
-              <span>Individual</span>
+              <span className="text-dynamic-sm">Individual</span>
             </Button>
             <Button
               variant={showTeams ? "default" : "ghost"}
               size="sm"
               onClick={() => setShowTeams(true)}
               className={cn(
-                "w-1/2", {/* Changed to 1/2 width */}
+                "w-1/2",
                 showTeams && "bg-[#18365a] text-white hover:bg-[#18365a]/90"
               )}
             >
               <Users className="h-4 w-4 mr-2" />
-              <span>Team</span>
+              <span className="text-dynamic-sm">Team</span>
             </Button>
           </div>
         </div>
 
         {/* Description Text */}
-        <p className="text-sm text-muted-foreground text-center mb-6" key={showTeams ? "team" : "individual"}>
+        <p className="text-dynamic-sm text-muted-foreground text-center mb-6" key={showTeams ? "team" : "individual"}>
           {showTeams
             ? "Teams are ranked by weekly quiz completion rate"
             : "Individuals are ranked by total points accumulated over multiple weeks through quiz completions"
@@ -106,7 +106,7 @@ export default function LeaderboardPage() {
                   index === 0 && "border-yellow-500/50"
                 )}>
                   <CardHeader className="py-3">
-                    <CardTitle className="flex items-center justify-between text-base">
+                    <CardTitle className="flex items-center justify-between text-dynamic-base">
                       <div className="flex items-center gap-2 min-w-0">
                         {Badge && <Badge className={cn("h-5 w-5", color)} />}
                         <span className="text-[#3a474e] font-semibold truncate">
@@ -114,7 +114,7 @@ export default function LeaderboardPage() {
                         </span>
                       </div>
                       <span className={cn(
-                        "text-base font-bold ml-2",
+                        "text-dynamic-base font-bold ml-2",
                         team.weeklyCompletionPercentage >= 80 ? "text-emerald-600" :
                           team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
                             "text-destructive"
@@ -138,14 +138,14 @@ export default function LeaderboardPage() {
                   index === 0 && "border-yellow-500/50"
                 )}>
                   <CardHeader className="py-3">
-                    <CardTitle className="flex items-center justify-between text-base">
+                    <CardTitle className="flex items-center justify-between text-dynamic-base">
                       <div className="flex items-center gap-2 min-w-0">
                         {Badge && <Badge className={cn("h-5 w-5", color)} />}
                         <span className="text-[#3a474e] font-semibold truncate">
                           {index + 1}. {user.username}
                         </span>
                       </div>
-                      <span className="font-bold text-emerald-600">{user.weeklyScore ?? 0} pts</span>
+                      <span className="text-dynamic-base font-bold text-emerald-600">{user.weeklyScore ?? 0} pts</span>
                     </CardTitle>
                   </CardHeader>
                 </Card>

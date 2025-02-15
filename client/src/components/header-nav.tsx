@@ -36,7 +36,7 @@ export function HeaderNav() {
       <div className="container max-w-md mx-auto px-4">
         <div className="flex items-center justify-between h-14">
           <Link href="/">
-            <h1 className="text-lg font-semibold cursor-pointer">Weekly Quiz</h1>
+            <h1 className="text-lg text-foreground">Weekly Quiz</h1>
           </Link>
           <nav className="flex items-center gap-2">
             <Button 
