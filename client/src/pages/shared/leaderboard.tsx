@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { User as UserType } from "@shared/schema";
+import { User as UserType, Achievement } from "@shared/schema";
 import {
   ArrowLeft,
   Trophy,
@@ -8,11 +8,15 @@ import {
   Award,
   User as UserIcon,
   Users as UsersIcon,
+  Star,
+  Target,
+  Medal as MedalIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HeaderNav } from "@/components/header-nav";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Types
 type TeamStats = {
@@ -30,6 +34,13 @@ const BADGES = [
   { icon: Medal, color: "text-gray-400", label: "Silver" },
   { icon: Award, color: "text-amber-600", label: "Bronze" },
 ];
+
+// Achievement badge icons
+const ACHIEVEMENT_ICONS = {
+  perfect_score: Star,
+  team_contribution: Target,
+  quiz_milestone: MedalIcon,
+};
 
 export default function LeaderboardPage() {
   // Fetch Individuals
@@ -49,6 +60,22 @@ export default function LeaderboardPage() {
   } = useQuery<TeamStats[]>({
     queryKey: ["/api/analytics/teams"],
   });
+
+  // Fetch Achievement Badges
+  const {
+    data: achievements,
+    isLoading: isAchievementsLoading,
+  } = useQuery<Achievement[]>({
+    queryKey: ["/api/achievements"],
+  });
+
+  // Helper to get user's highest tier badges
+  const getUserBadges = (userId: number) => {
+    if (!achievements) return [];
+    return achievements.filter(
+      (a) => a.userId === userId && a.isHighestTier
+    ).slice(0, 3); // Show up to 3 highest tier badges
+  };
 
   // Sort individuals by weekly score (descending)
   const sortedUsers =
@@ -79,31 +106,17 @@ export default function LeaderboardPage() {
 
           {/* Tabs / Toggle */}
           <Tabs defaultValue="individual" className="w-full">
-            <TabsList
-              className="
-                grid w-full grid-cols-2 mb-4
-                rounded-md overflow-hidden
-                h-10
-              "
-            >
+            <TabsList className="grid w-full grid-cols-2 mb-4 rounded-md overflow-hidden h-10">
               <TabsTrigger
                 value="individual"
-                className="
-                  flex items-center justify-center gap-2 px-3 text-sm font-medium
-                  [aria-selected='true']:bg-blue-900
-                  [aria-selected='true']:text-white
-                "
+                className="flex items-center justify-center gap-2 px-3 text-sm font-medium [aria-selected='true']:bg-blue-900 [aria-selected='true']:text-white"
               >
                 <UserIcon className="h-4 w-4" />
                 Individual
               </TabsTrigger>
               <TabsTrigger
                 value="team"
-                className="
-                  flex items-center justify-center gap-2 px-3 text-sm font-medium
-                  [aria-selected='true']:bg-blue-900
-                  [aria-selected='true']:text-white
-                "
+                className="flex items-center justify-center gap-2 px-3 text-sm font-medium [aria-selected='true']:bg-blue-900 [aria-selected='true']:text-white"
               >
                 <UsersIcon className="h-4 w-4" />
                 Team
@@ -112,14 +125,13 @@ export default function LeaderboardPage() {
 
             {/* ---------------- INDIVIDUAL TAB ---------------- */}
             <TabsContent value="individual" className="space-y-4">
-              {/* Two-line description */}
               <p className="text-xs text-muted-foreground leading-tight">
                 Individuals are ranked by total score as determined by
                 the number of correct answers, accumulated over each week.
               </p>
 
               {/* Loading / Error / Empty */}
-              {isUsersLoading && (
+              {(isUsersLoading || isAchievementsLoading) && (
                 <p className="text-center text-sm text-muted-foreground">
                   Loading individual leaderboard...
                 </p>
@@ -138,6 +150,8 @@ export default function LeaderboardPage() {
               {/* Render Individuals */}
               {sortedUsers.map((user, index) => {
                 const badge = BADGES[index]; // top-3 only
+                const achievementBadges = getUserBadges(user.id);
+
                 return (
                   <Card
                     key={user.id}
@@ -155,12 +169,36 @@ export default function LeaderboardPage() {
                               aria-label={`${badge.label} badge`}
                             />
                           )}
-                          {/* Subtle rank */}
                           <span className="text-xs text-muted-foreground">{`#${index + 1}`}</span>
-                          {/* Name in darker blue, larger font */}
-                          <span className="text-base font-semibold text-blue-800">
-                            {user.username}
-                          </span>
+                          {/* Name and Achievement Badges */}
+                          <div className="flex items-center gap-1">
+                            <span className="text-base font-semibold text-blue-800">
+                              {user.username}
+                            </span>
+                            {/* Achievement Badges */}
+                            <TooltipProvider>
+                              {achievementBadges.map((achievement, i) => {
+                                const IconComponent = ACHIEVEMENT_ICONS[achievement.type as keyof typeof ACHIEVEMENT_ICONS] || Award;
+                                return (
+                                  <Tooltip key={achievement.id}>
+                                    <TooltipTrigger>
+                                      <IconComponent 
+                                        className={`h-4 w-4 ${
+                                          achievement.tier === 'gold' ? 'text-yellow-500' :
+                                          achievement.tier === 'silver' ? 'text-gray-400' :
+                                          'text-amber-600'
+                                        }`}
+                                      />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-sm font-semibold">{achievement.name}</p>
+                                      <p className="text-xs">{achievement.description}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                );
+                              })}
+                            </TooltipProvider>
+                          </div>
                         </div>
                         {/* Weekly Score */}
                         <div className="text-base font-semibold text-emerald-600">

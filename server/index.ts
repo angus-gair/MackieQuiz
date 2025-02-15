@@ -40,7 +40,9 @@ app.use((req, res, next) => {
 (async () => {
   try {
     log('Starting server initialization...');
+    log('Initializing Express routes...');
     const server = registerRoutes(app);
+    log('Routes registered successfully');
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error('Error:', err);
@@ -51,14 +53,24 @@ app.use((req, res, next) => {
 
     if (app.get("env") === "development") {
       log('Setting up Vite for development...');
-      await setupVite(app, server);
+      try {
+        await setupVite(app, server);
+        log('Vite setup completed successfully');
+      } catch (error) {
+        log(`Failed to setup Vite: ${error}`);
+        throw error;
+      }
     } else {
       log('Setting up static serving for production...');
       serveStatic(app);
+      log('Static serving setup completed');
     }
 
-    const PORT = 5000;
+    // Use PORT from environment variable with fallback
+    const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
     const HOST = "0.0.0.0";
+
+    log(`Attempting to start server on ${HOST}:${PORT}...`);
 
     // Add error handling for the server
     server.on('error', (error: any) => {
@@ -71,8 +83,12 @@ app.use((req, res, next) => {
       }
     });
 
-    server.listen(PORT, HOST, () => {
-      log(`Server started successfully on ${HOST}:${PORT}`);
+    // Wrap server.listen in a promise for better error handling
+    await new Promise<void>((resolve, reject) => {
+      server.listen(PORT, HOST, () => {
+        log(`Server started successfully on ${HOST}:${PORT}`);
+        resolve();
+      }).on('error', reject);
     });
 
   } catch (error) {
