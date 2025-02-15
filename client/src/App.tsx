@@ -26,6 +26,7 @@ const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
 const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
 const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
 const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
+const AdminAnalytics = lazy(() => import("@/pages/admin/analytics"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -81,6 +82,9 @@ function Router() {
           </Route>
           <Route path="/admin/achievements">
             {() => <AdminAchievements />}
+          </Route>
+          <Route path="/admin/analytics">
+            {() => <AdminAnalytics />}
           </Route>
 
           <Route>
