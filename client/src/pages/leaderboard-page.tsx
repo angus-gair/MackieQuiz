@@ -52,7 +52,7 @@ export default function LeaderboardPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-lg font-bold text-primary">Weekly Leaderboard</h1>
+          <h1 className="text-lg font-bold text-foreground">Weekly Leaderboard</h1>
         </div>
 
         {/* Toggle Buttons */}
@@ -86,7 +86,7 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Description Text */}
-        <p className="text-sm text-muted text-center mb-6" key={showTeams ? "team" : "individual"}>
+        <p className="text-sm text-muted-foreground text-center mb-6" key={showTeams ? "team" : "individual"}>
           {showTeams
             ? "Teams are ranked by weekly quiz completion rate"
             : "Individuals are ranked by total points accumulated over multiple weeks through quiz completions"
@@ -98,7 +98,7 @@ export default function LeaderboardPage() {
             // Teams View
             teamStats.map((team, index) => {
               const Badge = BADGES[index]?.icon ?? null;
-              const color = BADGES[index]?.color ?? "text-muted";
+              const color = BADGES[index]?.color ?? "text-muted-foreground";
 
               return (
                 <Card key={`team-${index}`} className={cn(
@@ -115,9 +115,9 @@ export default function LeaderboardPage() {
                       </div>
                       <span className={cn(
                         "text-base font-bold ml-2",
-                        team.weeklyCompletionPercentage >= 80 ? "text-success-color" :
-                        team.weeklyCompletionPercentage >= 50 ? "text-warning-color" :
-                        "text-danger-color"
+                        team.weeklyCompletionPercentage >= 80 ? "text-emerald-600" :
+                        team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
+                        "text-destructive"
                       )}>
                         {Math.round(team.weeklyCompletionPercentage)}% completed
                       </span>
@@ -130,7 +130,7 @@ export default function LeaderboardPage() {
             // Individual View
             users.map((user, index) => {
               const Badge = BADGES[index]?.icon ?? null;
-              const color = BADGES[index]?.color ?? "text-muted";
+              const color = BADGES[index]?.color ?? "text-muted-foreground";
 
               return (
                 <Card key={`user-${index}`} className={cn(
@@ -145,7 +145,7 @@ export default function LeaderboardPage() {
                           {index + 1}. {user.username}
                         </span>
                       </div>
-                      <span className="font-bold text-success-color">{user.weeklyScore ?? 0} pts</span>
+                      <span className="font-bold text-emerald-600">{user.weeklyScore ?? 0} pts</span>
                     </CardTitle>
                   </CardHeader>
                 </Card>
