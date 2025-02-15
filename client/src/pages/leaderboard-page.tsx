@@ -43,10 +43,10 @@ export default function LeaderboardPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
       <div className="container max-w-md mx-auto">
         <div className="flex items-center mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 mr-3" 
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 mr-3"
             onClick={() => setLocation("/")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -64,7 +64,7 @@ export default function LeaderboardPage() {
               onClick={() => setShowTeams(false)}
               className={cn(
                 "w-full",
-                !showTeams && "bg-blue-900 text-white hover:bg-blue-900/90"
+                !showTeams && "bg-[#18365a] text-white hover:bg-[#18365a]/90"
               )}
             >
               <User className="h-4 w-4 mr-2" />
@@ -76,7 +76,7 @@ export default function LeaderboardPage() {
               onClick={() => setShowTeams(true)}
               className={cn(
                 "w-full",
-                showTeams && "bg-blue-900 text-white hover:bg-blue-900/90"
+                showTeams && "bg-[#18365a] text-white hover:bg-[#18365a]/90"
               )}
             >
               <Users className="h-4 w-4 mr-2" />
@@ -109,7 +109,7 @@ export default function LeaderboardPage() {
                     <CardTitle className="flex items-center justify-between text-base">
                       <div className="flex items-center gap-2 min-w-0">
                         {Badge && <Badge className={cn("h-5 w-5", color)} />}
-                        <span className="text-zinc-900 font-semibold truncate">
+                        <span className="text-[#3a474e] font-semibold truncate">
                           {index + 1}. {team.teamName}
                         </span>
                       </div>
@@ -141,7 +141,7 @@ export default function LeaderboardPage() {
                     <CardTitle className="flex items-center justify-between text-base">
                       <div className="flex items-center gap-2 min-w-0">
                         {Badge && <Badge className={cn("h-5 w-5", color)} />}
-                        <span className="text-zinc-900 font-semibold truncate">
+                        <span className="text-[#3a474e] font-semibold truncate">
                           {index + 1}. {user.username}
                         </span>
                       </div>
