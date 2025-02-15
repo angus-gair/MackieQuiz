@@ -39,6 +39,7 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
+    log('Starting server initialization...');
     const server = registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -48,24 +49,34 @@ app.use((req, res, next) => {
       res.status(status).json({ message });
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
     if (app.get("env") === "development") {
+      log('Setting up Vite for development...');
       await setupVite(app, server);
     } else {
+      log('Setting up static serving for production...');
       serveStatic(app);
     }
 
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client
     const PORT = 5000;
     const HOST = "0.0.0.0";
+
+    // Add error handling for the server
+    server.on('error', (error: any) => {
+      if (error.code === 'EADDRINUSE') {
+        log(`Error: Port ${PORT} is already in use. Please free up the port and try again.`);
+        process.exit(1);
+      } else {
+        log(`Server error: ${error.message}`);
+        throw error;
+      }
+    });
+
     server.listen(PORT, HOST, () => {
       log(`Server started successfully on ${HOST}:${PORT}`);
     });
+
   } catch (error) {
-    console.error('Failed to start server:', error);
+    log(`Failed to start server: ${error}`);
     process.exit(1);
   }
 })();

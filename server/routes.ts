@@ -6,7 +6,7 @@ import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
 import { UAParser } from "ua-parser-js";
 
 // In-memory cache settings storage
-let globalCacheSettings = {
+const globalCacheSettings = {
   extendedCaching: true,
   staleTime: 5 * 60 * 1000, // 5 minutes
   cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -19,6 +19,10 @@ export function registerRoutes(app: Express): Server {
 
   // Cache settings routes
   app.get("/api/admin/cache-settings", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     try {
       res.json({ settings: globalCacheSettings });
     } catch (error) {
@@ -28,6 +32,10 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.post("/api/admin/cache-settings", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     try {
       const newSettings = req.body.settings;
       if (!newSettings) {
@@ -35,10 +43,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Update global cache settings
-      globalCacheSettings = {
-        ...globalCacheSettings,
-        ...newSettings
-      };
+      Object.assign(globalCacheSettings, newSettings);
 
       res.json({ settings: globalCacheSettings });
     } catch (error) {
