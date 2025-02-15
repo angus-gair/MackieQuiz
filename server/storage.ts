@@ -105,6 +105,11 @@ export interface IStorage {
   updateAchievementProgress(userId: number, achievementType: string, progress: number): Promise<void>;
   getHighestTierBadges(userId: number): Promise<Achievement[]>;
   trackQuizProgress(userId: number, isCorrect: boolean): Promise<void>;
+
+  // Enhanced profile methods
+  updateUserProfileShowcase(userId: number, achievementIds: string[]): Promise<UserProfile>;
+  updateTeamAvatar(userId: number, preference: string, color?: string): Promise<UserProfile>;
+  getHighestTierAchievements(userId: number, limit?: number): Promise<Achievement[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1141,6 +1146,43 @@ export class DatabaseStorage implements IStorage {
         await this.updateAchievementProgress(userId, 'quiz_mastery', 1);
       }
     }
+  }
+
+  async updateUserProfileShowcase(userId: number, achievementIds: string[]): Promise<UserProfile> {
+    const [profile] = await db
+      .update(userProfiles)
+      .set({
+        showcaseAchievements: achievementIds,
+        lastProfileUpdate: new Date()
+      })
+      .where(eq(userProfiles.userId, userId))
+      .returning();
+    return profile;
+  }
+
+  async updateTeamAvatar(userId: number, preference: string, color?: string): Promise<UserProfile> {
+    const [profile] = await db
+      .update(userProfiles)
+      .set({
+        teamAvatarPreference: preference,
+        teamAvatarColor: color,
+        lastProfileUpdate: new Date()
+      })
+      .where(eq(userProfiles.userId, userId))
+      .returning();
+    return profile;
+  }
+
+  async getHighestTierAchievements(userId: number, limit: number = 3): Promise<Achievement[]> {
+    return await db
+      .select()
+      .from(achievements)
+      .where(and(
+        eq(achievements.userId, userId),
+        eq(achievements.isHighestTier, true)
+      ))
+      .orderBy(desc(achievements.earnedAt))
+      .limit(limit);
   }
 }
 

@@ -89,6 +89,11 @@ export const userProfiles = pgTable("user_profiles", {
   customTitle: text("custom_title"),
   preferredTheme: text("preferred_theme"),
   badges: text("badges").array(),
+  showcaseAchievements: text("showcase_achievements").array(), // IDs of achievements to showcase
+  teamAvatarPreference: text("team_avatar_preference"), // 'initials', 'icon', or 'custom'
+  teamAvatarColor: text("team_avatar_color"), // Custom color for team avatar
+  achievementShowcaseOrder: text("achievement_showcase_order").array(), // Order of achievements to display
+  lastProfileUpdate: timestamp("last_profile_update").defaultNow(),
 });
 
 export const feedback = pgTable("feedback", {
@@ -195,7 +200,8 @@ export const insertPowerUpSchema = createInsertSchema(powerUps).omit({
 });
 
 export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
-  id: true
+  id: true,
+  lastProfileUpdate: true
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

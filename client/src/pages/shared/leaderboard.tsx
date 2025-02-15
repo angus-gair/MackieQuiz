@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { User as UserType, Achievement } from "@shared/schema";
+import { User as UserType, Achievement, UserProfile } from "@shared/schema";
 import {
   ArrowLeft,
   Trophy,
@@ -17,6 +17,7 @@ import { Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HeaderNav } from "@/components/header-nav";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Types
 type TeamStats = {
@@ -61,7 +62,7 @@ export default function LeaderboardPage() {
     queryKey: ["/api/analytics/teams"],
   });
 
-  // Fetch Achievement Badges
+  // Fetch Achievement Badges and User Profiles
   const {
     data: achievements,
     isLoading: isAchievementsLoading,
@@ -69,12 +70,58 @@ export default function LeaderboardPage() {
     queryKey: ["/api/achievements"],
   });
 
-  // Helper to get user's highest tier badges
+  const {
+    data: userProfiles,
+    isLoading: isProfilesLoading,
+  } = useQuery<UserProfile[]>({
+    queryKey: ["/api/users/profiles"],
+  });
+
+  // Helper to get user's profile
+  const getUserProfile = (userId: number) => {
+    if (!userProfiles) return null;
+    return userProfiles.find(p => p.userId === userId);
+  };
+
+  // Fix the getUserBadges function with proper null checks
   const getUserBadges = (userId: number) => {
     if (!achievements) return [];
-    return achievements.filter(
-      (a) => a.userId === userId && a.isHighestTier
-    ).slice(0, 3); // Show up to 3 highest tier badges
+    const profile = getUserProfile(userId);
+    const userAchievements = achievements.filter(a => a.userId === userId);
+
+    if (profile?.showcaseAchievements?.length) {
+      // Return user's selected showcase achievements with proper null checking
+      return userAchievements
+        .filter(a => profile.showcaseAchievements?.includes(a.id.toString()))
+        .sort((a, b) => {
+          const aIndex = profile.achievementShowcaseOrder?.indexOf(a.id.toString()) ?? -1;
+          const bIndex = profile.achievementShowcaseOrder?.indexOf(b.id.toString()) ?? -1;
+          return aIndex - bIndex;
+        });
+    }
+
+    // Default to highest tier badges if no showcase set
+    return userAchievements
+      .filter(a => a.isHighestTier)
+      .slice(0, 3);
+  };
+
+  // Helper to generate team avatar
+  const getTeamAvatar = (teamName: string, userId: number) => {
+    const profile = getUserProfile(userId);
+    const preference = profile?.teamAvatarPreference || 'initials';
+    const color = profile?.teamAvatarColor || 'bg-blue-500';
+
+    return (
+      <Avatar className="h-8 w-8">
+        <AvatarFallback className={color}>
+          {preference === 'initials'
+            ? teamName.substring(0, 2).toUpperCase()
+            : <UsersIcon className="h-4 w-4" />
+          }
+        </AvatarFallback>
+      </Avatar>
+    );
   };
 
   // Sort individuals by weekly score (descending)
@@ -131,7 +178,7 @@ export default function LeaderboardPage() {
               </p>
 
               {/* Loading / Error / Empty */}
-              {(isUsersLoading || isAchievementsLoading) && (
+              {(isUsersLoading || isAchievementsLoading || isProfilesLoading) && (
                 <p className="text-center text-sm text-muted-foreground">
                   Loading individual leaderboard...
                 </p>
@@ -177,16 +224,16 @@ export default function LeaderboardPage() {
                             </span>
                             {/* Achievement Badges */}
                             <TooltipProvider>
-                              {achievementBadges.map((achievement, i) => {
+                              {achievementBadges.map((achievement) => {
                                 const IconComponent = ACHIEVEMENT_ICONS[achievement.type as keyof typeof ACHIEVEMENT_ICONS] || Award;
                                 return (
                                   <Tooltip key={achievement.id}>
                                     <TooltipTrigger>
-                                      <IconComponent 
+                                      <IconComponent
                                         className={`h-4 w-4 ${
                                           achievement.tier === 'gold' ? 'text-yellow-500' :
-                                          achievement.tier === 'silver' ? 'text-gray-400' :
-                                          'text-amber-600'
+                                            achievement.tier === 'silver' ? 'text-gray-400' :
+                                              'text-amber-600'
                                         }`}
                                       />
                                     </TooltipTrigger>
@@ -206,14 +253,17 @@ export default function LeaderboardPage() {
                         </div>
                       </div>
 
-                      {/* One line with "Team: X" (left) and "Quizzes: Y" (right) */}
+                      {/* Team Row with Avatar */}
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">
-                          Team:{" "}
-                          <span className="font-bold text-gray-800">
-                            {user.team || "—"}
+                        <div className="flex items-center gap-2">
+                          {user.team && getTeamAvatar(user.team, user.id)}
+                          <span className="text-gray-600">
+                            Team:{" "}
+                            <span className="font-bold text-gray-800">
+                              {user.team || "—"}
+                            </span>
                           </span>
-                        </span>
+                        </div>
                         <span className="text-gray-600">
                           Quizzes:{" "}
                           <span className="font-bold text-gray-800">

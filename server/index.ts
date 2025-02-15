@@ -66,10 +66,9 @@ app.use((req, res, next) => {
       log('Static serving setup completed');
     }
 
-    // Try different ports if the default is busy
-    const PORT = 3000;
+    const PORT = process.env.PORT || 5000;
     const HOST = "0.0.0.0";
-    
+
     try {
       log(`Starting server on ${HOST}:${PORT}...`);
       await new Promise<void>((resolve, reject) => {
@@ -77,15 +76,13 @@ app.use((req, res, next) => {
           log(`Server started successfully on ${HOST}:${PORT}`);
           resolve();
         }).on('error', (error) => {
+          log(`Error starting server: ${error}`);
           reject(error);
         });
       });
-      } catch (error: any) {
-        log(`Error starting server on port ${PORT}: ${error.message}`);
-        if (PORT === ports[ports.length - 1]) {
-          throw new Error('All ports are busy, cannot start server');
-        }
-      }
+    } catch (error: any) {
+      log(`Failed to start server on port ${PORT}: ${error.message}`);
+      throw new Error(`Failed to start server on port ${PORT}`);
     }
 
   } catch (error) {
