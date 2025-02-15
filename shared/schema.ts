@@ -2,6 +2,7 @@ import { pgTable, text, serial, integer, boolean, timestamp, date, jsonb } from 
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Existing tables remain unchanged
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -13,6 +14,55 @@ export const users = pgTable("users", {
   teamAssigned: boolean("team_assigned").notNull().default(false),
 });
 
+// New tables for gamification
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(), // 'quiz_milestone', 'streak', 'team_victory'
+  milestone: integer("milestone").notNull(), // e.g., 1, 3, 5, 7, 10 for quiz completions
+  earnedAt: timestamp("earned_at").notNull().defaultNow(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(), // SVG string or icon identifier
+});
+
+export const userStreaks = pgTable("user_streaks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  lastQuizDate: date("last_quiz_date"),
+  weeklyQuizzesTaken: integer("weekly_quizzes_taken").notNull().default(0),
+});
+
+export const teamStats = pgTable("team_stats", {
+  id: serial("id").primaryKey(),
+  teamName: text("team_name").notNull(),
+  weekWins: integer("week_wins").notNull().default(0),
+  currentWinStreak: integer("current_win_streak").notNull().default(0),
+  longestWinStreak: integer("longest_win_streak").notNull().default(0),
+  lastWinDate: date("last_win_date"),
+  totalScore: integer("total_score").notNull().default(0),
+});
+
+export const powerUps = pgTable("power_ups", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(), // 'hint', 'fifty_fifty'
+  quantity: integer("quantity").notNull().default(0),
+  lastRefillDate: timestamp("last_refill_date"),
+});
+
+export const userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  avatarUrl: text("avatar_url"),
+  customTitle: text("custom_title"),
+  preferredTheme: text("preferred_theme"),
+  badges: text("badges").array(),
+});
+
+// Existing tables remain unchanged
 export const feedback = pgTable("feedback", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -99,6 +149,27 @@ export const insertFeedbackSchema = createInsertSchema(feedback).omit({
   status: true 
 });
 
+export const insertAchievementSchema = createInsertSchema(achievements).omit({ 
+  id: true,
+  earnedAt: true
+});
+
+export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({ 
+  id: true
+});
+
+export const insertTeamStatSchema = createInsertSchema(teamStats).omit({ 
+  id: true
+});
+
+export const insertPowerUpSchema = createInsertSchema(powerUps).omit({ 
+  id: true
+});
+
+export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({ 
+  id: true
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
 export type InsertAnswer = z.infer<typeof insertAnswerSchema>;
@@ -113,3 +184,15 @@ export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 export type InsertAuthEvent = z.infer<typeof insertAuthEventSchema>;
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type Feedback = typeof feedback.$inferSelect;
+
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
+export type InsertTeamStat = z.infer<typeof insertTeamStatSchema>;
+export type InsertPowerUp = z.infer<typeof insertPowerUpSchema>;
+export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+
+export type Achievement = typeof achievements.$inferSelect;
+export type UserStreak = typeof userStreaks.$inferSelect;
+export type TeamStat = typeof teamStats.$inferSelect;
+export type PowerUp = typeof powerUps.$inferSelect;
+export type UserProfile = typeof userProfiles.$inferSelect;

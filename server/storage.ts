@@ -1,9 +1,10 @@
-import { users, questions, answers, userSessions, pageViews, authEvents, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent } from "@shared/schema";
+import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
+import { log } from "./vite";
 
 const PostgresSessionStore = connectPg(session);
 
@@ -74,6 +75,28 @@ export interface IStorage {
     locationBreakdown: { country: string; count: number }[];
     failureReasons: { reason: string; count: number }[];
   }>;
+
+  // Achievement methods
+  createAchievement(achievement: InsertAchievement): Promise<Achievement>;
+  getUserAchievements(userId: number): Promise<Achievement[]>;
+  checkAndAwardAchievements(userId: number): Promise<Achievement[]>;
+
+  // Streak methods
+  getOrCreateUserStreak(userId: number): Promise<UserStreak>;
+  updateUserStreak(userId: number, completed: boolean): Promise<UserStreak>;
+
+  // Team stats methods
+  updateTeamStats(teamName: string, won: boolean): Promise<TeamStat>;
+  getTeamLeaderboard(): Promise<TeamStat[]>;
+
+  // Power-up methods
+  getUserPowerUps(userId: number): Promise<PowerUp[]>;
+  usePowerUp(userId: number, type: string): Promise<boolean>;
+  refillPowerUps(userId: number): Promise<PowerUp[]>;
+
+  // Profile methods
+  getOrCreateUserProfile(userId: number): Promise<UserProfile>;
+  updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -141,38 +164,104 @@ export class DatabaseStorage implements IStorage {
 
   async submitAnswer(answer: InsertAnswer): Promise<Answer> {
     const [newAnswer] = await db.insert(answers).values(answer).returning();
+    log(`New answer submitted for user ${answer.userId}`);
 
-    if (answer.correct) {
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, answer.userId));
+    try {
+      if (answer.correct) {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, answer.userId));
 
-      await db
-        .update(users)
-        .set({
-          weeklyScore: (user?.weeklyScore || 0) + 10,
-        })
-        .where(eq(users.id, answer.userId));
+        await db
+          .update(users)
+          .set({
+            weeklyScore: (user?.weeklyScore || 0) + 10,
+          })
+          .where(eq(users.id, answer.userId));
+        log(`Updated weekly score for user ${answer.userId}`);
+      }
+
+      const userAnswers = await this.getUserAnswers(answer.userId);
+      const today = new Date();
+      const todaysAnswers = userAnswers.filter(a => {
+        const answerDate = new Date(a.answeredAt);
+        return answerDate.toDateString() === today.toDateString();
+      });
+
+      log(`User ${answer.userId} has ${todaysAnswers.length} answers today`);
+
+      // Check if user completed a quiz (3 questions)
+      const completedQuiz = todaysAnswers.length % 3 === 0;
+      if (completedQuiz) {
+        log(`User ${answer.userId} completed a quiz`);
+
+        try {
+          // Ensure user streak record exists and update it
+          const streak = await this.getOrCreateUserStreak(answer.userId);
+          await this.updateUserStreak(answer.userId, true);
+          log(`Updated streak for user ${answer.userId}: current streak ${streak.currentStreak}`);
+        } catch (err) {
+          log(`Error updating user streak: ${err}`);
+        }
+
+        try {
+          // Calculate total completed quizzes for achievements
+          const totalQuizzes = Math.floor(userAnswers.length / 3);
+          log(`User ${answer.userId} has completed ${totalQuizzes} quizzes total`);
+
+          // Explicitly check for first quiz achievement
+          if (totalQuizzes === 1) {
+            const [firstQuizAchievement] = await db.insert(achievements).values({
+              userId: answer.userId,
+              type: 'quiz_milestone',
+              milestone: 1,
+              name: 'First Quiz Complete',
+              description: 'Completed your first quiz!',
+              icon: 'quiz-1'
+            }).returning();
+            log(`Created first quiz achievement for user ${answer.userId}`);
+          }
+
+          // Check for other milestone achievements
+          await this.checkAndAwardAchievements(answer.userId);
+        } catch (err) {
+          log(`Error creating achievements: ${err}`);
+        }
+
+        try {
+          // Update team stats if user is in a team
+          const [user] = await db
+            .select()
+            .from(users)
+            .where(eq(users.id, answer.userId));
+
+          if (user.team) {
+            // Consider a team "won" if they completed a quiz with a perfect score
+            const latestQuizAnswers = todaysAnswers.slice(-3);
+            const perfectScore = latestQuizAnswers.every(a => a.correct);
+            await this.updateTeamStats(user.team, perfectScore);
+            log(`Updated team stats for team ${user.team}`);
+          }
+        } catch (err) {
+          log(`Error updating team stats: ${err}`);
+        }
+
+        try {
+          // Refill power-ups weekly
+          await this.refillPowerUps(answer.userId);
+          log(`Refilled power-ups for user ${answer.userId}`);
+        } catch (err) {
+          log(`Error refilling power-ups: ${err}`);
+        }
+      }
+
+      return newAnswer;
+    } catch (error) {
+      log(`Error in submitAnswer gamification features: ${error}`);
+      // Return the answer even if gamification features fail
+      return newAnswer;
     }
-
-    const userAnswers = await this.getUserAnswers(answer.userId);
-    const today = new Date();
-    const todaysAnswers = userAnswers.filter(a => {
-      const answerDate = new Date(a.answeredAt);
-      return answerDate.toDateString() === today.toDateString();
-    });
-
-    if (todaysAnswers.length % 3 === 0) {
-      await db
-        .update(users)
-        .set({
-          weeklyQuizzes: sql`${users.weeklyQuizzes} + 1`,
-        })
-        .where(eq(users.id, answer.userId));
-    }
-
-    return newAnswer;
   }
 
   async getUserAnswers(userId: number): Promise<Answer[]> {
@@ -240,11 +329,11 @@ export class DatabaseStorage implements IStorage {
     for (const user of allUsers) {
       if (!user.team) continue; // Skip users without teams
 
-      const stats = teamStats.get(user.team) || { 
-        totalScore: 0, 
-        members: 0, 
+      const stats = teamStats.get(user.team) || {
+        totalScore: 0,
+        members: 0,
         completedQuizzes: 0,
-        weeklyCompleted: 0 
+        weeklyCompleted: 0
       };
 
       stats.totalScore += user.weeklyScore || 0;
@@ -547,9 +636,9 @@ export class DatabaseStorage implements IStorage {
         .map(([path, views]) => ({ path, views }))
         .sort((a, b) => b.views - a.views),
       averageTimeOnPage: Array.from(pageTimeTotals.entries())
-        .map(([path, { total, count }]) => ({ 
-          path, 
-          avgTime: total / count 
+        .map(([path, { total, count }]) => ({
+          path,
+          avgTime: total / count
         })),
       bounceRate,
       errorPages: Array.from(errorCounts.entries())
@@ -590,6 +679,269 @@ export class DatabaseStorage implements IStorage {
         .sort((a, b) => b.count - a.count),
     };
   }
+
+
+  private async checkMilestoneAchievement(userId: number, quizCount: number): Promise<Achievement | null> {
+    const milestones = [1, 3, 5, 7, 10];
+    if (milestones.includes(quizCount)) {
+      // Check if achievement already exists
+      const [existing] = await db
+        .select()
+        .from(achievements)
+        .where(and(
+          eq(achievements.userId, userId),
+          eq(achievements.type, 'quiz_milestone'),
+          eq(achievements.milestone, quizCount)
+        ));
+
+      if (!existing) {
+        const [achievement] = await db.insert(achievements).values({
+          userId,
+          type: 'quiz_milestone',
+          milestone: quizCount,
+          name: `${quizCount} Quizzes Completed`,
+          description: `Completed ${quizCount} quizzes!`,
+          icon: `quiz-${quizCount}`, // Frontend will map this to actual icon
+        }).returning();
+        return achievement;
+      }
+    }
+    return null;
+  }
+
+  async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
+    const [newAchievement] = await db.insert(achievements).values(achievement).returning();
+    return newAchievement;
+  }
+
+  async getUserAchievements(userId: number): Promise<Achievement[]> {
+    return await db
+      .select()
+      .from(achievements)
+      .where(eq(achievements.userId, userId))
+      .orderBy(desc(achievements.earnedAt));
+  }
+
+  async checkAndAwardAchievements(userId: number): Promise<Achievement[]> {
+    const userAnswers = await this.getUserAnswers(userId);
+    const quizCount = Math.floor(userAnswers.length / 3);
+    const newAchievements: Achievement[] = [];
+
+    const milestoneAchievement = await this.checkMilestoneAchievement(userId, quizCount);
+    if (milestoneAchievement) {
+      newAchievements.push(milestoneAchievement);
+    }
+
+    return newAchievements;
+  }
+
+  async getOrCreateUserStreak(userId: number): Promise<UserStreak> {
+    const [existingStreak] = await db
+      .select()
+      .from(userStreaks)
+      .where(eq(userStreaks.userId, userId));
+
+    if (existingStreak) {
+      return existingStreak;
+    }
+
+    const [newStreak] = await db.insert(userStreaks)
+      .values({ userId, currentStreak: 0, longestStreak: 0 })
+      .returning();
+
+    return newStreak;
+  }
+
+  async updateUserStreak(userId: number, completed: boolean): Promise<UserStreak> {
+    const streak = await this.getOrCreateUserStreak(userId);
+    const today = new Date();
+    const lastQuizDate = streak.lastQuizDate ? new Date(streak.lastQuizDate) : null;
+
+    let currentStreak = streak.currentStreak;
+    if (completed) {
+      if (!lastQuizDate || isConsecutiveDay(lastQuizDate, today)) {
+        currentStreak += 1;
+      } else if (!isConsecutiveDay(lastQuizDate, today)) {
+        currentStreak = 1;
+      }
+    } else if (!isConsecutiveDay(lastQuizDate, today)) {
+      currentStreak = 0;
+    }
+
+    const [updatedStreak] = await db.update(userStreaks)
+      .set({
+        currentStreak,
+        longestStreak: Math.max(currentStreak, streak.longestStreak),
+        lastQuizDate: today,
+        weeklyQuizzesTaken: completed ? streak.weeklyQuizzesTaken + 1 : streak.weeklyQuizzesTaken
+      })
+      .where(eq(userStreaks.userId, userId))
+      .returning();
+
+    return updatedStreak;
+  }
+
+  async updateTeamStats(teamName: string, won: boolean): Promise<TeamStat> {
+    const [existingStat] = await db
+      .select()
+      .from(teamStats)
+      .where(eq(teamStats.teamName, teamName));
+
+    const today = new Date();
+    const updates: Partial<TeamStat> = {
+      weekWins: (existingStat?.weekWins || 0) + (won ? 1 : 0),
+      lastWinDate: won ? today : existingStat?.lastWinDate
+    };
+
+    if (won) {
+      updates.currentWinStreak = (existingStat?.currentWinStreak || 0) + 1;
+      updates.longestWinStreak = Math.max(
+        updates.currentWinStreak,
+        existingStat?.longestWinStreak || 0
+      );
+    } else {
+      updates.currentWinStreak = 0;
+    }
+
+    if (existingStat) {
+      const [updatedStat] = await db.update(teamStats)
+        .set(updates)
+        .where(eq(teamStats.teamName, teamName))
+        .returning();
+      return updatedStat;
+    }
+
+    const [newStat] = await db.insert(teamStats)
+      .values({
+        teamName,
+        weekWins: won ? 1 : 0,
+        currentWinStreak: won ? 1 : 0,
+        longestWinStreak: won ? 1 : 0,
+        lastWinDate: won ? today : null,
+        totalScore: 0
+      })
+      .returning();
+
+    return newStat;
+  }
+
+  async getTeamLeaderboard(): Promise<TeamStat[]> {
+    return await db
+      .select()
+      .from(teamStats)
+      .orderBy([desc(teamStats.weekWins), desc(teamStats.currentWinStreak)]);
+  }
+
+  async getUserPowerUps(userId: number): Promise<PowerUp[]> {
+    return await db
+      .select()
+      .from(powerUps)
+      .where(eq(powerUps.userId, userId));
+  }
+
+  async usePowerUp(userId: number, type: string): Promise<boolean> {
+    const [powerUp] = await db
+      .select()
+      .from(powerUps)
+      .where(and(
+        eq(powerUps.userId, userId),
+        eq(powerUps.type, type)
+      ));
+
+    if (!powerUp || powerUp.quantity <= 0) {
+      return false;
+    }
+
+    await db.update(powerUps)
+      .set({ quantity: powerUp.quantity - 1 })
+      .where(eq(powerUps.id, powerUp.id));
+
+    return true;
+  }
+
+  async refillPowerUps(userId: number): Promise<PowerUp[]> {
+    const powerUpTypes = ['hint', 'fifty_fifty'];
+    const now = new Date();
+    const refills: PowerUp[] = [];
+
+    for (const type of powerUpTypes) {
+      const [existing] = await db
+        .select()
+        .from(powerUps)
+        .where(and(
+          eq(powerUps.userId, userId),
+          eq(powerUps.type, type)
+        ));
+
+      if (existing) {
+        // Refill if it's been more than a week since last refill
+        const lastRefill = existing.lastRefillDate ? new Date(existing.lastRefillDate) : null;
+        if (!lastRefill || differenceInDays(now, lastRefill) >= 7) {
+          const [refilled] = await db.update(powerUps)
+            .set({
+              quantity: 3, // Weekly allowance
+              lastRefillDate: now
+            })
+            .where(eq(powerUps.id, existing.id))
+            .returning();
+          refills.push(refilled);
+        }
+      } else {
+        const [newPowerUp] = await db.insert(powerUps)
+          .values({
+            userId,
+            type,
+            quantity: 3,
+            lastRefillDate: now
+          })
+          .returning();
+        refills.push(newPowerUp);
+      }
+    }
+
+    return refills;
+  }
+
+  async getOrCreateUserProfile(userId: number): Promise<UserProfile> {
+    const [existing] = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId));
+
+    if (existing) {
+      return existing;
+    }
+
+    const [newProfile] = await db.insert(userProfiles)
+      .values({
+        userId,
+        badges: [],
+        preferredTheme: 'light'
+      })
+      .returning();
+
+    return newProfile;
+  }
+
+  async updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile> {
+    const [updated] = await db.update(userProfiles)
+      .set(profile)
+      .where(eq(userProfiles.userId, userId))
+      .returning();
+    return updated;
+  }
+}
+
+// Helper functions
+function isConsecutiveDay(date1: Date, date2: Date): boolean {
+  const diffTime = Math.abs(date2.getTime() - date1.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays === 1;
+}
+
+function differenceInDays(date1: Date, date2: Date): number {
+  const diffTime = Math.abs(date2.getTime() - date1.getTime());
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
 export const storage = new DatabaseStorage();
