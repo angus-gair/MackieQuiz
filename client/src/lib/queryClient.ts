@@ -47,23 +47,35 @@ export const getQueryFn: <T>(options: {
     }
   };
 
+interface CacheSettings {
+  staleTime: number;
+  cacheTime: number;
+  refetchOnWindowFocus: boolean;
+  retryOnReconnect: boolean;
+}
+
+const defaultSettings: CacheSettings = {
+  staleTime: 5 * 60 * 1000,
+  cacheTime: 10 * 60 * 1000,
+  refetchOnWindowFocus: false,
+  retryOnReconnect: true,
+};
+
 // Get cache settings from localStorage or use defaults
-const getCacheSettings = () => {
+const getCacheSettings = (): CacheSettings => {
   try {
     const savedSettings = localStorage.getItem('cacheSettings');
     if (savedSettings) {
-      return JSON.parse(savedSettings);
+      const parsed = JSON.parse(savedSettings) as Partial<CacheSettings>;
+      return {
+        ...defaultSettings,
+        ...parsed
+      };
     }
   } catch (error) {
     console.error('Error parsing cache settings:', error);
   }
-  // Return default settings if parsing fails or no settings exist
-  return {
-    staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retryOnReconnect: true,
-  };
+  return defaultSettings;
 };
 
 export const queryClient = new QueryClient({
@@ -89,14 +101,21 @@ export const queryClient = new QueryClient({
 });
 
 // Update cache settings
-export const updateCacheSettings = (settings: any) => {
+export const updateCacheSettings = (settings: Partial<CacheSettings>) => {
   try {
-    const settingsString = JSON.stringify(settings);
+    const currentSettings = getCacheSettings();
+    const newSettings = {
+      ...currentSettings,
+      ...settings
+    };
+
+    const settingsString = JSON.stringify(newSettings);
     localStorage.setItem('cacheSettings', settingsString);
+
     queryClient.setDefaultOptions({
       queries: {
         ...queryClient.getDefaultOptions().queries,
-        ...settings,
+        ...newSettings,
       },
     });
   } catch (error) {
