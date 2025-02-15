@@ -221,6 +221,16 @@ export function registerRoutes(app: Express): Server {
     res.json(stats);
   });
 
+  app.get("/api/achievements/latest", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    // Get the latest achievement for the user
+    const achievements = await storage.getUserAchievements(req.user.id);
+    // Return the most recent achievement if it exists
+    const latestAchievement = achievements[0];
+    res.json(latestAchievement || null);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
