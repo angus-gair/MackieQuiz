@@ -5,10 +5,48 @@ import { setupAuth } from "./auth";
 import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
 import { UAParser } from "ua-parser-js";
 
+// In-memory cache settings storage
+let globalCacheSettings = {
+  extendedCaching: true,
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  cacheTime: 10 * 60 * 1000, // 10 minutes
+  refetchOnWindowFocus: false,
+  retryOnReconnect: true,
+};
+
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
-  // Middleware to capture analytics for all routes
+  // Cache settings routes
+  app.get("/api/admin/cache-settings", (req, res) => {
+    try {
+      res.json({ settings: globalCacheSettings });
+    } catch (error) {
+      console.error('Error fetching cache settings:', error);
+      res.status(500).json({ error: 'Failed to fetch cache settings' });
+    }
+  });
+
+  app.post("/api/admin/cache-settings", (req, res) => {
+    try {
+      const newSettings = req.body.settings;
+      if (!newSettings) {
+        return res.status(400).json({ error: 'Missing settings in request body' });
+      }
+
+      // Update global cache settings
+      globalCacheSettings = {
+        ...globalCacheSettings,
+        ...newSettings
+      };
+
+      res.json({ settings: globalCacheSettings });
+    } catch (error) {
+      console.error('Error updating cache settings:', error);
+      res.status(500).json({ error: 'Failed to update cache settings' });
+    }
+  });
+
   app.use(async (req, res, next) => {
     const startTime = Date.now();
     const ua = new UAParser(req.headers["user-agent"]);
