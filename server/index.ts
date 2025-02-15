@@ -67,29 +67,19 @@ app.use((req, res, next) => {
     }
 
     // Try different ports if the default is busy
-    const ports = [5000, 5001, 3000, 3001];
+    const PORT = 3000;
     const HOST = "0.0.0.0";
-    let server_started = false;
-
-    for (const PORT of ports) {
-      try {
-        log(`Attempting to start server on ${HOST}:${PORT}...`);
-        await new Promise<void>((resolve, reject) => {
-          server.listen(PORT, HOST, () => {
-            log(`Server started successfully on ${HOST}:${PORT}`);
-            server_started = true;
-            resolve();
-          }).on('error', (error) => {
-            if (error.code === 'EADDRINUSE') {
-              log(`Port ${PORT} is already in use, trying next port...`);
-              resolve(); // Continue to next port
-            } else {
-              reject(error);
-            }
-          });
+    
+    try {
+      log(`Starting server on ${HOST}:${PORT}...`);
+      await new Promise<void>((resolve, reject) => {
+        server.listen(PORT, HOST, () => {
+          log(`Server started successfully on ${HOST}:${PORT}`);
+          resolve();
+        }).on('error', (error) => {
+          reject(error);
         });
-
-        if (server_started) break;
+      });
       } catch (error: any) {
         log(`Error starting server on port ${PORT}: ${error.message}`);
         if (PORT === ports[ports.length - 1]) {
