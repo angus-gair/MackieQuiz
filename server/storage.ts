@@ -694,6 +694,7 @@ export class DatabaseStorage implements IStorage {
   }
 
 
+
   private async checkMilestoneAchievement(userId: number, quizCount: number): Promise<Achievement | null> {
     const milestones = [1, 3, 5, 7, 10];
     if (milestones.includes(quizCount)) {
@@ -750,7 +751,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllAchievements(): Promise<Achievement[]> {
-    return await db
+    const results = await db
       .select({
         id: achievements.id,
         userId: achievements.userId,
@@ -762,12 +763,14 @@ export class DatabaseStorage implements IStorage {
         icon: achievements.icon,
         badge: achievements.badge,
         user: {
-          username: users.username
-        }
+          username: users.username,
+        },
       })
       .from(achievements)
       .leftJoin(users, eq(achievements.userId, users.id))
       .orderBy(desc(achievements.earnedAt));
+
+    return results;
   }
 
   async checkAndAwardAchievements(userId: number): Promise<Achievement[]> {
