@@ -20,17 +20,31 @@ export const usersRelations = relations(users, ({ many }) => ({
   achievements: many(achievements)
 }));
 
-// Updated achievements table with badge field
+// Updated achievements table with new fields
 export const achievements = pgTable("achievements", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
-  type: text("type").notNull(), // 'quiz_milestone', 'streak', 'team_victory'
+  type: text("type").notNull(), // 'quiz_milestone', 'streak', 'team_victory', 'perfect_score', 'team_contribution'
   milestone: integer("milestone").notNull(),
   earnedAt: timestamp("earned_at").notNull().defaultNow(),
   name: text("name").notNull(),
   description: text("description").notNull(),
   icon: text("icon").notNull(),
-  badge: text("badge").notNull(), // Added badge field for milestone badges
+  badge: text("badge").notNull(),
+  progress: integer("progress").notNull().default(0), // Track progress towards next milestone
+  category: text("category"), // For categorizing achievements (e.g., 'quiz', 'team', 'personal')
+  tier: text("tier").notNull().default('bronze'), // 'bronze', 'silver', 'gold', 'platinum'
+  isHighestTier: boolean("is_highest_tier").notNull().default(false), // Flag for highest tier achievements
+});
+
+// Add achievement progress tracking
+export const achievementProgress = pgTable("achievement_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  achievementType: text("achievement_type").notNull(),
+  currentProgress: integer("current_progress").notNull().default(0),
+  targetProgress: integer("target_progress").notNull(),
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
 });
 
 // Define relations for achievements
@@ -157,30 +171,30 @@ export const insertAnswerSchema = createInsertSchema(answers);
 export const insertSessionSchema = createInsertSchema(userSessions);
 export const insertPageViewSchema = createInsertSchema(pageViews);
 export const insertAuthEventSchema = createInsertSchema(authEvents);
-export const insertFeedbackSchema = createInsertSchema(feedback).omit({ 
+export const insertFeedbackSchema = createInsertSchema(feedback).omit({
   id: true,
   createdAt: true,
-  status: true 
+  status: true
 });
 
-export const insertAchievementSchema = createInsertSchema(achievements).omit({ 
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
   id: true,
   earnedAt: true
 });
 
-export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({ 
+export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({
   id: true
 });
 
-export const insertTeamStatSchema = createInsertSchema(teamStats).omit({ 
+export const insertTeamStatSchema = createInsertSchema(teamStats).omit({
   id: true
 });
 
-export const insertPowerUpSchema = createInsertSchema(powerUps).omit({ 
+export const insertPowerUpSchema = createInsertSchema(powerUps).omit({
   id: true
 });
 
-export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({ 
+export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   id: true
 });
 

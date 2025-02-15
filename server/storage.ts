@@ -1,4 +1,4 @@
-import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile } from "@shared/schema";
+import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile, type AchievementProgress, type InsertAchievementProgress} from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte } from "drizzle-orm";
 import session from "express-session";
@@ -98,6 +98,13 @@ export interface IStorage {
   getOrCreateUserProfile(userId: number): Promise<UserProfile>;
   updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
   getAllAchievements(): Promise<Achievement[]>;
+
+  // New achievement methods
+  awardPerfectQuizAchievement(userId: number): Promise<Achievement | null>;
+  awardTeamContributionAchievement(userId: number, contributionType: string): Promise<Achievement | null>;
+  updateAchievementProgress(userId: number, achievementType: string, progress: number): Promise<void>;
+  getHighestTierBadges(userId: number): Promise<Achievement[]>;
+  trackQuizProgress(userId: number, isCorrect: boolean): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -266,6 +273,25 @@ export class DatabaseStorage implements IStorage {
           log(`Refilled power-ups for user ${answer.userId}`);
         } catch (err) {
           log(`Error refilling power-ups: ${err}`);
+        }
+
+        try {
+          //Check for perfect quiz completion
+          if (todaysAnswers.length % 3 === 0) {
+            const latestQuizAnswers = todaysAnswers.slice(-3);
+            const isPerfectQuiz = latestQuizAnswers.every(a => a.correct);
+            if (isPerfectQuiz) {
+              await this.awardPerfectQuizAchievement(answer.userId);
+            }
+
+            //Check for team contribution
+            const user = await this.getUser(answer.userId);
+            if (user?.team) {
+              await this.awardTeamContributionAchievement(answer.userId, 'Quiz');
+            }
+          }
+        } catch (error) {
+          console.error('Error in achievement tracking:', error);
         }
       }
 
@@ -879,7 +905,8 @@ export class DatabaseStorage implements IStorage {
   async getTeamLeaderboard(): Promise<TeamStat[]> {
     return await db
       .select()
-      .from(teamStats)      .orderBy([desc(teamStats.weekWins), desc(teamStats.currentWinStreak)]);
+      .from(teamStats)
+      .orderBy([desc(teamStats.weekWins), desc(teamStats.currentWinStreak)]);
   }
 
   async getUserPowerUps(userId: number): Promise<PowerUp[]> {
@@ -979,6 +1006,141 @@ export class DatabaseStorage implements IStorage {
       .where(eq(userProfiles.userId, userId))
       .returning();
     return updated;
+  }
+
+  async awardPerfectQuizAchievement(userId: number): Promise<Achievement | null> {
+    const [existing] = await db
+      .select()
+      .from(achievements)
+      .where(
+        and(
+          eq(achievements.userId, userId),
+          eq(achievements.type, 'perfect_score')
+        )
+      );
+
+    if (!existing) {
+      const [achievement] = await db.insert(achievements).values({
+        userId,
+        type: 'perfect_score',
+        milestone: 1,
+        name: 'Perfect Quiz Master',
+        description: 'Completed a quiz with all correct answers!',
+        icon: 'perfect-score',
+        badge: 'perfect-1',
+        category: 'quiz',
+        tier: 'gold',
+        isHighestTier: true
+      }).returning();
+      return achievement;
+    }
+    return null;
+  }
+
+  async awardTeamContributionAchievement(
+    userId: number,
+    contributionType: string
+  ): Promise<Achievement | null> {
+    const [existing] = await db
+      .select()
+      .from(achievements)
+      .where(
+        and(
+          eq(achievements.userId, userId),
+          eq(achievements.type, 'team_contribution'),
+          eq(achievements.category, contributionType)
+        )
+      );
+
+    if (!existing) {
+      const [achievement] = await db.insert(achievements).values({
+        userId,
+        type: 'team_contribution',
+        milestone: 1,
+        name: `Team ${contributionType} Champion`,
+        description: `Outstanding contribution to team ${contributionType}!`,
+        icon: `team-${contributionType.toLowerCase()}`,
+        badge: `team-contrib-1`,
+        category: 'team',
+        tier: 'silver',
+        isHighestTier: false
+      }).returning();
+      return achievement;
+    }
+    return null;
+  }
+
+  async updateAchievementProgress(
+    userId: number,
+    achievementType: string,
+    progress: number
+  ): Promise<void> {
+    const [existing] = await db
+      .select()
+      .from(achievementProgress)
+      .where(
+        and(
+          eq(achievementProgress.userId, userId),
+          eq(achievementProgress.achievementType, achievementType)
+        )
+      );
+
+    if (existing) {
+      await db
+        .update(achievementProgress)
+        .set({
+          currentProgress: progress,
+          lastUpdated: new Date()
+        })
+        .where(eq(achievementProgress.id, existing.id));
+    } else {
+      await db.insert(achievementProgress).values({
+        userId,
+        achievementType,
+        currentProgress: progress,
+        targetProgress: 100, // Default target
+        lastUpdated: new Date()
+      });
+    }
+  }
+
+  async getHighestTierBadges(userId: number): Promise<Achievement[]> {
+    return await db
+      .select()
+      .from(achievements)
+      .where(
+        and(
+          eq(achievements.userId, userId),
+          eq(achievements.isHighestTier, true)
+        )
+      )
+      .orderBy(desc(achievements.earnedAt))
+      .limit(3); // Get top 3 highest tier badges
+  }
+
+  async trackQuizProgress(userId: number, isCorrect: boolean): Promise<void> {
+    // Update quiz progress for achievements
+    if (isCorrect) {
+      const [progress] = await db
+        .select()
+        .from(achievementProgress)
+        .where(
+          and(
+            eq(achievementProgress.userId, userId),
+            eq(achievementProgress.achievementType, 'quiz_mastery')
+          )
+        );
+
+      if (progress) {
+        await this.updateAchievementProgress(
+          userId,
+          'quiz_mastery',
+          progress.currentProgress + 1
+        );
+      } else {
+        await this.updateAchievementProgress(userId, 'quiz_mastery', 1);
+      }
+    }
   }
 }
 
