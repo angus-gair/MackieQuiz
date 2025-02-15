@@ -41,8 +41,13 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
 
   const updateCacheMutation = useMutation({
     mutationFn: async (newSettings: CacheSettings) => {
-      const res = await apiRequest("POST", "/api/admin/cache-settings", newSettings);
-      return res.json();
+      try {
+        const res = await apiRequest("POST", "/api/admin/cache-settings", newSettings);
+        return await res.json();
+      } catch (error) {
+        console.error('Failed to update cache settings:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.clear();
@@ -66,8 +71,10 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await fetch("/api/admin/cache-settings");
         if (!res.ok) return defaultSettings;
-        return await res.json();
-      } catch {
+        const data = await res.json();
+        return data as CacheSettings;
+      } catch (error) {
+        console.error('Failed to fetch cache settings:', error);
         return defaultSettings;
       }
     },

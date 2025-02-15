@@ -54,9 +54,10 @@ const getCacheSettings = () => {
     if (savedSettings) {
       return JSON.parse(savedSettings);
     }
-  } catch {
-    // If parsing fails, return default settings
+  } catch (error) {
+    console.error('Error parsing cache settings:', error);
   }
+  // Return default settings if parsing fails or no settings exist
   return {
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
@@ -89,11 +90,17 @@ export const queryClient = new QueryClient({
 
 // Update cache settings
 export const updateCacheSettings = (settings: any) => {
-  localStorage.setItem('cacheSettings', JSON.stringify(settings));
-  queryClient.setDefaultOptions({
-    queries: {
-      ...queryClient.getDefaultOptions().queries,
-      ...settings,
-    },
-  });
+  try {
+    const settingsString = JSON.stringify(settings);
+    localStorage.setItem('cacheSettings', settingsString);
+    queryClient.setDefaultOptions({
+      queries: {
+        ...queryClient.getDefaultOptions().queries,
+        ...settings,
+      },
+    });
+  } catch (error) {
+    console.error('Error saving cache settings:', error);
+    throw new Error('Failed to save cache settings');
+  }
 };
