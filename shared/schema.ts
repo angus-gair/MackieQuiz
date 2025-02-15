@@ -68,6 +68,17 @@ export const powerUps = pgTable("power_ups", {
   lastRefillDate: timestamp("last_refill_date"),
 });
 
+// Add dim_date table for date management
+export const dimDate = pgTable("dim_date", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  dayOfWeek: integer("day_of_week").notNull(), // 1 = Monday, 7 = Sunday
+  weekStartDate: date("week_start_date").notNull(),
+  weekEndDate: date("week_end_date").notNull(),
+  isCurrentWeek: boolean("is_current_week").notNull().default(false),
+  isFutureWeek: boolean("is_future_week").notNull().default(false),
+});
+
 export const userProfiles = pgTable("user_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -87,6 +98,7 @@ export const feedback = pgTable("feedback", {
   status: text("status").notNull().default('pending'),
 });
 
+// Update questions table to link with dim_date
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(),
@@ -96,6 +108,7 @@ export const questions = pgTable("questions", {
   explanation: text("explanation").notNull(),
   weekOf: date("week_of").notNull(),
   isArchived: boolean("is_archived").notNull().default(false),
+  weekId: integer("week_id").references(() => dimDate.id), // Add reference to dim_date
 });
 
 export const answers = pgTable("answers", {
@@ -152,35 +165,44 @@ export const insertUserSchema = createInsertSchema(users).pick({
   teamAssigned: z.boolean().optional().default(false)
 });
 
-export const insertQuestionSchema = createInsertSchema(questions);
+// Update question schema to include weekId
+export const insertQuestionSchema = createInsertSchema(questions).omit({
+  weekId: true, // This will be set automatically by the backend
+});
+
 export const insertAnswerSchema = createInsertSchema(answers);
 export const insertSessionSchema = createInsertSchema(userSessions);
 export const insertPageViewSchema = createInsertSchema(pageViews);
 export const insertAuthEventSchema = createInsertSchema(authEvents);
-export const insertFeedbackSchema = createInsertSchema(feedback).omit({ 
+export const insertFeedbackSchema = createInsertSchema(feedback).omit({
   id: true,
   createdAt: true,
-  status: true 
+  status: true
 });
 
-export const insertAchievementSchema = createInsertSchema(achievements).omit({ 
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
   id: true,
   earnedAt: true
 });
 
-export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({ 
+export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({
   id: true
 });
 
-export const insertTeamStatSchema = createInsertSchema(teamStats).omit({ 
+export const insertTeamStatSchema = createInsertSchema(teamStats).omit({
   id: true
 });
 
-export const insertPowerUpSchema = createInsertSchema(powerUps).omit({ 
+export const insertPowerUpSchema = createInsertSchema(powerUps).omit({
   id: true
 });
 
-export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({ 
+export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
+  id: true
+});
+
+// Add new insert schema for dim_date
+export const insertDimDateSchema = createInsertSchema(dimDate).omit({
   id: true
 });
 
@@ -210,3 +232,7 @@ export type UserStreak = typeof userStreaks.$inferSelect;
 export type TeamStat = typeof teamStats.$inferSelect;
 export type PowerUp = typeof powerUps.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
+
+// Add new types
+export type DimDate = typeof dimDate.$inferSelect;
+export type InsertDimDate = z.infer<typeof insertDimDateSchema>;

@@ -37,8 +37,42 @@ app.use((req, res, next) => {
   next();
 });
 
+async function initializeDateSystem() {
+  try {
+    log('Initializing date dimension table...');
+    await storage.initializeDimDate();
+    log('Date dimension table initialized.');
+
+    log('Updating week statuses...');
+    await storage.updateWeekStatuses();
+    log('Week statuses updated.');
+
+    log('Archiving old questions...');
+    await storage.archiveOldQuestions();
+    log('Question archive complete.');
+
+    // Set up weekly updates
+    setInterval(async () => {
+      try {
+        await storage.updateWeekStatuses();
+        await storage.archiveOldQuestions();
+        log('Weekly update completed successfully');
+      } catch (error) {
+        console.error('Error during weekly update:', error);
+      }
+    }, 24 * 60 * 60 * 1000); // Check daily, but only update when week changes
+  } catch (error) {
+    console.error('Error initializing date system:', error);
+    throw error;
+  }
+}
+
 (async () => {
   try {
+    // Initialize the date system before starting the server
+    await initializeDateSystem();
+    log('Date system initialized successfully');
+
     const server = registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
