@@ -1,6 +1,6 @@
-import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile, dimDate, type DimDate } from "@shared/schema";
+import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, gte, inArray } from "drizzle-orm";
+import { eq, desc, sql, and, gte } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -43,7 +43,7 @@ export interface IStorage {
     movingAverage: number;
   }[]>;
   assignTeam(userId: number, team: string): Promise<User>;
-  getQuestionsByWeek(weekId: number): Promise<Question[]>;
+  getQuestionsByWeek(weekOf: Date): Promise<Question[]>;
   getActiveWeeks(): Promise<Date[]>;
   getArchivedQuestions(): Promise<Question[]>;
   archiveQuestion(id: number): Promise<void>;
@@ -98,13 +98,6 @@ export interface IStorage {
   getOrCreateUserProfile(userId: number): Promise<UserProfile>;
   updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
   getAllAchievements(): Promise<Achievement[]>;
-
-  // New methods for date management
-  initializeDimDate(): Promise<void>;
-  updateWeekStatuses(): Promise<void>;
-  getCurrentWeek(): Promise<DimDate>;
-  getFutureWeeks(count: number): Promise<DimDate[]>;
-  archiveOldQuestions(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -153,21 +146,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getQuestions(): Promise<Question[]> {
-    const currentWeek = await this.getCurrentWeek();
-    const futureWeeks = await this.getFutureWeeks(3); // Get next 3 weeks
-    const allRelevantWeeks = [currentWeek, ...futureWeeks];
-
     return await db
       .select()
       .from(questions)
-      .where(and(
-        eq(questions.isArchived, false),
-        inArray(
-          questions.weekId,
-          allRelevantWeeks.map(w => w.id)
-        )
-      ))
-      .orderBy(desc(questions.weekOf));
+      .where(eq(questions.isArchived, false))
+      .orderBy(questions.weekOf);
   }
 
   async getDailyQuestions(): Promise<Question[]> {
@@ -176,24 +159,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
-    const weekDate = new Date(question.weekOf);
-    const [weekRecord] = await db
-      .select()
-      .from(dimDate)
-      .where(sql`date_trunc('week', ${dimDate.date}) = date_trunc('week', ${weekDate}::date)`)
-      .limit(1);
-
-    if (!weekRecord) {
-      throw new Error('Invalid week specified');
-    }
-
-    const [newQuestion] = await db.insert(questions)
-      .values({
-        ...question,
-        weekId: weekRecord.id,
-      })
-      .returning();
-
+    const [newQuestion] = await db.insert(questions).values(question).returning();
     return newQuestion;
   }
 
@@ -335,13 +301,14 @@ export class DatabaseStorage implements IStorage {
     return newArray;
   }
 
-  private getStartOfWeek(date: Date = new Date()): Date {
-    const result = new Date(date);
-    const day = result.getDay();
-    const diff = result.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is sunday
-    result.setDate(diff);
-    result.setHours(0, 0, 0, 0);
-    return result;
+  private getStartOfWeek(): Date {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = (day + 6) % 7; // Adjust to make Monday = 0
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - diff);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
   }
 
   private formatDayName(date: Date): string {
@@ -517,13 +484,25 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return user;
   }
+  async getQuestionsByWeek(weekOf: Date): Promise<Question[]> {
+    const startOfWeek = new Date(weekOf);
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setMinutes(0, 0, 0);
 
-  async getQuestionsByWeek(weekId: number): Promise<Question[]> {
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+    endOfWeek.setHours(23, 59, 59);
+
     return await db
       .select()
       .from(questions)
-      .where(eq(questions.weekId, weekId))
-      .orderBy(questions.weekOf);
+      .where(
+        and(
+          sql`${questions.weekOf} >= DATE(${startOfWeek})`,
+          sql`${questions.weekOf} < DATE(${endOfWeek})`,
+          eq(questions.isArchived, false)
+        )
+      );
   }
 
   async getActiveWeeks(): Promise<Date[]> {
@@ -745,17 +724,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
-    const [newAchievement] = await db.insert(achievements)
-      .values({
-        type: achievement.type,
-        milestone: achievement.milestone,
-        name: achievement.name,
-        description: achievement.description,
-        icon: achievement.icon,
-        badge: achievement.badge,
-        userId: achievement.userId
-      })
-      .returning();
+    const [newAchievement] = await db.insert(achievements).values(achievement).returning();
     return newAchievement;
   }
 
@@ -910,8 +879,7 @@ export class DatabaseStorage implements IStorage {
   async getTeamLeaderboard(): Promise<TeamStat[]> {
     return await db
       .select()
-      .from(teamStats)
-      .orderBy([desc(teamStats.weekWins), desc(teamStats.currentWinStreak)]);
+      .from(teamStats)      .orderBy([desc(teamStats.weekWins), desc(teamStats.currentWinStreak)]);
   }
 
   async getUserPowerUps(userId: number): Promise<PowerUp[]> {
@@ -1011,164 +979,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(userProfiles.userId, userId))
       .returning();
     return updated;
-  }
-
-  async initializeDimDate(): Promise<void> {
-    const today = new Date();
-
-    // First, get all existing questions
-    const existingQuestions = await db.select().from(questions);
-
-    // Create a set of unique week start dates
-    const uniqueDates = new Set<string>();
-
-    // Add dates from existing questions
-    existingQuestions.forEach(q => {
-      const questionDate = new Date(q.weekOf);
-      const weekStart = this.getStartOfWeek(questionDate);
-      uniqueDates.add(weekStart.toISOString().split('T')[0]);
-    });
-
-    // Add future dates (12 weeks)
-    for (let i = 0; i < 84; i++) {
-      const currentDate = new Date(today);
-      currentDate.setDate(today.getDate() + i);
-      const weekStart = this.getStartOfWeek(currentDate);
-      uniqueDates.add(weekStart.toISOString().split('T')[0]);
-    }
-
-    // Create dim_date entries
-    for (const dateStr of uniqueDates) {
-      const currentDate = new Date(dateStr);
-      const weekStart = this.getStartOfWeek(currentDate);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
-
-      const isCurrentWeek = this.isSameWeek(currentDate, today);
-      const isFutureWeek = currentDate > today;
-
-      try {
-        const [dimDateEntry] = await db.insert(dimDate)
-          .values({
-            date: dateStr,
-            dayOfWeek: ((currentDate.getDay() + 6) % 7) + 1,
-            weekStartDate: dateStr,
-            weekEndDate: weekEnd.toISOString().split('T')[0],
-            isCurrentWeek,
-            isFutureWeek
-          })
-          .onConflictDoNothing()
-          .returning();
-
-        if (dimDateEntry) {
-          log(`Created dim_date entry for week of ${dateStr}`);
-        }
-      } catch (err) {
-        log(`Error creating dim_date entry for ${dateStr}: ${err}`);
-      }
-    }
-
-    // Link existing questions to dim_date entries
-    for (const question of existingQuestions) {
-      const questionDate = new Date(question.weekOf);
-      try {
-        const [weekRecord] = await db
-          .select()
-          .from(dimDate)
-          .where(sql`date_trunc('week', ${dimDate.date}::date) = date_trunc('week', ${questionDate}::date)`)
-          .limit(1);
-
-        if (weekRecord) {
-          await db
-            .update(questions)
-            .set({ weekId: weekRecord.id })
-            .where(eq(questions.id, question.id));
-
-          log(`Linked question ${question.id} to week ${weekRecord.date}`);
-        }
-      } catch (err) {
-        log(`Error linking question ${question.id}: ${err}`);
-      }
-    }
-  }
-
-  async updateWeekStatuses(): Promise<void> {
-    const today = new Date();
-
-    try {
-      // Reset all current week flags
-      await db
-        .update(dimDate)
-        .set({
-          isCurrentWeek: false,
-          isFutureWeek: false
-        });
-
-      // Update current week
-      await db
-        .update(dimDate)
-        .set({ isCurrentWeek: true })
-        .where(sql`date_trunc('week', ${dimDate.date}::date) = date_trunc('week', ${today}::date)`);
-
-      // Update future weeks
-      await db
-        .update(dimDate)
-        .set({ isFutureWeek: true })
-        .where(sql`${dimDate.date}::date > ${today}::date`);
-
-      log('Week statuses updated successfully');
-    } catch (err) {
-      log(`Error updating week statuses: ${err}`);
-    }
-  }
-
-  async getCurrentWeek(): Promise<DimDate> {
-    const [currentWeek] = await db
-      .select()
-      .from(dimDate)
-      .where(eq(dimDate.isCurrentWeek, true))
-      .limit(1);
-
-    if (!currentWeek) {
-      throw new Error('No current week found in dim_date');
-    }
-
-    return currentWeek;
-  }
-
-  async getFutureWeeks(count: number): Promise<DimDate[]> {
-    return await db
-      .select()
-      .from(dimDate)
-      .where(eq(dimDate.isFutureWeek, true))
-      .orderBy(dimDate.date)
-      .limit(count);
-  }
-
-  private isSameWeek(date1: Date, date2: Date): boolean {
-    const week1 = this.getStartOfWeek(date1);
-    const week2 = this.getStartOfWeek(date2);
-    return week1.getTime() === week2.getTime();
-  }
-
-  async archiveOldQuestions(): Promise<void> {
-    const currentWeek = await this.getCurrentWeek();
-
-    if (!currentWeek) {
-      log('No current week found, skipping archive');
-      return;
-    }
-
-    try {
-      await db
-        .update(questions)
-        .set({ isArchived: true })
-        .where(sql`${questions.weekOf}::date < ${currentWeek.weekStartDate}::date`);
-
-      log('Old questions archived successfully');
-    } catch (err) {
-      log(`Error archiving old questions: ${err}`);
-    }
   }
 }
 
