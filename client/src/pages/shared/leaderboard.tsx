@@ -193,8 +193,7 @@ export default function LeaderboardPage() {
             <TabsContent value="team" className="space-y-4">
               {/* Two-line description */}
               <p className="text-xs text-muted-foreground leading-tight">
-                Teams are ranked by weekly quiz completion rate.<br />
-                See how your group compares across each week.
+                Teams are ranked by weekly quiz completion rate. See how your group compares across each week.
               </p>
 
               {/* Loading / Error / Empty */}
