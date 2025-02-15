@@ -10,7 +10,10 @@ import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
 import { HeaderNav } from "@/components/header-nav";
 
-// Properly type the lazy loaded components
+// Import WelcomePage directly to avoid dynamic import issues
+import WelcomePage from "@/pages/welcome-page";
+
+// Lazy load other components
 const NotFound = lazy(() => import("@/pages/not-found"));
 const HomePage = lazy(() => import("@/pages/home-page"));
 const AuthPage = lazy(() => import("@/pages/auth-page"));
@@ -19,7 +22,6 @@ const ProfilePage = lazy(() => import("@/pages/user/profile"));
 const TeamsPage = lazy(() => import("@/pages/teams-page"));
 const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
 const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
-const WelcomePage = lazy(() => import("@/pages/welcome-page"));
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
@@ -30,7 +32,7 @@ const AdminAnalytics = lazy(() => import("@/pages/admin/analytics"));
 
 // Loading component
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
+  <div className="flex items-center justify-center min-h-screen">
     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
   </div>
 );

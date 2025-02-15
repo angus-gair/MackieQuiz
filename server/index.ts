@@ -66,27 +66,42 @@ app.use((req, res, next) => {
       log('Static serving setup completed');
     }
 
-    const PORT = process.env.PORT || 5000;
+    // Find an available port starting from the default
+    let port = parseInt(process.env.PORT || "5000");
+    const maxAttempts = 10;
     const HOST = "0.0.0.0";
 
-    try {
-      log(`Starting server on ${HOST}:${PORT}...`);
-      await new Promise<void>((resolve, reject) => {
-        server.listen(PORT, HOST, () => {
-          log(`Server started successfully on ${HOST}:${PORT}`);
-          resolve();
-        }).on('error', (error) => {
-          log(`Error starting server: ${error}`);
-          reject(error);
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        log(`Attempting to start server on ${HOST}:${port} (attempt ${attempt + 1}/${maxAttempts})...`);
+        await new Promise<void>((resolve, reject) => {
+          server.listen(port, HOST)
+            .once('listening', () => {
+              log(`Server started successfully on ${HOST}:${port}`);
+              resolve();
+            })
+            .once('error', (error: any) => {
+              if (error.code === 'EADDRINUSE') {
+                log(`Port ${port} is in use, trying next port...`);
+                port++;
+                reject(new Error('Port in use'));
+              } else {
+                log(`Error starting server: ${error}`);
+                reject(error);
+              }
+            });
         });
-      });
-    } catch (error: any) {
-      log(`Failed to start server on port ${PORT}: ${error.message}`);
-      throw new Error(`Failed to start server on port ${PORT}`);
+        break; // If we get here, the server started successfully
+      } catch (error: any) {
+        if (error.message === 'Port in use' && attempt < maxAttempts - 1) {
+          continue; // Try next port
+        }
+        log(`Failed to start server: ${error}`);
+        throw error;
+      }
     }
-
   } catch (error) {
-    log(`Failed to start server: ${error}`);
+    log(`Server initialization failed: ${error}`);
     process.exit(1);
   }
 })();

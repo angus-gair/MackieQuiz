@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertFeedbackSchema, type InsertFeedback } from "../../../shared/schema";
+import { insertFeedbackSchema, type InsertFeedback } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -74,7 +74,7 @@ export default function WelcomePage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Welcome, {user?.username}! 🎉</h1>
           <p className="text-muted-foreground">
-            Ready to test your wine knowledge and compete with your team?
+            Ready to enhance your professional knowledge and compete with your team?
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function WelcomePage() {
                 <div>
                   <h3 className="font-semibold mb-1">Test Your Knowledge</h3>
                   <p className="text-sm text-muted-foreground">
-                    Challenge yourself with our curated wine quizzes and learn something new every day.
+                    Challenge yourself with our curated quizzes and learn something new every day.
                   </p>
                 </div>
               </div>
@@ -113,9 +113,9 @@ export default function WelcomePage() {
               <div className="flex items-start gap-4">
                 <Award className="h-8 w-8 text-primary" />
                 <div>
-                  <h3 className="font-semibold mb-1">Win Prizes</h3>
+                  <h3 className="font-semibold mb-1">Win Achievements</h3>
                   <p className="text-sm text-muted-foreground">
-                    Top performers have a chance to win exciting weekly prizes!
+                    Earn badges and showcase your expertise!
                   </p>
                 </div>
               </div>
@@ -127,9 +127,9 @@ export default function WelcomePage() {
               <div className="flex items-start gap-4">
                 <Check className="h-8 w-8 text-primary" />
                 <div>
-                  <h3 className="font-semibold mb-1">Get to Know Your Team</h3>
+                  <h3 className="font-semibold mb-1">Track Progress</h3>
                   <p className="text-sm text-muted-foreground">
-                    Unlock fun personal facts about your coworkers and discover your shared interests!
+                    Monitor your learning journey and see your improvement over time.
                   </p>
                 </div>
               </div>
