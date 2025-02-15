@@ -97,6 +97,7 @@ export interface IStorage {
   // Profile methods
   getOrCreateUserProfile(userId: number): Promise<UserProfile>;
   updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
+  getAllAchievements(): Promise<Achievement[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -728,9 +729,44 @@ export class DatabaseStorage implements IStorage {
 
   async getUserAchievements(userId: number): Promise<Achievement[]> {
     return await db
-      .select()
+      .select({
+        id: achievements.id,
+        userId: achievements.userId,
+        type: achievements.type,
+        milestone: achievements.milestone,
+        earnedAt: achievements.earnedAt,
+        name: achievements.name,
+        description: achievements.description,
+        icon: achievements.icon,
+        badge: achievements.badge,
+        user: {
+          username: users.username
+        }
+      })
       .from(achievements)
+      .leftJoin(users, eq(achievements.userId, users.id))
       .where(eq(achievements.userId, userId))
+      .orderBy(desc(achievements.earnedAt));
+  }
+
+  async getAllAchievements(): Promise<Achievement[]> {
+    return await db
+      .select({
+        id: achievements.id,
+        userId: achievements.userId,
+        type: achievements.type,
+        milestone: achievements.milestone,
+        earnedAt: achievements.earnedAt,
+        name: achievements.name,
+        description: achievements.description,
+        icon: achievements.icon,
+        badge: achievements.badge,
+        user: {
+          username: users.username
+        }
+      })
+      .from(achievements)
+      .leftJoin(users, eq(achievements.userId, users.id))
       .orderBy(desc(achievements.earnedAt));
   }
 
@@ -840,8 +876,7 @@ export class DatabaseStorage implements IStorage {
   async getTeamLeaderboard(): Promise<TeamStat[]> {
     return await db
       .select()
-      .from(teamStats)
-      .orderBy([desc(teamStats.weekWins), desc(teamStats.currentWinStreak)]);
+      .from(teamStats)      .orderBy([desc(teamStats.weekWins), desc(teamStats.currentWinStreak)]);
   }
 
   async getUserPowerUps(userId: number): Promise<PowerUp[]> {

@@ -1,8 +1,9 @@
 import { pgTable, text, serial, integer, boolean, timestamp, date, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
-// Existing tables remain unchanged
+// Users table remains unchanged
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -14,17 +15,31 @@ export const users = pgTable("users", {
   teamAssigned: boolean("team_assigned").notNull().default(false),
 });
 
-// New tables for gamification
+// Define relations for users
+export const usersRelations = relations(users, ({ many }) => ({
+  achievements: many(achievements)
+}));
+
+// Updated achievements table with badge field
 export const achievements = pgTable("achievements", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id),
   type: text("type").notNull(), // 'quiz_milestone', 'streak', 'team_victory'
-  milestone: integer("milestone").notNull(), // e.g., 1, 3, 5, 7, 10 for quiz completions
+  milestone: integer("milestone").notNull(),
   earnedAt: timestamp("earned_at").notNull().defaultNow(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  icon: text("icon").notNull(), // SVG string or icon identifier
+  icon: text("icon").notNull(),
+  badge: text("badge").notNull(), // Added badge field for milestone badges
 });
+
+// Define relations for achievements
+export const achievementsRelations = relations(achievements, ({ one }) => ({
+  user: one(users, {
+    fields: [achievements.userId],
+    references: [users.id],
+  })
+}));
 
 export const userStreaks = pgTable("user_streaks", {
   id: serial("id").primaryKey(),
@@ -62,7 +77,6 @@ export const userProfiles = pgTable("user_profiles", {
   badges: text("badges").array(),
 });
 
-// Existing tables remain unchanged
 export const feedback = pgTable("feedback", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
