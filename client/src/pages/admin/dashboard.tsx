@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Users } from "lucide-react";
+import { PlusCircle, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -20,6 +20,12 @@ export default function AdminDashboard() {
       title: "User Management",
       description: "Manage user team assignments and compositions",
       href: "/admin/users"
+    },
+    {
+      icon: <Award className="h-4 w-4" />,
+      title: "Achievement Management",
+      description: "View and manage user achievements and milestones",
+      href: "/admin/achievements"
     }
   ];
 

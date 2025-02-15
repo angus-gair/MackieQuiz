@@ -202,7 +202,33 @@ export function registerRoutes(app: Express): Server {
     res.json(result);
   });
 
-  // New analytics routes
+  // Updated achievements route
+  app.get("/api/admin/achievements", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+
+    try {
+      // Get all achievements from all users using the storage interface
+      const achievements = await Promise.all(
+        (await storage.getUsers()).map(async user =>
+          await storage.getUserAchievements(user.id)
+        )
+      );
+
+      // Flatten the array and sort by earnedAt
+      const allAchievements = achievements
+        .flat()
+        .sort((a, b) =>
+          new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime()
+        );
+
+      res.json(allAchievements);
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+      res.status(500).json({ error: 'Failed to fetch achievements' });
+    }
+  });
+
+
   app.get("/api/analytics/sessions", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
     const stats = await storage.getSessionAnalytics();
