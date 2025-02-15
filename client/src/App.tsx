@@ -24,6 +24,7 @@ const WelcomePage = lazy(() => import("@/pages/welcome-page"));
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
 const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
 const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
+const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -51,10 +52,11 @@ function Router() {
           <ProtectedRoute path="/teams" component={TeamsPage} />
           <ProtectedRoute path="/team-allocation" component={TeamAllocationPage} />
 
-          {/* Admin Routes - Simplified */}
+          {/* Admin Routes */}
           <AdminRoute path="/admin" component={AdminDashboard} />
           <AdminRoute path="/admin/questions" component={AdminQuestions} />
           <AdminRoute path="/admin/users" component={AdminUsersTeams} />
+          <AdminRoute path="/admin/achievements" component={AdminAchievements} />
 
           <Route component={NotFound} />
         </Switch>
