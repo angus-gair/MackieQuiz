@@ -3,123 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-// Users table remains unchanged
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  team: text("team"),
-  isAdmin: boolean("is_admin").notNull().default(false),
-  weeklyScore: integer("weekly_score").notNull().default(0),
-  weeklyQuizzes: integer("weekly_quizzes").notNull().default(0),
-  teamAssigned: boolean("team_assigned").notNull().default(false),
-});
-
-// Define relations for users
-export const usersRelations = relations(users, ({ many }) => ({
-  achievements: many(achievements)
-}));
-
-// Updated achievements table with badge field
-export const achievements = pgTable("achievements", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  type: text("type").notNull(), // 'quiz_milestone', 'streak', 'team_victory'
-  milestone: integer("milestone").notNull(),
-  earnedAt: timestamp("earned_at").notNull().defaultNow(),
-  name: text("name").notNull(),
-  description: text("description").notNull(),
-  icon: text("icon").notNull(),
-  badge: text("badge").notNull(), // Added badge field for milestone badges
-});
-
-// Define relations for achievements
-export const achievementsRelations = relations(achievements, ({ one }) => ({
-  user: one(users, {
-    fields: [achievements.userId],
-    references: [users.id],
-  })
-}));
-
-export const userStreaks = pgTable("user_streaks", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  currentStreak: integer("current_streak").notNull().default(0),
-  longestStreak: integer("longest_streak").notNull().default(0),
-  lastQuizDate: date("last_quiz_date"),
-  weeklyQuizzesTaken: integer("weekly_quizzes_taken").notNull().default(0),
-});
-
-export const teamStats = pgTable("team_stats", {
-  id: serial("id").primaryKey(),
-  teamName: text("team_name").notNull(),
-  weekWins: integer("week_wins").notNull().default(0),
-  currentWinStreak: integer("current_win_streak").notNull().default(0),
-  longestWinStreak: integer("longest_win_streak").notNull().default(0),
-  lastWinDate: date("last_win_date"),
-  totalScore: integer("total_score").notNull().default(0),
-});
-
-export const powerUps = pgTable("power_ups", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  type: text("type").notNull(), // 'hint', 'fifty_fifty'
-  quantity: integer("quantity").notNull().default(0),
-  lastRefillDate: timestamp("last_refill_date"),
-});
-
-// Add dim_date table for date management
-export const dimDate = pgTable("dim_date", {
-  id: serial("id").primaryKey(),
-  date: date("date").notNull().unique(),
-  dayOfWeek: integer("day_of_week").notNull(), // 1 = Monday, 7 = Sunday
-  weekStartDate: date("week_start_date").notNull(),
-  weekEndDate: date("week_end_date").notNull(),
-  isCurrentWeek: boolean("is_current_week").notNull().default(false),
-  isFutureWeek: boolean("is_future_week").notNull().default(false),
-});
-
-export const userProfiles = pgTable("user_profiles", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  avatarUrl: text("avatar_url"),
-  customTitle: text("custom_title"),
-  preferredTheme: text("preferred_theme"),
-  badges: text("badges").array(),
-});
-
-export const feedback = pgTable("feedback", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  content: text("content").notNull(),
-  rating: integer("rating").notNull(),
-  category: text("category").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  status: text("status").notNull().default('pending'),
-});
-
-// Update questions table to link with dim_date
-export const questions = pgTable("questions", {
-  id: serial("id").primaryKey(),
-  question: text("question").notNull(),
-  correctAnswer: text("correct_answer").notNull(),
-  options: text("options").array().notNull(),
-  category: text("category").notNull(),
-  explanation: text("explanation").notNull(),
-  weekOf: date("week_of").notNull(),
-  isArchived: boolean("is_archived").notNull().default(false),
-  weekId: integer("week_id").references(() => dimDate.id), // Add reference to dim_date
-});
-
-export const answers = pgTable("answers", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  questionId: integer("question_id").notNull(),
-  answer: text("answer").notNull(),
-  correct: boolean("correct").notNull(),
-  answeredAt: timestamp("answered_at").notNull().defaultNow(),
-});
-
+// Tables
 export const userSessions = pgTable("user_sessions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -156,6 +40,119 @@ export const authEvents = pgTable("auth_events", {
   failureReason: text("failure_reason"),
 });
 
+export const userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  avatarUrl: text("avatar_url"),
+  customTitle: text("custom_title"),
+  preferredTheme: text("preferred_theme"),
+  badges: text("badges").array(),
+});
+
+export const feedback = pgTable("feedback", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  content: text("content").notNull(),
+  rating: integer("rating").notNull(),
+  category: text("category").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  status: text("status").notNull().default('pending'),
+});
+
+export const dimDate = pgTable("dim_date", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  dayOfWeek: integer("day_of_week").notNull(),
+  weekStartDate: date("week_start_date").notNull(),
+  weekEndDate: date("week_end_date").notNull(),
+  isCurrentWeek: boolean("is_current_week").notNull().default(false),
+  isFutureWeek: boolean("is_future_week").notNull().default(false),
+});
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  team: text("team"),
+  isAdmin: boolean("is_admin").notNull().default(false),
+  weeklyScore: integer("weekly_score").notNull().default(0),
+  weeklyQuizzes: integer("weekly_quizzes").notNull().default(0),
+  teamAssigned: boolean("team_assigned").notNull().default(false),
+});
+
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  type: text("type").notNull(),
+  milestone: integer("milestone").notNull(),
+  earnedAt: timestamp("earned_at").notNull().defaultNow(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  badge: text("badge").notNull(),
+});
+
+export const questions = pgTable("questions", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  correctAnswer: text("correct_answer").notNull(),
+  options: text("options").array().notNull(),
+  category: text("category").notNull(),
+  explanation: text("explanation").notNull(),
+  weekOf: date("week_of").notNull(),
+  isArchived: boolean("is_archived").notNull().default(false),
+  weekId: integer("week_id").references(() => dimDate.id),
+});
+
+export const answers = pgTable("answers", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  questionId: integer("question_id").notNull(),
+  answer: text("answer").notNull(),
+  correct: boolean("correct").notNull(),
+  answeredAt: timestamp("answered_at").notNull().defaultNow(),
+});
+
+export const userStreaks = pgTable("user_streaks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  lastQuizDate: date("last_quiz_date"),
+  weeklyQuizzesTaken: integer("weekly_quizzes_taken").notNull().default(0),
+});
+
+export const teamStats = pgTable("team_stats", {
+  id: serial("id").primaryKey(),
+  teamName: text("team_name").notNull(),
+  weekWins: integer("week_wins").notNull().default(0),
+  currentWinStreak: integer("current_win_streak").notNull().default(0),
+  longestWinStreak: integer("longest_win_streak").notNull().default(0),
+  lastWinDate: date("last_win_date"),
+  totalScore: integer("total_score").notNull().default(0),
+});
+
+export const powerUps = pgTable("power_ups", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(),
+  quantity: integer("quantity").notNull().default(0),
+  lastRefillDate: timestamp("last_refill_date"),
+});
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  achievements: many(achievements)
+}));
+
+export const achievementsRelations = relations(achievements, ({ one }) => ({
+  user: one(users, {
+    fields: [achievements.userId],
+    references: [users.id],
+  })
+}));
+
+// Insert Schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -165,9 +162,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   teamAssigned: z.boolean().optional().default(false)
 });
 
-// Update question schema to include weekId
 export const insertQuestionSchema = createInsertSchema(questions).omit({
-  weekId: true, // This will be set automatically by the backend
+  weekId: true,
 });
 
 export const insertAnswerSchema = createInsertSchema(answers);
@@ -201,38 +197,34 @@ export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   id: true
 });
 
-// Add new insert schema for dim_date
 export const insertDimDateSchema = createInsertSchema(dimDate).omit({
   id: true
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
-export type InsertAnswer = z.infer<typeof insertAnswerSchema>;
+// Types
 export type User = typeof users.$inferSelect;
 export type Question = typeof questions.$inferSelect;
 export type Answer = typeof answers.$inferSelect;
 export type UserSession = typeof userSessions.$inferSelect;
 export type PageView = typeof pageViews.$inferSelect;
 export type AuthEvent = typeof authEvents.$inferSelect;
-export type InsertUserSession = z.infer<typeof insertSessionSchema>;
-export type InsertPageView = z.infer<typeof insertPageViewSchema>;
-export type InsertAuthEvent = z.infer<typeof insertAuthEventSchema>;
-export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
-export type Feedback = typeof feedback.$inferSelect;
-
-export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
-export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
-export type InsertTeamStat = z.infer<typeof insertTeamStatSchema>;
-export type InsertPowerUp = z.infer<typeof insertPowerUpSchema>;
-export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
-
 export type Achievement = typeof achievements.$inferSelect;
 export type UserStreak = typeof userStreaks.$inferSelect;
 export type TeamStat = typeof teamStats.$inferSelect;
 export type PowerUp = typeof powerUps.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
-
-// Add new types
 export type DimDate = typeof dimDate.$inferSelect;
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
+export type InsertAnswer = z.infer<typeof insertAnswerSchema>;
+export type InsertUserSession = z.infer<typeof insertSessionSchema>;
+export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+export type InsertAuthEvent = z.infer<typeof insertAuthEventSchema>;
+export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
+export type InsertTeamStat = z.infer<typeof insertTeamStatSchema>;
+export type InsertPowerUp = z.infer<typeof insertPowerUpSchema>;
+export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
 export type InsertDimDate = z.infer<typeof insertDimDateSchema>;
