@@ -44,13 +44,6 @@ app.use((req, res, next) => {
     const server = registerRoutes(app);
     log('Routes registered successfully');
 
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      console.error('Error:', err);
-      const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
-      res.status(status).json({ message });
-    });
-
     if (app.get("env") === "development") {
       log('Setting up Vite for development...');
       try {
@@ -66,42 +59,48 @@ app.use((req, res, next) => {
       log('Static serving setup completed');
     }
 
-    // Find an available port starting from the default
-    let port = parseInt(process.env.PORT || "5000");
-    const maxAttempts = 10;
+    // Use the environment-provided port
     const HOST = "0.0.0.0";
+    const port = parseInt(process.env.PORT || "3000"); // Changed default port to 3000
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      try {
-        log(`Attempting to start server on ${HOST}:${port} (attempt ${attempt + 1}/${maxAttempts})...`);
-        await new Promise<void>((resolve, reject) => {
-          server.listen(port, HOST)
-            .once('listening', () => {
-              log(`Server started successfully on ${HOST}:${port}`);
-              resolve();
-            })
-            .once('error', (error: any) => {
-              if (error.code === 'EADDRINUSE') {
-                log(`Port ${port} is in use, trying next port...`);
-                port++;
-                reject(new Error('Port in use'));
-              } else {
-                log(`Error starting server: ${error}`);
-                reject(error);
-              }
-            });
-        });
-        break; // If we get here, the server started successfully
-      } catch (error: any) {
-        if (error.message === 'Port in use' && attempt < maxAttempts - 1) {
-          continue; // Try next port
+    log(`Configuration: HOST=${HOST}, PORT=${port}, ENV=${app.get("env")}`);
+
+    // Check if port is already in use before attempting to bind
+    const net = require('net');
+    const testServer = net.createServer()
+      .once('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          log(`ERROR: Port ${port} is already in use`);
+          process.exit(1);
         }
-        log(`Failed to start server: ${error}`);
-        throw error;
-      }
-    }
-  } catch (error) {
-    log(`Server initialization failed: ${error}`);
+        log(`ERROR: Unexpected error checking port availability: ${err.message}`);
+        process.exit(1);
+      })
+      .once('listening', () => {
+        testServer.close();
+        // Port is available, start the actual server
+        server.listen(port, HOST)
+          .once('listening', () => {
+            log(`Server started successfully on ${HOST}:${port}`);
+          })
+          .once('error', (error: any) => {
+            log(`ERROR: Failed to start server:`);
+            log(error.stack || error.message || error);
+            process.exit(1);
+          });
+      })
+      .listen(port, HOST);
+
+  } catch (error: any) {
+    log(`FATAL: Server initialization failed:`);
+    log(error.stack || error.message || error);
     process.exit(1);
   }
 })();
+
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('Error:', err);
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ message });
+});

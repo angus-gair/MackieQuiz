@@ -194,7 +194,7 @@ export default function LeaderboardPage() {
                 </p>
               )}
 
-              {/* Render Individuals */}
+              {/* Individual Card */}
               {sortedUsers.map((user, index) => {
                 const badge = BADGES[index]; // top-3 only
                 const achievementBadges = getUserBadges(user.id);
@@ -253,10 +253,9 @@ export default function LeaderboardPage() {
                         </div>
                       </div>
 
-                      {/* Team Row with Avatar */}
+                      {/* Team Row without Avatar */}
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
-                          {user.team && getTeamAvatar(user.team, user.id)}
                           <span className="text-gray-600">
                             Team:{" "}
                             <span className="font-bold text-gray-800">
@@ -301,7 +300,7 @@ export default function LeaderboardPage() {
                 </p>
               )}
 
-              {/* Render Teams */}
+              {/* Team Card */}
               {sortedTeams.map((team, index) => {
                 const badge = BADGES[index]; // top-3 only
                 return (
@@ -322,17 +321,20 @@ export default function LeaderboardPage() {
                             />
                           )}
                           <span className="text-xs text-muted-foreground">{`#${index + 1}`}</span>
-                          {/* Name in darker blue, larger font */}
-                          <span className="text-base font-semibold text-blue-800">
-                            {team.teamName}
-                          </span>
+                          {/* Team Avatar and Name */}
+                          <div className="flex items-center gap-2">
+                            {getTeamAvatar(team.teamName, team.members)} {/* Add team avatar */}
+                            <span className="text-base font-semibold text-blue-800">
+                              {team.teamName}
+                            </span>
+                          </div>
                         </div>
                         <div className="text-base font-semibold text-emerald-600">
                           {Math.round(team.weeklyCompletionPercentage)}% completed
                         </div>
                       </div>
 
-                      {/* Stats Row: Score, Avg Score, Members */}
+                      {/* Stats Row */}
                       <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
                         <div>
                           <div className="text-gray-600">Score</div>
