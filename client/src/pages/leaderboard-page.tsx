@@ -57,13 +57,13 @@ export default function LeaderboardPage() {
 
         {/* Toggle Buttons */}
         <div className="flex justify-center mb-4">
-          <div className="inline-flex items-center justify-center rounded-lg bg-muted p-1 w-64">
+          <div className="inline-flex items-center justify-center rounded-lg bg-muted p-2 w-full max-w-[25rem]"> {/*Added padding and max-width */}
             <Button
               variant={!showTeams ? "default" : "ghost"}
               size="sm"
               onClick={() => setShowTeams(false)}
               className={cn(
-                "w-full",
+                "w-1/2", {/* Changed to 1/2 width */}
                 !showTeams && "bg-[#18365a] text-white hover:bg-[#18365a]/90"
               )}
             >
@@ -75,7 +75,7 @@ export default function LeaderboardPage() {
               size="sm"
               onClick={() => setShowTeams(true)}
               className={cn(
-                "w-full",
+                "w-1/2", {/* Changed to 1/2 width */}
                 showTeams && "bg-[#18365a] text-white hover:bg-[#18365a]/90"
               )}
             >
@@ -116,8 +116,8 @@ export default function LeaderboardPage() {
                       <span className={cn(
                         "text-base font-bold ml-2",
                         team.weeklyCompletionPercentage >= 80 ? "text-emerald-600" :
-                        team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
-                        "text-destructive"
+                          team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
+                            "text-destructive"
                       )}>
                         {Math.round(team.weeklyCompletionPercentage)}% completed
                       </span>
