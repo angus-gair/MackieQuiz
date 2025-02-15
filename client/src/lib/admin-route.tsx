@@ -5,13 +5,11 @@ import { Route } from "wouter";
 type AdminRouteProps = {
   path: string;
   component: React.ComponentType;
-  userAnalyticsOnly?: boolean;
 };
 
 export function AdminRoute({
   path,
-  component: Component,
-  userAnalyticsOnly = false
+  component: Component
 }: AdminRouteProps) {
   const { user, isLoading } = useAuth();
 
@@ -26,13 +24,6 @@ export function AdminRoute({
           );
         }
 
-        // For /admin/user page, only allow user "gair"
-        if (userAnalyticsOnly && user?.username !== "gair") {
-          window.location.href = "/";
-          return null;
-        }
-
-        // For other admin pages, check isAdmin
         if (!user?.isAdmin) {
           window.location.href = "/";
           return null;
