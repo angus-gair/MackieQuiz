@@ -3,7 +3,7 @@ import { PlusCircle, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { HeaderNav } from "@/components/header-nav";
+import { CacheSettings } from "@/components/admin/cache-settings";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -31,10 +31,16 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <HeaderNav />
       <main className="pt-16 px-4 pb-24">
         <div className="max-w-md mx-auto">
           <h1 className="text-2xl font-bold text-primary mb-6">Admin Dashboard</h1>
+
+          {/* Cache Settings Section */}
+          <div className="mb-6">
+            <CacheSettings />
+          </div>
+
+          {/* Module Cards */}
           <div className="space-y-2">
             {modules.map((module) => (
               <Card key={module.href}>

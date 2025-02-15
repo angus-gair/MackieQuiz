@@ -2,29 +2,30 @@ import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { Suspense, lazy, ComponentType } from "react";
+import { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/use-auth";
+import { CacheProvider } from "@/hooks/use-cache-settings";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
 import { HeaderNav } from "@/components/header-nav";
 
-// Lazy load components with proper typing
-const NotFound = lazy(() => import("@/pages/not-found")) as ComponentType;
-const HomePage = lazy(() => import("@/pages/home-page")) as ComponentType;
-const AuthPage = lazy(() => import("@/pages/auth-page")) as ComponentType;
-const SettingsPage = lazy(() => import("@/pages/settings-page")) as ComponentType;
-const ProfilePage = lazy(() => import("@/pages/user/profile")) as ComponentType;
-const TeamsPage = lazy(() => import("@/pages/teams-page")) as ComponentType;
-const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard")) as ComponentType;
-const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page")) as ComponentType;
-const WelcomePage = lazy(() => import("@/pages/welcome-page")) as ComponentType;
+// Properly type the lazy loaded components
+const NotFound = lazy(() => import("@/pages/not-found"));
+const HomePage = lazy(() => import("@/pages/home-page"));
+const AuthPage = lazy(() => import("@/pages/auth-page"));
+const SettingsPage = lazy(() => import("@/pages/settings-page"));
+const ProfilePage = lazy(() => import("@/pages/user/profile"));
+const TeamsPage = lazy(() => import("@/pages/teams-page"));
+const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
+const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
+const WelcomePage = lazy(() => import("@/pages/welcome-page"));
 
 // Admin imports
-const AdminDashboard = lazy(() => import("@/pages/admin/dashboard")) as ComponentType;
-const AdminQuestions = lazy(() => import("@/pages/admin/questions")) as ComponentType;
-const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams")) as ComponentType;
-const AdminAchievements = lazy(() => import("@/pages/admin/achievements")) as ComponentType;
+const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
+const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
+const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
+const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -39,26 +40,52 @@ function Router() {
       <HeaderNav />
       <Suspense fallback={<LoadingSpinner />}>
         <Switch>
-          <Route path="/auth" component={AuthPage} />
+          <Route path="/auth">
+            {(params) => <AuthPage {...params} />}
+          </Route>
 
           {/* Public Routes */}
-          <Route path="/leaderboard" component={LeaderboardPage} />
+          <Route path="/leaderboard">
+            {(params) => <LeaderboardPage {...params} />}
+          </Route>
 
           {/* Protected User Routes */}
-          <ProtectedRoute path="/" component={WelcomePage} />
-          <ProtectedRoute path="/quiz" component={HomePage} />
-          <ProtectedRoute path="/settings" component={SettingsPage} />
-          <ProtectedRoute path="/profile" component={ProfilePage} />
-          <ProtectedRoute path="/teams" component={TeamsPage} />
-          <ProtectedRoute path="/team-allocation" component={TeamAllocationPage} />
+          <Route path="/">
+            {() => <WelcomePage />}
+          </Route>
+          <Route path="/quiz">
+            {() => <HomePage />}
+          </Route>
+          <Route path="/settings">
+            {() => <SettingsPage />}
+          </Route>
+          <Route path="/profile">
+            {() => <ProfilePage />}
+          </Route>
+          <Route path="/teams">
+            {() => <TeamsPage />}
+          </Route>
+          <Route path="/team-allocation">
+            {() => <TeamAllocationPage />}
+          </Route>
 
           {/* Admin Routes */}
-          <AdminRoute path="/admin" component={AdminDashboard} />
-          <AdminRoute path="/admin/questions" component={AdminQuestions} />
-          <AdminRoute path="/admin/users" component={AdminUsersTeams} />
-          <AdminRoute path="/admin/achievements" component={AdminAchievements} />
+          <Route path="/admin">
+            {() => <AdminDashboard />}
+          </Route>
+          <Route path="/admin/questions">
+            {() => <AdminQuestions />}
+          </Route>
+          <Route path="/admin/users">
+            {() => <AdminUsersTeams />}
+          </Route>
+          <Route path="/admin/achievements">
+            {() => <AdminAchievements />}
+          </Route>
 
-          <Route component={NotFound} />
+          <Route>
+            {(params) => <NotFound {...params} />}
+          </Route>
         </Switch>
       </Suspense>
     </>
@@ -68,10 +95,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router />
-        <Toaster />
-      </AuthProvider>
+      <CacheProvider>
+        <AuthProvider>
+          <Router />
+          <Toaster />
+        </AuthProvider>
+      </CacheProvider>
     </QueryClientProvider>
   );
 }

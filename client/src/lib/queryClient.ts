@@ -32,7 +32,7 @@ export const getQueryFn: <T>(options: {
     try {
       const res = await fetch(queryKey[0] as string, {
         credentials: "include",
-        cache: 'default', // Use browser's cache when possible
+        cache: 'default',
       });
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
@@ -47,16 +47,30 @@ export const getQueryFn: <T>(options: {
     }
   };
 
+// Get cache settings from localStorage or use defaults
+const getCacheSettings = () => {
+  try {
+    const savedSettings = localStorage.getItem('cacheSettings');
+    if (savedSettings) {
+      return JSON.parse(savedSettings);
+    }
+  } catch {
+    // If parsing fails, return default settings
+  }
+  return {
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retryOnReconnect: true,
+  };
+};
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-      cacheTime: 10 * 60 * 1000, // Cache persists for 10 minutes
-      refetchOnWindowFocus: false, // Disable automatic refetch on window focus
-      refetchOnReconnect: 'always', // Refetch when reconnecting to ensure data consistency
+      ...getCacheSettings(),
       retry: (failureCount, error) => {
-        // Only retry twice for network errors
         if (error instanceof Error && error.message.includes('network')) {
           return failureCount < 2;
         }
@@ -72,3 +86,14 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Update cache settings
+export const updateCacheSettings = (settings: any) => {
+  localStorage.setItem('cacheSettings', JSON.stringify(settings));
+  queryClient.setDefaultOptions({
+    queries: {
+      ...queryClient.getDefaultOptions().queries,
+      ...settings,
+    },
+  });
+};
