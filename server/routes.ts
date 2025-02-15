@@ -300,6 +300,29 @@ export function registerRoutes(app: Express): Server {
     res.json(latestAchievement || null);
   });
 
+  app.get("/api/analytics/navigation", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    // Add test data
+    const stats = {
+      externalReferrers: [
+        { source: "Google", count: 150 },
+        { source: "Direct", count: 100 },
+        { source: "Bing", count: 45 }
+      ],
+      topExitPages: [
+        { path: "/quiz", count: 75 },
+        { path: "/leaderboard", count: 50 },
+        { path: "/profile", count: 30 }
+      ],
+      internalFlows: [
+        { from: "/home", to: "/quiz", count: 200 },
+        { from: "/quiz", to: "/leaderboard", count: 150 }
+      ],
+      bounceRate: 35
+    };
+    res.json(stats);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
