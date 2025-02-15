@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Award } from "lucide-react";
 
-export function AdminAchievementsPage() {
+export default function AdminAchievementsPage() {
   const { data: achievements, isLoading } = useQuery<Achievement[]>({
     queryKey: ["/api/admin/achievements"],
   });
