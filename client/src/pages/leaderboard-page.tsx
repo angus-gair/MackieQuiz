@@ -41,9 +41,14 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
-      <div className="max-w-md mx-auto">
+      <div className="container max-w-md mx-auto">
         <div className="flex items-center mb-6">
-          <Button variant="ghost" size="sm" className="h-8 mr-3" onClick={() => setLocation("/")}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 mr-3" 
+            onClick={() => setLocation("/")}
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
@@ -59,7 +64,7 @@ export default function LeaderboardPage() {
               onClick={() => setShowTeams(false)}
               className={cn(
                 "w-full",
-                !showTeams && "bg-[#1a365d] text-white hover:bg-[#1a365d]/90"
+                !showTeams && "bg-primary text-primary-foreground hover:bg-primary/90"
               )}
             >
               <User className="h-4 w-4 mr-2" />
@@ -71,7 +76,7 @@ export default function LeaderboardPage() {
               onClick={() => setShowTeams(true)}
               className={cn(
                 "w-full",
-                showTeams && "bg-[#1a365d] text-white hover:bg-[#1a365d]/90"
+                showTeams && "bg-primary text-primary-foreground hover:bg-primary/90"
               )}
             >
               <Users className="h-4 w-4 mr-2" />
@@ -81,35 +86,38 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Description Text */}
-        <div className="text-sm text-muted-foreground text-center mb-6" key={showTeams ? "team" : "individual"}>
+        <p className="text-sm text-muted text-center mb-6" key={showTeams ? "team" : "individual"}>
           {showTeams
             ? "Teams are ranked by weekly quiz completion rate"
             : "Individuals are ranked by total points accumulated over multiple weeks through quiz completions"
           }
-        </div>
+        </p>
 
         <div className="space-y-3">
           {showTeams ? (
             // Teams View
             teamStats.map((team, index) => {
               const Badge = BADGES[index]?.icon ?? null;
-              const color = BADGES[index]?.color ?? "text-gray-500";
+              const color = BADGES[index]?.color ?? "text-muted";
 
               return (
-                <Card key={`team-${index}`} className={cn("overflow-hidden", index === 0 && "border-yellow-500/50")}>
+                <Card key={`team-${index}`} className={cn(
+                  "overflow-hidden transition-all duration-200 hover:shadow-md",
+                  index === 0 && "border-yellow-500/50"
+                )}>
                   <CardHeader className="py-3">
                     <CardTitle className="flex items-center justify-between text-base">
                       <div className="flex items-center gap-2 min-w-0">
                         {Badge && <Badge className={cn("h-5 w-5", color)} />}
-                        <span className="text-[#1a365d] font-semibold truncate">
+                        <span className="text-primary font-semibold truncate">
                           {index + 1}. {team.teamName}
                         </span>
                       </div>
                       <span className={cn(
                         "text-base font-bold ml-2",
-                        team.weeklyCompletionPercentage >= 80 ? "text-green-500" :
-                        team.weeklyCompletionPercentage >= 50 ? "text-yellow-500" :
-                        "text-red-500"
+                        team.weeklyCompletionPercentage >= 80 ? "text-success-color" :
+                        team.weeklyCompletionPercentage >= 50 ? "text-warning-color" :
+                        "text-danger-color"
                       )}>
                         {Math.round(team.weeklyCompletionPercentage)}% completed
                       </span>
@@ -122,19 +130,22 @@ export default function LeaderboardPage() {
             // Individual View
             users.map((user, index) => {
               const Badge = BADGES[index]?.icon ?? null;
-              const color = BADGES[index]?.color ?? "text-gray-500";
+              const color = BADGES[index]?.color ?? "text-muted";
 
               return (
-                <Card key={`user-${index}`} className={cn("overflow-hidden", index === 0 && "border-yellow-500/50")}>
+                <Card key={`user-${index}`} className={cn(
+                  "overflow-hidden transition-all duration-200 hover:shadow-md",
+                  index === 0 && "border-yellow-500/50"
+                )}>
                   <CardHeader className="py-3">
                     <CardTitle className="flex items-center justify-between text-base">
                       <div className="flex items-center gap-2 min-w-0">
                         {Badge && <Badge className={cn("h-5 w-5", color)} />}
-                        <span className="text-[#1a365d] font-semibold truncate">
+                        <span className="text-primary font-semibold truncate">
                           {index + 1}. {user.username}
                         </span>
                       </div>
-                      <span className="font-bold">{user.weeklyScore ?? 0} pts</span>
+                      <span className="font-bold text-success-color">{user.weeklyScore ?? 0} pts</span>
                     </CardTitle>
                   </CardHeader>
                 </Card>
