@@ -197,15 +197,6 @@ export class DatabaseStorage implements IStorage {
         log(`User ${answer.userId} completed a quiz`);
 
         try {
-          // Ensure user streak record exists and update it
-          const streak = await this.getOrCreateUserStreak(answer.userId);
-          await this.updateUserStreak(answer.userId, true);
-          log(`Updated streak for user ${answer.userId}: current streak ${streak.currentStreak}`);
-        } catch (err) {
-          log(`Error updating user streak: ${err}`);
-        }
-
-        try {
           // Calculate total completed quizzes for achievements
           const totalQuizzes = Math.floor(userAnswers.length / 3);
           log(`User ${answer.userId} has completed ${totalQuizzes} quizzes total`);
@@ -223,10 +214,31 @@ export class DatabaseStorage implements IStorage {
             log(`Created first quiz achievement for user ${answer.userId}`);
           }
 
-          // Check for other milestone achievements
-          await this.checkAndAwardAchievements(answer.userId);
+          // Check for other milestone achievements (3, 5, 7, 10)
+          const milestones = [3, 5, 7, 10];
+          if (milestones.includes(totalQuizzes)) {
+            const [achievement] = await db.insert(achievements).values({
+              userId: answer.userId,
+              type: 'quiz_milestone',
+              milestone: totalQuizzes,
+              name: `${totalQuizzes} Quizzes Complete!`,
+              description: `You've completed ${totalQuizzes} quizzes!`,
+              icon: `quiz-${totalQuizzes}`
+            }).returning();
+            log(`Created ${totalQuizzes} quiz milestone achievement for user ${answer.userId}`);
+          }
+
         } catch (err) {
           log(`Error creating achievements: ${err}`);
+        }
+
+        try {
+          // Ensure user streak record exists and update it
+          const streak = await this.getOrCreateUserStreak(answer.userId);
+          await this.updateUserStreak(answer.userId, true);
+          log(`Updated streak for user ${answer.userId}: current streak ${streak.currentStreak}`);
+        } catch (err) {
+          log(`Error updating user streak: ${err}`);
         }
 
         try {
