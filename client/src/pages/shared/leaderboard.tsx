@@ -115,8 +115,7 @@ export default function LeaderboardPage() {
               {/* Two-line description */}
               <p className="text-xs text-muted-foreground leading-tight">
                 Individuals are ranked by total score as determined by
-                the number of correct answers,<br />
-                accumulated over each week.
+                the number of correct answers, accumulated over each week.
               </p>
 
               {/* Loading / Error / Empty */}
