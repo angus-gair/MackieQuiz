@@ -66,30 +66,37 @@ app.use((req, res, next) => {
       log('Static serving setup completed');
     }
 
-    // Use PORT from environment variable with fallback
-    const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+    // Try different ports if the default is busy
+    const ports = [5000, 5001, 3000, 3001];
     const HOST = "0.0.0.0";
+    let server_started = false;
 
-    log(`Attempting to start server on ${HOST}:${PORT}...`);
+    for (const PORT of ports) {
+      try {
+        log(`Attempting to start server on ${HOST}:${PORT}...`);
+        await new Promise<void>((resolve, reject) => {
+          server.listen(PORT, HOST, () => {
+            log(`Server started successfully on ${HOST}:${PORT}`);
+            server_started = true;
+            resolve();
+          }).on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+              log(`Port ${PORT} is already in use, trying next port...`);
+              resolve(); // Continue to next port
+            } else {
+              reject(error);
+            }
+          });
+        });
 
-    // Add error handling for the server
-    server.on('error', (error: any) => {
-      if (error.code === 'EADDRINUSE') {
-        log(`Error: Port ${PORT} is already in use. Please free up the port and try again.`);
-        process.exit(1);
-      } else {
-        log(`Server error: ${error.message}`);
-        throw error;
+        if (server_started) break;
+      } catch (error: any) {
+        log(`Error starting server on port ${PORT}: ${error.message}`);
+        if (PORT === ports[ports.length - 1]) {
+          throw new Error('All ports are busy, cannot start server');
+        }
       }
-    });
-
-    // Wrap server.listen in a promise for better error handling
-    await new Promise<void>((resolve, reject) => {
-      server.listen(PORT, HOST, () => {
-        log(`Server started successfully on ${HOST}:${PORT}`);
-        resolve();
-      }).on('error', reject);
-    });
+    }
 
   } catch (error) {
     log(`Failed to start server: ${error}`);
