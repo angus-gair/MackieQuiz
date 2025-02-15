@@ -2,5 +2,11 @@
   "variant": "professional",
   "primary": "#1a365d",
   "appearance": "light",
-  "radius": 0.75
+  "radius": 0.75,
+  "colors": {
+    "background": "#f8f9fa",
+    "foreground": "#1c1c1e",
+    "muted": "#64748b",
+    "border": "#e2e8f0"
+  }
 }
