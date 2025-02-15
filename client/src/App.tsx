@@ -2,29 +2,29 @@ import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, ComponentType } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
 import { HeaderNav } from "@/components/header-nav";
 
-// Lazy load components
-const NotFound = lazy(() => import("@/pages/not-found"));
-const HomePage = lazy(() => import("@/pages/home-page"));
-const AuthPage = lazy(() => import("@/pages/auth-page"));
-const SettingsPage = lazy(() => import("@/pages/settings-page"));
-const ProfilePage = lazy(() => import("@/pages/user/profile"));
-const TeamsPage = lazy(() => import("@/pages/teams-page"));
-const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
-const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
-const WelcomePage = lazy(() => import("@/pages/welcome-page"));
+// Lazy load components with proper typing
+const NotFound = lazy(() => import("@/pages/not-found")) as ComponentType;
+const HomePage = lazy(() => import("@/pages/home-page")) as ComponentType;
+const AuthPage = lazy(() => import("@/pages/auth-page")) as ComponentType;
+const SettingsPage = lazy(() => import("@/pages/settings-page")) as ComponentType;
+const ProfilePage = lazy(() => import("@/pages/user/profile")) as ComponentType;
+const TeamsPage = lazy(() => import("@/pages/teams-page")) as ComponentType;
+const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard")) as ComponentType;
+const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page")) as ComponentType;
+const WelcomePage = lazy(() => import("@/pages/welcome-page")) as ComponentType;
 
 // Admin imports
-const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
-const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
-const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
-const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
+const AdminDashboard = lazy(() => import("@/pages/admin/dashboard")) as ComponentType;
+const AdminQuestions = lazy(() => import("@/pages/admin/questions")) as ComponentType;
+const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams")) as ComponentType;
+const AdminAchievements = lazy(() => import("@/pages/admin/achievements")) as ComponentType;
 
 // Loading component
 const LoadingSpinner = () => (
