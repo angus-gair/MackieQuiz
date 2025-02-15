@@ -22,18 +22,7 @@ export default {
           foreground: "hsl(var(--popover-foreground))",
         },
         primary: {
-          DEFAULT: "var(--primary-color)",
-          50: "var(--primary-50)",
-          100: "var(--primary-100)",
-          200: "var(--primary-200)",
-          300: "var(--primary-300)",
-          400: "var(--primary-400)",
-          500: "var(--primary-500)",
-          600: "var(--primary-600)",
-          700: "var(--primary-700)",
-          800: "var(--primary-800)",
-          900: "var(--primary-900)",
-          950: "var(--primary-950)",
+          DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -75,12 +64,20 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
         },
       },
       animation: {
