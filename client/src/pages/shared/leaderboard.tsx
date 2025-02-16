@@ -311,8 +311,8 @@ export default function LeaderboardPage() {
                     }`}
                   >
                     <CardContent className="p-4">
-                      {/* Team Name / % Completed */}
-                      <div className="flex items-center justify-between mb-2">
+                      {/* Team Name and Badge */}
+                      <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           {badge && (
                             <badge.icon
@@ -321,37 +321,43 @@ export default function LeaderboardPage() {
                             />
                           )}
                           <span className="text-xs text-muted-foreground">{`#${index + 1}`}</span>
-                          {/* Team Avatar and Name */}
-                          <div className="flex items-center gap-2">
-                            {getTeamAvatar(team.teamName, team.members)} {/* Add team avatar */}
-                            <span className="text-base font-semibold text-blue-800">
-                              {team.teamName}
-                            </span>
-                          </div>
+                          <span className="text-base font-semibold text-blue-800">
+                            {team.teamName}
+                          </span>
                         </div>
-                        <div className="text-base font-semibold text-emerald-600">
-                          {Math.round(team.weeklyCompletionPercentage)}% completed
-                        </div>
+                        {/* Team Avatar */}
+                        {getTeamAvatar(team.teamName, team.members)}
                       </div>
 
-                      {/* Stats Row */}
-                      <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <div className="text-gray-600">Score</div>
+                          <div className="text-gray-600 text-sm">Score</div>
                           <div className="text-base font-semibold text-blue-800">
                             {team.totalScore}
                           </div>
                         </div>
                         <div>
-                          <div className="text-gray-600">Avg Score</div>
+                          <div className="text-gray-600 text-sm">Avg Score</div>
                           <div className="text-base font-semibold text-blue-800">
                             {Math.round(team.averageScore)}
                           </div>
                         </div>
                         <div>
-                          <div className="text-gray-600">Members</div>
+                          <div className="text-gray-600 text-sm">Members</div>
                           <div className="text-base font-semibold text-blue-800">
                             {team.members}
+                          </div>
+                        </div>
+                        {/* Completion Rate - Highlighted */}
+                        <div>
+                          <div className="text-gray-600 text-sm font-medium">Completion Rate</div>
+                          <div className={`text-base font-bold ${
+                            team.weeklyCompletionPercentage >= 80 ? "text-emerald-600" :
+                            team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
+                            "text-destructive"
+                          }`}>
+                            {Math.round(team.weeklyCompletionPercentage)}%
                           </div>
                         </div>
                       </div>
