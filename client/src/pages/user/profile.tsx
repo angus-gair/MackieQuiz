@@ -1,12 +1,18 @@
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Award } from "lucide-react";
 import { HeaderNav } from "@/components/header-nav";
+import type { Achievement } from "@shared/schema";
 
 export default function ProfilePage() {
   const { user } = useAuth();
+
+  const { data: achievements } = useQuery<Achievement[]>({
+    queryKey: ["/api/achievements/user"],
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -54,6 +60,46 @@ export default function ProfilePage() {
                   Edit Profile
                 </Link>
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Achievements Section */}
+          <Card className="mt-4">
+            <CardHeader className="py-4">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                Achievements
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {achievements && achievements.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {achievements.map((achievement) => (
+                    <div
+                      key={achievement.id}
+                      className="flex flex-col items-center p-3 bg-muted/30 rounded-lg text-center hover:bg-muted/50 transition-colors"
+                      title={achievement.description}
+                    >
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+                        <Award className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="text-xs font-medium truncate w-full">
+                        {achievement.name}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {new Date(achievement.earnedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <Award className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    No achievements yet. Complete quizzes to earn badges!
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

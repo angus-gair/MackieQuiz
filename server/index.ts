@@ -2,11 +2,13 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import * as net from "net";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -37,6 +39,27 @@ app.use((req, res, next) => {
   next();
 });
 
+async function findAvailablePort(startPort: number): Promise<number> {
+  for (let port = startPort; port < startPort + 10; port++) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const testServer = net.createServer()
+          .once('error', reject)
+          .once('listening', () => {
+            testServer.close();
+            resolve();
+          })
+          .listen(port, '0.0.0.0');
+      });
+      return port;
+    } catch (err) {
+      log(`Port ${port} is in use, trying next port...`);
+      continue;
+    }
+  }
+  throw new Error('No available ports found');
+}
+
 (async () => {
   try {
     log('Starting server initialization...');
@@ -59,37 +82,22 @@ app.use((req, res, next) => {
       log('Static serving setup completed');
     }
 
-    // Use the environment-provided port
     const HOST = "0.0.0.0";
-    const port = parseInt(process.env.PORT || "3000"); // Changed default port to 3000
+    const preferredPort = parseInt(process.env.PORT || "3000");
 
-    log(`Configuration: HOST=${HOST}, PORT=${port}, ENV=${app.get("env")}`);
+    log(`Searching for available port starting from ${preferredPort}...`);
+    const port = await findAvailablePort(preferredPort);
+    log(`Found available port: ${port}`);
 
-    // Check if port is already in use before attempting to bind
-    const net = require('net');
-    const testServer = net.createServer()
-      .once('error', (err: any) => {
-        if (err.code === 'EADDRINUSE') {
-          log(`ERROR: Port ${port} is already in use`);
-          process.exit(1);
-        }
-        log(`ERROR: Unexpected error checking port availability: ${err.message}`);
-        process.exit(1);
-      })
+    server.listen(port, HOST)
       .once('listening', () => {
-        testServer.close();
-        // Port is available, start the actual server
-        server.listen(port, HOST)
-          .once('listening', () => {
-            log(`Server started successfully on ${HOST}:${port}`);
-          })
-          .once('error', (error: any) => {
-            log(`ERROR: Failed to start server:`);
-            log(error.stack || error.message || error);
-            process.exit(1);
-          });
+        log(`✨ Server started successfully on ${HOST}:${port}`);
       })
-      .listen(port, HOST);
+      .once('error', (error: any) => {
+        log(`ERROR: Failed to start server:`);
+        log(error.stack || error.message || error);
+        process.exit(1);
+      });
 
   } catch (error: any) {
     log(`FATAL: Server initialization failed:`);
@@ -98,6 +106,7 @@ app.use((req, res, next) => {
   }
 })();
 
+// Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   const status = err.status || err.statusCode || 500;
