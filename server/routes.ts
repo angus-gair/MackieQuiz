@@ -377,6 +377,8 @@ export function registerRoutes(app: Express): Server {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     try {
+      console.log('Received feedback request:', req.body); // Debug log
+
       const feedback = await storage.createFeedback({
         ...req.body,
         userId: req.user.id

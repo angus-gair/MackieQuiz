@@ -39,6 +39,7 @@ export default function WelcomePage() {
   const feedbackMutation = useMutation({
     mutationFn: async (values: InsertFeedback) => {
       try {
+        console.log('Submitting feedback:', values); // Debug log
         const response = await fetch("/api/feedback", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -52,6 +53,7 @@ export default function WelcomePage() {
 
         return response.json();
       } catch (error) {
+        console.error('Feedback submission error:', error); // Debug log
         if (error instanceof Error) {
           throw error;
         }
@@ -76,7 +78,8 @@ export default function WelcomePage() {
     },
   });
 
-  const onSubmit = (values: InsertFeedback) => {
+  const onSubmit = async (values: InsertFeedback) => {
+    console.log('Form submitted with values:', values); // Debug log
     if (!user?.id) {
       toast({
         title: "Error",
