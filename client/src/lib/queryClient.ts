@@ -42,8 +42,15 @@ export const getQueryFn: <T>(options: {
       await throwIfResNotOk(res);
       return await res.json();
     } catch (error) {
-      console.error('Query error:', error);
-      throw error;
+      // Enhanced error logging with more context
+      const errorDetails = {
+        queryKey,
+        type: error instanceof Error ? error.name : typeof error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      };
+      console.error('Query error:', JSON.stringify(errorDetails, null, 2));
+      throw error; // Re-throw to let React Query handle the error state
     }
   };
 
