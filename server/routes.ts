@@ -271,6 +271,17 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get("/api/achievements", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const achievements = await storage.getUserAchievements(req.user.id);
+      res.json(achievements);
+    } catch (error) {
+      console.error('Error fetching user achievements:', error);
+      res.status(500).json({ error: 'Failed to fetch achievements' });
+    }
+  });
 
   app.get("/api/users/profiles", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
