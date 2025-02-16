@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertFeedbackSchema, type InsertFeedback } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function WelcomePage() {
   const { user } = useAuth();
@@ -38,48 +39,33 @@ export default function WelcomePage() {
 
   const feedbackMutation = useMutation({
     mutationFn: async (values: InsertFeedback) => {
-      try {
-        console.log('Submitting feedback:', values); // Debug log
-        const response = await fetch("/api/feedback", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...values, userId: user?.id }),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || "Failed to submit feedback");
-        }
-
-        return response.json();
-      } catch (error) {
-        console.error('Feedback submission error:', error); // Debug log
-        if (error instanceof Error) {
-          throw error;
-        }
-        throw new Error("Failed to submit feedback");
-      }
+      console.log('Submitting feedback:', values);
+      return await apiRequest("/api/feedback", {
+        method: "POST",
+        body: JSON.stringify({ ...values, userId: user?.id }),
+      });
     },
     onSuccess: (data) => {
       toast({
         title: "Feedback Submitted",
-        description: data.message || "Thank you for your feedback!",
+        description: "Thank you for your feedback! We appreciate your input.",
         duration: 5000,
       });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/feedback"] });
     },
     onError: (error: Error) => {
+      console.error('Feedback submission error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to submit feedback. Please try again.",
+        description: "Failed to submit feedback. Please try again.",
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = async (values: InsertFeedback) => {
-    console.log('Form submitted with values:', values); // Debug log
+    console.log('Form submitted with values:', values);
     if (!user?.id) {
       toast({
         title: "Error",

@@ -863,7 +863,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(userStreaks.userId, userId))
       .returning();
 
-    returnupdatedStreak;
+    return updatedStreak;
   }
 
   async updateTeamStats(teamName: string, won: boolean): Promise<TeamStat> {
@@ -1049,33 +1049,38 @@ export class DatabaseStorage implements IStorage {
     userId: number,
     contributionType: string
   ): Promise<Achievement | null> {
-    const [existing] = await db
-      .select()
-      .from(achievements)
-      .where(
-        and(
+    try {
+      const user = await this.getUser(userId);
+      if (!user?.team) return null;
+
+      // Check if user already has this achievement
+      const [existingAchievement] = await db
+        .select()
+        .from(achievements)
+        .where(and(
           eq(achievements.userId, userId),
           eq(achievements.type, 'team_contribution'),
           eq(achievements.category, contributionType)
-        )
-      );
+        ));
 
-    if (!existing) {
-      const [achievement] = await db.insert(achievements).values({
-        userId,
-        type: 'team_contribution',
-        milestone: 1,
-        name: `Team ${contributionType} Champion`,
-        description: `Outstanding contribution to team ${contributionType}!`,
-        icon: `team-${contributionType.toLowerCase()}`,
-        badge: `team-contrib-1`,
-        category: 'team',
-        tier: 'silver',
-        isHighestTier: false
-      }).returning();
-      return achievement;
+      if (!existingAchievement) {
+        const [achievement] = await db.insert(achievements).values({
+          userId,
+          type: 'team_contribution',
+          category: contributionType,
+          name: 'Team Contributor',
+          description: `Outstanding contribution to team through ${contributionType}`,
+          icon: 'team-contributor',
+          earnedAt: new Date()
+        }).returning();
+        return achievement;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error awarding team contribution achievement:', error);
+      return null;
     }
-    return null;
   }
 
   async updateAchievementProgress(
@@ -1188,21 +1193,44 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
   async createFeedback(feedbackData: InsertFeedback): Promise<Feedback> {
-    const [newFeedback] = await db
-      .insert(feedback)
-      .values({
-        ...feedbackData,
-        status: 'pending'
-      })
-      .returning();
-    return newFeedback;
+    try {
+      console.log('Creating feedback in storage:', feedbackData); // Debug log
+      const [newFeedback] = await db
+        .insert(feedback)
+        .values({
+          ...feedbackData,
+          createdAt: new Date()
+        })
+        .returning();
+      console.log('Feedback created successfully:', newFeedback); // Debug log
+      return newFeedback;
+    } catch (error) {
+      console.error('Error creating feedback:', error);
+      throw error;
+    }
   }
 
   async getFeedback(): Promise<Feedback[]> {
-    return await db
-      .select()
-      .from(feedback)
-      .orderBy(desc(feedback.createdAt));
+    try {
+      return await db
+        .select({
+          id: feedback.id,
+          userId: feedback.userId,
+          content: feedback.content,
+          rating: feedback.rating,
+          category: feedback.category,
+          createdAt: feedback.createdAt,
+          user: {
+            username: users.username
+          }
+        })
+        .from(feedback)
+        .leftJoin(users, eq(feedback.userId, users.id))
+        .orderBy(desc(feedback.createdAt));
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+      throw error;
+    }
   }
 }
 

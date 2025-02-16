@@ -15,24 +15,28 @@ export async function sendFeedbackNotification(feedback: {
   rating: number;
   username?: string;
 }) {
+  console.log('Preparing to send feedback notification email'); // Debug log
+
   const emailContent = `
     New Feedback Received
-    
+
     Category: ${feedback.category}
     Rating: ${feedback.rating}/5
     User: ${feedback.username || 'Anonymous'}
-    
+
     Message:
     ${feedback.content}
   `;
 
   try {
+    console.log('Sending email to admins:', ADMIN_EMAILS); // Debug log
     await mailService.send({
       to: ADMIN_EMAILS,
       from: 'no-reply@projectroundtable.com',
       subject: `New Feedback: ${feedback.category}`,
       text: emailContent,
     });
+    console.log('Email sent successfully'); // Debug log
     return true;
   } catch (error) {
     console.error('SendGrid email error:', error);
