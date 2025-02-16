@@ -43,21 +43,25 @@ export default function WelcomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
-      if (!response.ok) throw new Error("Failed to submit feedback");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to submit feedback");
+      }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Feedback Submitted",
-        description: "Thank you for your feedback!",
+        description: data.message || "Thank you for your feedback!",
+        duration: 5000,
       });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/feedback"] });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to submit feedback. Please try again.",
+        description: error.message || "Failed to submit feedback. Please try again.",
         variant: "destructive",
       });
     },

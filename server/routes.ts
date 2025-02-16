@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
 import { UAParser } from "ua-parser-js";
+import { sendFeedbackNotification } from "./utils/email"; // Fixed import path
 
 // In-memory cache settings storage
 const globalCacheSettings = {
@@ -371,6 +372,51 @@ export function registerRoutes(app: Express): Server {
     };
     res.json(stats);
   });
+
+  app.post("/api/feedback", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const feedback = await storage.createFeedback({
+        ...req.body,
+        userId: req.user.id
+      });
+
+      // Send email notification to admins
+      const emailSent = await sendFeedbackNotification({
+        ...feedback,
+        username: req.user.username
+      });
+
+      if (!emailSent) {
+        console.error('Failed to send feedback notification email');
+      }
+
+      res.json({
+        success: true,
+        message: 'Thank you for your feedback! We appreciate your input.'
+      });
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      res.status(500).json({
+        error: 'Failed to submit feedback',
+        message: 'An error occurred while submitting your feedback. Please try again.'
+      });
+    }
+  });
+
+  app.get("/api/feedback", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+
+    try {
+      const feedback = await storage.getFeedback();
+      res.json(feedback);
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+      res.status(500).json({ error: 'Failed to fetch feedback' });
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;

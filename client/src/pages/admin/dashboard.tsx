@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { CacheSettings } from "@/components/admin/cache-settings";
+import { FeedbackView } from "@/components/admin/feedback-view";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <main className="pt-16 px-4 pb-24">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-bold text-primary mb-6">Admin Dashboard</h1>
 
           {/* Cache Settings Section */}
@@ -40,8 +41,13 @@ export default function AdminDashboard() {
             <CacheSettings />
           </div>
 
+          {/* Feedback Section */}
+          <div className="mb-6">
+            <FeedbackView />
+          </div>
+
           {/* Module Cards */}
-          <div className="space-y-2">
+          <div className="grid gap-4 md:grid-cols-3">
             {modules.map((module) => (
               <Card key={module.href}>
                 <CardHeader className="py-3">

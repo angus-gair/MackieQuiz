@@ -1,4 +1,5 @@
 import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile, type AchievementProgress, type InsertAchievementProgress} from "@shared/schema";
+import { feedback, type Feedback, type InsertFeedback } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte } from "drizzle-orm";
 import session from "express-session";
@@ -110,6 +111,8 @@ export interface IStorage {
   updateUserProfileShowcase(userId: number, achievementIds: string[]): Promise<UserProfile>;
   updateTeamAvatar(userId: number, preference: string, color?: string): Promise<UserProfile>;
   getHighestTierAchievements(userId: number, limit?: number): Promise<Achievement[]>;
+  createFeedback(feedbackData: InsertFeedback): Promise<Feedback>;
+  getFeedback(): Promise<Feedback[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -860,7 +863,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(userStreaks.userId, userId))
       .returning();
 
-    return updatedStreak;
+    returnupdatedStreak;
   }
 
   async updateTeamStats(teamName: string, won: boolean): Promise<TeamStat> {
@@ -1183,6 +1186,23 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(achievements.earnedAt))
       .limit(limit);
+  }
+  async createFeedback(feedbackData: InsertFeedback): Promise<Feedback> {
+    const [newFeedback] = await db
+      .insert(feedback)
+      .values({
+        ...feedbackData,
+        status: 'pending'
+      })
+      .returning();
+    return newFeedback;
+  }
+
+  async getFeedback(): Promise<Feedback[]> {
+    return await db
+      .select()
+      .from(feedback)
+      .orderBy(desc(feedback.createdAt));
   }
 }
 
