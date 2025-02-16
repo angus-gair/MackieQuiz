@@ -38,16 +38,25 @@ export default function WelcomePage() {
 
   const feedbackMutation = useMutation({
     mutationFn: async (values: InsertFeedback) => {
-      const response = await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to submit feedback");
+      try {
+        const response = await fetch("/api/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, userId: user?.id }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to submit feedback");
+        }
+
+        return response.json();
+      } catch (error) {
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error("Failed to submit feedback");
       }
-      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -68,6 +77,14 @@ export default function WelcomePage() {
   });
 
   const onSubmit = (values: InsertFeedback) => {
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit feedback",
+        variant: "destructive",
+      });
+      return;
+    }
     feedbackMutation.mutate(values);
   };
 
