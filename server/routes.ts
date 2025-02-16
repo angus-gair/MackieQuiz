@@ -272,6 +272,26 @@ export function registerRoutes(app: Express): Server {
   });
 
 
+  app.get("/api/users/profiles", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      // Get all users first to get their IDs
+      const users = await storage.getUsers();
+      // Fetch profiles for all users
+      const profiles = await Promise.all(
+        users.map(async (user) => {
+          return await storage.getOrCreateUserProfile(user.id);
+        })
+      );
+
+      res.json(profiles);
+    } catch (error) {
+      console.error('Error fetching user profiles:', error);
+      res.status(500).json({ error: 'Failed to fetch user profiles' });
+    }
+  });
+
   app.get("/api/analytics/sessions", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
     const stats = await storage.getSessionAnalytics();
