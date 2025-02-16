@@ -83,7 +83,7 @@ async function findAvailablePort(startPort: number): Promise<number> {
     }
 
     const HOST = "0.0.0.0";
-    const preferredPort = parseInt(process.env.PORT || "3000");
+    const preferredPort = parseInt(process.env.PORT || "5000");
 
     log(`Searching for available port starting from ${preferredPort}...`);
     const port = await findAvailablePort(preferredPort);
