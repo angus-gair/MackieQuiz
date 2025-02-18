@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import { createServer } from "http";
+import net from "net";
 
 const app = express();
 app.use(express.json());
@@ -38,11 +40,27 @@ app.use((req, res, next) => {
   next();
 });
 
+// Function to check if a port is available
+const isPortAvailable = (port: number): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const server = net.createServer()
+      .once('error', () => {
+        resolve(false);
+      })
+      .once('listening', () => {
+        server.close();
+        resolve(true);
+      })
+      .listen(port);
+  });
+};
+
 (async () => {
   try {
     log('Starting server initialization...');
     log('Initializing Express routes...');
-    const server = registerRoutes(app);
+    const server = createServer(app);
+    registerRoutes(app);
     log('Routes registered successfully');
 
     if (app.get("env") === "development") {
@@ -60,25 +78,32 @@ app.use((req, res, next) => {
       log('Static serving setup completed');
     }
 
-    // Force port 5000 for development
     const HOST = process.env.HOST || "0.0.0.0";
-    process.env.PORT = "5000"; // Explicitly set port 5000
-    const PORT = parseInt(process.env.PORT, 10);
+    const PORT = 5000;
 
-    log(`Starting server on port ${PORT}...`);
-    server.listen(PORT, HOST)
-      .once('listening', () => {
-        log(`✨ Server started successfully on ${HOST}:${PORT}`);
-      })
-      .once('error', (error: any) => {
-        if ((error as NodeJS.ErrnoException).code === 'EADDRINUSE') {
-          log(`ERROR: Port ${PORT} is already in use. Please free up port ${PORT} and try again.`);
-        } else {
-          log(`ERROR: Failed to start server:`);
-          log(error.stack || error.message || error);
-        }
-        process.exit(1);
+    // Check if port is available
+    const portAvailable = await isPortAvailable(PORT);
+    if (!portAvailable) {
+      log(`Port ${PORT} is already in use. Attempting to force close...`);
+      process.exit(1); // This will trigger a restart by Replit
+    }
+
+    // Set up cleanup handler
+    const cleanup = () => {
+      log('Shutting down server...');
+      server.close(() => {
+        log('Server closed successfully');
+        process.exit(0);
       });
+    };
+
+    // Handle process termination
+    process.on('SIGTERM', cleanup);
+    process.on('SIGINT', cleanup);
+
+    server.listen(PORT, HOST, () => {
+      log(`✨ Server started successfully on ${HOST}:${PORT}`);
+    });
 
   } catch (error: any) {
     log(`FATAL: Server initialization failed:`);

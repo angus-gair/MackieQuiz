@@ -107,14 +107,16 @@ export default function WelcomePage() {
                 Provide Feedback
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Send Feedback</DialogTitle>
                 <DialogDescription>
                   Share your thoughts with us to help improve the platform.
                 </DialogDescription>
               </DialogHeader>
-              {user && <FeedbackForm userId={user.id} />}
+              <div className="mt-4 px-1">
+                {user && <FeedbackForm userId={user.id} />}
+              </div>
             </DialogContent>
           </Dialog>
         </div>
