@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertFeedbackSchema, type InsertFeedback } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useState } from "react";
 
 interface FeedbackFormProps {
   userId: number;
@@ -18,7 +17,6 @@ interface FeedbackFormProps {
 
 export function FeedbackForm({ userId, onSuccess, onClose }: FeedbackFormProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<InsertFeedback>({
     resolver: zodResolver(insertFeedbackSchema),
@@ -31,23 +29,18 @@ export function FeedbackForm({ userId, onSuccess, onClose }: FeedbackFormProps) 
   });
 
   const onSubmit = async (values: InsertFeedback) => {
-    console.log('Submitting feedback:', values); // Debug log
-    setIsSubmitting(true);
-
     try {
       const response = await apiRequest("POST", "/api/feedback", values);
-      const data = await response.json();
-      console.log('Feedback submission response:', data); // Debug log
-
-      toast({
-        title: "Thank You!",
-        description: "Your feedback has been submitted successfully.",
-        duration: 5000,
-      });
-
-      form.reset();
-      onSuccess?.();
-      onClose?.();
+      if (response.ok) {
+        toast({
+          title: "Thank You!",
+          description: "Your feedback has been submitted successfully.",
+          duration: 5000,
+        });
+        form.reset();
+        onSuccess?.();
+        onClose?.();
+      }
     } catch (error) {
       console.error('Feedback submission error:', error);
       toast({
@@ -56,8 +49,6 @@ export function FeedbackForm({ userId, onSuccess, onClose }: FeedbackFormProps) 
         variant: "destructive",
         duration: 5000,
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -127,12 +118,8 @@ export function FeedbackForm({ userId, onSuccess, onClose }: FeedbackFormProps) 
           )}
         />
 
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Submitting..." : "Submit Feedback"}
+        <Button type="submit" className="w-full">
+          Submit Feedback
         </Button>
       </form>
     </Form>
