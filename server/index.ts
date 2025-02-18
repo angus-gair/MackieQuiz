@@ -2,7 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
-import * as net from "net";
 
 const app = express();
 app.use(express.json());
@@ -39,27 +38,6 @@ app.use((req, res, next) => {
   next();
 });
 
-async function findAvailablePort(startPort: number): Promise<number> {
-  for (let port = startPort; port < startPort + 10; port++) {
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const testServer = net.createServer()
-          .once('error', reject)
-          .once('listening', () => {
-            testServer.close();
-            resolve();
-          })
-          .listen(port, '0.0.0.0');
-      });
-      return port;
-    } catch (err) {
-      log(`Port ${port} is in use, trying next port...`);
-      continue;
-    }
-  }
-  throw new Error('No available ports found');
-}
-
 (async () => {
   try {
     log('Starting server initialization...');
@@ -82,20 +60,23 @@ async function findAvailablePort(startPort: number): Promise<number> {
       log('Static serving setup completed');
     }
 
-    const HOST = "0.0.0.0";
-    const preferredPort = parseInt(process.env.PORT || "5000");
+    // Force port 5000 for development
+    const HOST = process.env.HOST || "0.0.0.0";
+    process.env.PORT = "5000"; // Explicitly set port 5000
+    const PORT = parseInt(process.env.PORT, 10);
 
-    log(`Searching for available port starting from ${preferredPort}...`);
-    const port = await findAvailablePort(preferredPort);
-    log(`Found available port: ${port}`);
-
-    server.listen(port, HOST)
+    log(`Starting server on port ${PORT}...`);
+    server.listen(PORT, HOST)
       .once('listening', () => {
-        log(`✨ Server started successfully on ${HOST}:${port}`);
+        log(`✨ Server started successfully on ${HOST}:${PORT}`);
       })
       .once('error', (error: any) => {
-        log(`ERROR: Failed to start server:`);
-        log(error.stack || error.message || error);
+        if ((error as NodeJS.ErrnoException).code === 'EADDRINUSE') {
+          log(`ERROR: Port ${PORT} is already in use. Please free up port ${PORT} and try again.`);
+        } else {
+          log(`ERROR: Failed to start server:`);
+          log(error.stack || error.message || error);
+        }
         process.exit(1);
       });
 

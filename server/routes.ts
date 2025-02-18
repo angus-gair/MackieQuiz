@@ -1,10 +1,20 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
 import { UAParser } from "ua-parser-js";
-import { sendFeedbackNotification } from "./utils/email"; // Fixed import path
+import { sendFeedbackNotification } from "./utils/email";
+
+// Extend Express Request type
+declare global {
+  namespace Express {
+    interface Request {
+      analyticsSessionId?: string;
+      user?: any; // TODO: Replace with proper user type
+    }
+  }
+}
 
 // In-memory cache settings storage
 const globalCacheSettings = {
@@ -186,11 +196,21 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const id = parseInt(req.params.id);
-      const result = await storage.updateQuestion(id, req.body);
+
+      // Validate the update data
+      const result = await storage.updateQuestion(id, {
+        ...req.body,
+        updatedAt: new Date()
+      });
+
+      console.log(`Question ${id} updated successfully:`, result);
       res.json(result);
     } catch (error) {
       console.error("Question Update Error:", error);
-      res.status(500).json({ error: "Failed to update question" });
+      res.status(500).json({ 
+        error: "Failed to update question",
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
@@ -374,7 +394,13 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.post("/api/feedback", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) {
+      console.log('Unauthorized feedback submission attempt');
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'You must be logged in to submit feedback'
+      });
+    }
 
     try {
       console.log('Received feedback request:', req.body); // Debug log
@@ -391,7 +417,7 @@ export function registerRoutes(app: Express): Server {
       });
 
       if (!emailSent) {
-        console.error('Failed to send feedback notification email');
+        console.warn('Failed to send feedback notification email, but feedback was saved');
       }
 
       res.json({
@@ -399,7 +425,13 @@ export function registerRoutes(app: Express): Server {
         message: 'Thank you for your feedback! We appreciate your input.'
       });
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      console.error('Error submitting feedback:', {
+        error,
+        body: req.body,
+        userId: req.user.id,
+        timestamp: new Date().toISOString()
+      });
+
       res.status(500).json({
         error: 'Failed to submit feedback',
         message: 'An error occurred while submitting your feedback. Please try again.'
