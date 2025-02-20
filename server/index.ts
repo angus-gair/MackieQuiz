@@ -79,7 +79,7 @@ const isPortAvailable = (port: number): Promise<boolean> => {
     }
 
     const HOST = process.env.HOST || "0.0.0.0";
-    const PORT = 5000;
+    const PORT = process.env.PORT || 3001; // Changed port to 3001
 
     // Check if port is available
     const portAvailable = await isPortAvailable(PORT);
