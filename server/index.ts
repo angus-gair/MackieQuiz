@@ -79,7 +79,10 @@ const isPortAvailable = (port: number): Promise<boolean> => {
     }
 
     const HOST = process.env.HOST || "0.0.0.0";
-    const PORT = process.env.PORT || 3001; // Changed port to 3001
+    const PORT = Number(process.env.PORT) || 5000; // Changed default to 5000
+
+    log(`Environment PORT value: ${process.env.PORT}`);
+    log(`Using PORT: ${PORT}`);
 
     // Check if port is available
     const portAvailable = await isPortAvailable(PORT);
@@ -101,8 +104,20 @@ const isPortAvailable = (port: number): Promise<boolean> => {
     process.on('SIGTERM', cleanup);
     process.on('SIGINT', cleanup);
 
+    // Add more detailed logging for port binding
+    log(`Attempting to start server on ${HOST}:${PORT}...`);
+
     server.listen(PORT, HOST, () => {
       log(`✨ Server started successfully on ${HOST}:${PORT}`);
+    });
+
+    server.on('error', (error: any) => {
+      if (error.code === 'EADDRINUSE') {
+        log(`❌ Port ${PORT} is already in use`);
+      } else {
+        log(`❌ Server error: ${error.message}`);
+      }
+      process.exit(1);
     });
 
   } catch (error: any) {

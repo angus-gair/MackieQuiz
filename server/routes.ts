@@ -5,13 +5,14 @@ import { setupAuth } from "./auth";
 import { insertAnswerSchema, insertQuestionSchema } from "@shared/schema";
 import { UAParser } from "ua-parser-js";
 import { sendFeedbackNotification } from "./utils/email";
+import type { User } from "@shared/schema";
 
-// Extend Express Request type
+// Extend Express Request type with proper typing
 declare global {
   namespace Express {
     interface Request {
-      analyticsSessionId?: string;
-      user?: any; // TODO: Replace with proper user type
+      analyticsSessionId?: number;
+      user?: User;
     }
   }
 }
@@ -68,11 +69,11 @@ export function registerRoutes(app: Express): Server {
     const ua = new UAParser(req.headers["user-agent"]);
 
     // Create or update session
-    if (req.isAuthenticated()) {
+    if (req.isAuthenticated() && req.user) {
       const session = await storage.createUserSession({
         userId: req.user.id,
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"] || "",
+        ipAddress: req.ip || "unknown",
+        userAgent: req.headers["user-agent"] || "unknown",
         device: ua.getDevice().type || "desktop",
         browser: ua.getBrowser().name || "unknown",
         referrer: req.headers.referer || null,
@@ -84,7 +85,7 @@ export function registerRoutes(app: Express): Server {
 
     // Continue with request
     res.on("finish", async () => {
-      if (req.analyticsSessionId) {
+      if (req.analyticsSessionId && req.user) {
         const timeSpent = Date.now() - startTime;
 
         // Record page view
@@ -225,7 +226,7 @@ export function registerRoutes(app: Express): Server {
       res.json(result);
     } catch (error) {
       console.error("Question Update Error:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to update question",
         details: error instanceof Error ? error.message : 'Unknown error'
       });

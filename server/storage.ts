@@ -113,6 +113,9 @@ export interface IStorage {
   getHighestTierAchievements(userId: number, limit?: number): Promise<Achievement[]>;
   createFeedback(feedbackData: InsertFeedback): Promise<Feedback>;
   getFeedback(): Promise<Feedback[]>;
+  getCurrentWeekQuestions(): Promise<Question[]>;
+  archivePastWeeks(): Promise<void>;
+  updateQuestion(id: number, question: Partial<InsertQuestion>): Promise<Question>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1232,6 +1235,38 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+  async getCurrentWeekQuestions(): Promise<Question[]> {
+    const currentWeek = startOfWeek(new Date());
+    return this.getQuestionsByWeek(currentWeek);
+  }
+
+  async archivePastWeeks(): Promise<void> {
+    const currentWeek = startOfWeek(new Date());
+    const questions = await this.getQuestions();
+
+    const pastQuestions = questions.filter(q => {
+      if (!q.weekOf || q.isArchived) return false;
+      const questionWeek = startOfWeek(new Date(q.weekOf));
+      return isBefore(questionWeek, currentWeek);
+    });
+
+    // Archive all past questions
+    await Promise.all(
+      pastQuestions.map(q => this.archiveQuestion(q.id))
+    );
+  }
+
+  async updateQuestion(id: number, questionData: Partial<InsertQuestion>): Promise<Question> {
+    const [question] = await db
+      .update(questions)
+      .set({
+        ...questionData,
+        updatedAt: new Date()
+      })
+      .where(eq(questions.id, id))
+      .returning();
+    return question;
+  }
 }
 
 // Helper functions
@@ -1244,6 +1279,16 @@ function isConsecutiveDay(date1: Date, date2: Date): boolean {
 function differenceInDays(date1: Date, date2: Date): number {
   const diffTime = Math.abs(date2.getTime() - date1.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function startOfWeek(date: Date): Date {
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust to make Monday = 0
+  return new Date(date.setDate(diff));
+}
+
+function isBefore(date1: Date, date2: Date): boolean {
+  return date1 < date2;
 }
 
 export const storage = new DatabaseStorage();
