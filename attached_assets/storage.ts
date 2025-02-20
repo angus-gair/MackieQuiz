@@ -4,6 +4,7 @@ import { eq, desc, sql, and, gte } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
+import { addWeeks, startOfWeek, isAfter, isBefore, isEqual } from "date-fns";
 
 const PostgresSessionStore = connectPg(session);
 
@@ -41,6 +42,12 @@ export interface IStorage {
     movingAverage: number;
   }[]>;
   assignTeam(userId: number, team: string): Promise<User>;
+  getQuestionsByWeek(weekOf: Date): Promise<Question[]>;
+  getArchivedQuestions(): Promise<Question[]>;
+  archiveQuestion(id: number): Promise<void>;
+  getActiveWeeks(): Promise<Date[]>;
+  getCurrentWeekQuestions(): Promise<Question[]>;
+  archivePastWeeks(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -333,6 +340,56 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async getQuestionsByWeek(weekOf: Date): Promise<Question[]> {
+    const startOfRequestedWeek = startOfWeek(weekOf);
+    const questions = await this.getQuestions();
+    return questions.filter(q => {
+      if (!q.weekOf || q.isArchived) return false;
+      const questionWeekStart = startOfWeek(new Date(q.weekOf));
+      return isEqual(startOfRequestedWeek, questionWeekStart);
+    });
+  }
+
+  async getArchivedQuestions(): Promise<Question[]> {
+    const questions = await this.getQuestions();
+    return questions.filter(q => q.isArchived);
+  }
+
+  async archiveQuestion(id: number): Promise<void> {
+    const [question] = await db
+      .update(questions)
+      .set({ isArchived: true })
+      .where(eq(questions.id, id))
+      .returning();
+    return;
+  }
+
+  async getActiveWeeks(): Promise<Date[]> {
+    const currentWeek = startOfWeek(new Date());
+    return Array.from({ length: 4 }, (_, i) => addWeeks(currentWeek, i));
+  }
+
+  async getCurrentWeekQuestions(): Promise<Question[]> {
+    const currentWeek = startOfWeek(new Date());
+    return this.getQuestionsByWeek(currentWeek);
+  }
+
+  async archivePastWeeks(): Promise<void> {
+    const currentWeek = startOfWeek(new Date());
+    const questions = await this.getQuestions();
+
+    const pastQuestions = questions.filter(q => {
+      if (!q.weekOf || q.isArchived) return false;
+      const questionWeek = startOfWeek(new Date(q.weekOf));
+      return isBefore(questionWeek, currentWeek);
+    });
+
+    // Archive all past questions
+    await Promise.all(
+      pastQuestions.map(q => this.archiveQuestion(q.id))
+    );
   }
 }
 

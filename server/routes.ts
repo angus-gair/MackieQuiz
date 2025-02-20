@@ -130,8 +130,16 @@ export function registerRoutes(app: Express): Server {
 
   app.get("/api/questions/weekly", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    const questions = await storage.getWeeklyQuestions();
-    res.json(questions);
+    try {
+      // Archive past weeks' questions first
+      await storage.archivePastWeeks();
+      // Then get current week's questions
+      const questions = await storage.getCurrentWeekQuestions();
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching weekly questions:", error);
+      res.status(500).json({ error: "Failed to fetch weekly questions" });
+    }
   });
 
   app.get("/api/questions", async (req, res) => {
@@ -167,15 +175,25 @@ export function registerRoutes(app: Express): Server {
 
   app.get("/api/questions/weekly/:date", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
-    const weekOf = new Date(req.params.date);
-    const questions = await storage.getQuestionsByWeek(weekOf);
-    res.json(questions);
+    try {
+      const weekOf = new Date(req.params.date);
+      const questions = await storage.getQuestionsByWeek(weekOf);
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching questions for week:", error);
+      res.status(500).json({ error: "Failed to fetch questions for week" });
+    }
   });
 
   app.get("/api/questions/weeks", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
-    const weeks = await storage.getActiveWeeks();
-    res.json(weeks);
+    try {
+      const weeks = await storage.getActiveWeeks();
+      res.json(weeks);
+    } catch (error) {
+      console.error("Error fetching weeks:", error);
+      res.status(500).json({ error: "Failed to fetch weeks" });
+    }
   });
 
   app.get("/api/questions/archived", async (req, res) => {
