@@ -62,8 +62,16 @@ export default function AdminQuestionsPage() {
     addWeeks(currentWeek, i)
   );
 
-  const { data: questions } = useQuery<Question[]>({
+  // Query to get questions and automatically archive past weeks
+  const { data: questions, isLoading } = useQuery<Question[]>({
     queryKey: ["/api/questions"],
+    queryFn: async () => {
+      // First, trigger archiving of past weeks
+      await apiRequest("POST", "/api/questions/archive-past-weeks");
+      // Then get the current questions
+      const res = await apiRequest("GET", "/api/questions");
+      return await res.json();
+    }
   });
 
   const createQuestionMutation = useMutation({

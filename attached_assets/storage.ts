@@ -1,10 +1,10 @@
 import { users, questions, answers, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, gte } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lt } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
-import { addWeeks, startOfWeek, isAfter, isBefore, isEqual } from "date-fns";
+import { addWeeks, startOfWeek, isAfter, isBefore, isEqual, subWeeks } from "date-fns";
 
 const PostgresSessionStore = connectPg(session);
 
@@ -48,6 +48,7 @@ export interface IStorage {
   getActiveWeeks(): Promise<Date[]>;
   getCurrentWeekQuestions(): Promise<Question[]>;
   archivePastWeeks(): Promise<void>;
+  cleanupAndPrepareWeeks(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -358,16 +359,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async archiveQuestion(id: number): Promise<void> {
-    const [question] = await db
+    await db
       .update(questions)
       .set({ isArchived: true })
-      .where(eq(questions.id, id))
-      .returning();
-    return;
+      .where(eq(questions.id, id));
   }
 
   async getActiveWeeks(): Promise<Date[]> {
     const currentWeek = startOfWeek(new Date());
+    // Return current week and next 3 weeks
     return Array.from({ length: 4 }, (_, i) => addWeeks(currentWeek, i));
   }
 
@@ -380,6 +380,7 @@ export class DatabaseStorage implements IStorage {
     const currentWeek = startOfWeek(new Date());
     const questions = await this.getQuestions();
 
+    // Find questions from past weeks that aren't archived
     const pastQuestions = questions.filter(q => {
       if (!q.weekOf || q.isArchived) return false;
       const questionWeek = startOfWeek(new Date(q.weekOf));
@@ -390,6 +391,11 @@ export class DatabaseStorage implements IStorage {
     await Promise.all(
       pastQuestions.map(q => this.archiveQuestion(q.id))
     );
+  }
+
+  async cleanupAndPrepareWeeks(): Promise<void> {
+    // This method should be called periodically (e.g., daily) to maintain the system
+    await this.archivePastWeeks();
   }
 }
 

@@ -143,12 +143,32 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.post("/api/questions/archive-past-weeks", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      console.log("Archive past weeks: Unauthorized access attempt");
+      return res.sendStatus(401);
+    }
+
+    try {
+      await storage.archivePastWeeks();
+      console.log("Successfully archived past weeks' questions");
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("Error archiving past weeks:", error);
+      res.status(500).json({ error: "Failed to archive past weeks" });
+    }
+  });
+
   app.get("/api/questions", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) {
       console.log("Questions API: Unauthorized access attempt");
       return res.sendStatus(401);
     }
     try {
+      // First archive past weeks' questions
+      await storage.archivePastWeeks();
+
+      // Then get current questions
       const questions = await storage.getQuestions();
       console.log(`Questions API: Retrieved ${questions.length} questions`);
       res.json(questions);
