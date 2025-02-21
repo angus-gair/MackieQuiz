@@ -40,21 +40,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Function to check if a port is available
-const isPortAvailable = (port: number): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const server = net.createServer()
-      .once('error', () => {
-        resolve(false);
-      })
-      .once('listening', () => {
-        server.close();
-        resolve(true);
-      })
-      .listen(port);
-  });
-};
-
 (async () => {
   try {
     log('Starting server initialization...');
@@ -79,17 +64,13 @@ const isPortAvailable = (port: number): Promise<boolean> => {
     }
 
     const HOST = process.env.HOST || "0.0.0.0";
-    const PORT = Number(process.env.PORT) || 5000; // Changed default to 5000
+    const PORT = 5000; // Force port 5000
 
-    log(`Environment PORT value: ${process.env.PORT}`);
-    log(`Using PORT: ${PORT}`);
+    log(`Starting server on ${HOST}:${PORT}...`);
 
-    // Check if port is available
-    const portAvailable = await isPortAvailable(PORT);
-    if (!portAvailable) {
-      log(`Port ${PORT} is already in use. Attempting to force close...`);
-      process.exit(1); // This will trigger a restart by Replit
-    }
+    server.listen(PORT, HOST, () => {
+      log(`✨ Server started successfully on ${HOST}:${PORT}`);
+    });
 
     // Set up cleanup handler
     const cleanup = () => {
@@ -100,25 +81,8 @@ const isPortAvailable = (port: number): Promise<boolean> => {
       });
     };
 
-    // Handle process termination
     process.on('SIGTERM', cleanup);
     process.on('SIGINT', cleanup);
-
-    // Add more detailed logging for port binding
-    log(`Attempting to start server on ${HOST}:${PORT}...`);
-
-    server.listen(PORT, HOST, () => {
-      log(`✨ Server started successfully on ${HOST}:${PORT}`);
-    });
-
-    server.on('error', (error: any) => {
-      if (error.code === 'EADDRINUSE') {
-        log(`❌ Port ${PORT} is already in use`);
-      } else {
-        log(`❌ Server error: ${error.message}`);
-      }
-      process.exit(1);
-    });
 
   } catch (error: any) {
     log(`FATAL: Server initialization failed:`);

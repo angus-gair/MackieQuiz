@@ -171,13 +171,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   private getStartOfWeek(): Date {
-    const now = new Date();
-    const day = now.getDay();
-    const diff = (day + 6) % 7; // Adjust to make Monday = 0
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - diff);
-    monday.setHours(0, 0, 0, 0);
-    return monday;
+    // Use date-fns startOfWeek with weekStartsOn option set to 1 (Monday)
+    return startOfWeek(new Date(), { weekStartsOn: 1 });
   }
 
   private formatDayName(date: Date): string {
@@ -344,11 +339,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getQuestionsByWeek(weekOf: Date): Promise<Question[]> {
-    const startOfRequestedWeek = startOfWeek(weekOf);
+    const startOfRequestedWeek = startOfWeek(weekOf, { weekStartsOn: 1 });
     const questions = await this.getQuestions();
     return questions.filter(q => {
       if (!q.weekOf || q.isArchived) return false;
-      const questionWeekStart = startOfWeek(new Date(q.weekOf));
+      const questionWeekStart = startOfWeek(new Date(q.weekOf), { weekStartsOn: 1 });
       return isEqual(startOfRequestedWeek, questionWeekStart);
     });
   }
@@ -366,24 +361,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveWeeks(): Promise<Date[]> {
-    const currentWeek = startOfWeek(new Date());
+    const currentWeek = this.getStartOfWeek();
     // Return current week and next 3 weeks
     return Array.from({ length: 4 }, (_, i) => addWeeks(currentWeek, i));
   }
 
   async getCurrentWeekQuestions(): Promise<Question[]> {
-    const currentWeek = startOfWeek(new Date());
+    const currentWeek = this.getStartOfWeek();
     return this.getQuestionsByWeek(currentWeek);
   }
 
   async archivePastWeeks(): Promise<void> {
-    const currentWeek = startOfWeek(new Date());
+    const currentWeek = this.getStartOfWeek();
     const questions = await this.getQuestions();
 
     // Find questions from past weeks that aren't archived
     const pastQuestions = questions.filter(q => {
       if (!q.weekOf || q.isArchived) return false;
-      const questionWeek = startOfWeek(new Date(q.weekOf));
+      const questionWeek = startOfWeek(new Date(q.weekOf), { weekStartsOn: 1 });
       return isBefore(questionWeek, currentWeek);
     });
 
