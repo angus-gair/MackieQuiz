@@ -74,6 +74,7 @@ app.use((req, res, next) => {
         log(`Error Code: ${error.code}`);
         log(`Error Message: ${error.message}`);
         log(`Error Stack: ${error.stack}`);
+        log(`Process ID: ${process.pid}`);
         log('\nTroubleshooting Steps:');
         log('1. Stop any other running instances of the application');
         log('2. Wait a few seconds for the port to be released');
@@ -93,6 +94,7 @@ app.use((req, res, next) => {
 
     // Start server on port 5000
     log(`Attempting to start server on ${HOST}:${PORT}...`);
+    log(`Current process ID: ${process.pid}`);
     server.listen(PORT, HOST, () => {
       log(`✨ Server started successfully on ${HOST}:${PORT}`);
     });
