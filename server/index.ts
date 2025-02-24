@@ -68,6 +68,17 @@ app.use((req, res, next) => {
 
     log(`Starting server on ${HOST}:${PORT}...`);
 
+    server.on('error', (error: any) => {
+      if (error.code === 'EADDRINUSE') {
+        log(`Error: Port ${PORT} is already in use. This could be due to:`);
+        log('1. Another instance of the application running');
+        log('2. Another service using port 5000');
+        log('3. A recently closed instance that hasn\'t fully released the port');
+        log('\nPlease ensure port 5000 is available and try again.');
+      }
+      process.exit(1);
+    });
+
     server.listen(PORT, HOST, () => {
       log(`✨ Server started successfully on ${HOST}:${PORT}`);
     });
