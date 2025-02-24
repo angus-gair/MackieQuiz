@@ -64,21 +64,35 @@ app.use((req, res, next) => {
     }
 
     const HOST = process.env.HOST || "0.0.0.0";
-    const PORT = 5000; // Force port 5000
+    const PORT = 5000; // Always use port 5000 as required
 
-    log(`Starting server on ${HOST}:${PORT}...`);
-
+    // Set up detailed error handler for port conflicts
     server.on('error', (error: any) => {
       if (error.code === 'EADDRINUSE') {
-        log(`Error: Port ${PORT} is already in use. This could be due to:`);
-        log('1. Another instance of the application running');
-        log('2. Another service using port 5000');
-        log('3. A recently closed instance that hasn\'t fully released the port');
-        log('\nPlease ensure port 5000 is available and try again.');
+        log('==== Port Conflict Error Details ====');
+        log(`ERROR: Port ${PORT} is already in use`);
+        log(`Error Code: ${error.code}`);
+        log(`Error Message: ${error.message}`);
+        log(`Error Stack: ${error.stack}`);
+        log('\nTroubleshooting Steps:');
+        log('1. Stop any other running instances of the application');
+        log('2. Wait a few seconds for the port to be released');
+        log('3. Restart the application');
+        log('4. If the issue persists, contact system administrator');
+        log('====================================');
+        process.exit(1);
+      } else {
+        log('==== Server Error Details ====');
+        log(`Error Code: ${error.code}`);
+        log(`Error Message: ${error.message}`);
+        log(`Error Stack: ${error.stack}`);
+        log('============================');
+        throw error;
       }
-      process.exit(1);
     });
 
+    // Start server on port 5000
+    log(`Attempting to start server on ${HOST}:${PORT}...`);
     server.listen(PORT, HOST, () => {
       log(`✨ Server started successfully on ${HOST}:${PORT}`);
     });
@@ -90,6 +104,12 @@ app.use((req, res, next) => {
         log('Server closed successfully');
         process.exit(0);
       });
+
+      // Force exit after 5 seconds if graceful shutdown fails
+      setTimeout(() => {
+        log('Forcing exit after timeout');
+        process.exit(1);
+      }, 5000);
     };
 
     process.on('SIGTERM', cleanup);
