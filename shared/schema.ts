@@ -118,6 +118,10 @@ export const dimDate = pgTable("dim_date", {
   weekIdentifier: text("week_identifier").notNull()
 });
 
+// Update the questions schema with better type definitions for week status and bonus questions
+export const weekStatus = ['past', 'current', 'future'] as const;
+export type WeekStatus = typeof weekStatus[number];
+
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(),
@@ -127,7 +131,7 @@ export const questions = pgTable("questions", {
   explanation: text("explanation").notNull(),
   weekOf: date("week_of").notNull(),
   isArchived: boolean("is_archived").notNull().default(false),
-  weekStatus: text("week_status").notNull().default('future'), // 'past', 'current', 'future'
+  weekStatus: text("week_status", { enum: weekStatus }).notNull().default('future'),
   isBonus: boolean("is_bonus").notNull().default(false),
   bonusPoints: integer("bonus_points").notNull().default(10),
   availableFrom: timestamp("available_from"),
@@ -196,12 +200,13 @@ export const insertUserSchema = createInsertSchema(users).pick({
   teamAssigned: z.boolean().optional().default(false)
 });
 
+// Update the insert schema with proper validation
 export const insertQuestionSchema = createInsertSchema(questions).extend({
   isBonus: z.boolean().optional().default(false),
   bonusPoints: z.number().optional().default(10),
   availableFrom: z.date().optional(),
   availableUntil: z.date().optional(),
-  weekStatus: z.enum(['past', 'current', 'future']).optional().default('future'),
+  weekStatus: z.enum(weekStatus).optional().default('future'),
 });
 
 export const insertAnswerSchema = createInsertSchema(answers);
@@ -267,3 +272,4 @@ export type PowerUp = typeof powerUps.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type InsertDimDate = z.infer<typeof insertDimDateSchema>;
 export type DimDate = typeof dimDate.$inferSelect;
+export type WeekQuestion = typeof questions.$inferSelect;

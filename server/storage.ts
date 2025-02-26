@@ -860,7 +860,7 @@ export class DatabaseStorage implements IStorage {
       return existingStreak;
     }
 
-    const [newStreak] = await db.insert(userStreks)
+    const [newStreak] = await db.insert(userStreaks)
       .values({ userId, currentStreak: 0, longestStreak: 0 })
       .returning();
 
@@ -1303,9 +1303,10 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           lte(dimDate.date, today),
-          gte(sql`${dimDate.date} + INTERVAL '6 days'`, today)
+          gte(sql`${dimDate.date}::date + INTERVAL '6 days'`, today)
         )
       )
+      .orderBy(dimDate.date)
       .limit(1);
 
     if (!currentWeek) {
@@ -1359,23 +1360,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAvailableWeeks(): Promise<DimDate[]> {
-    // Get current week
-    const currentWeek = await this.getCurrentWeek();
+    const today = new Date();
 
-    // Get current week plus next 3 weeks
+    // Get the current week's Monday
+    const currentMonday = new Date(today);
+    currentMonday.setDate(today.getDate() - today.getDay() + 1);
+    currentMonday.setHours(0, 0, 0, 0);
+
+    // Get exactly 4 weeks of data
     const weeks = await db
       .select()
       .from(dimDate)
       .where(
         and(
-          gte(dimDate.date, currentWeek.date),
-          lt(dimDate.date, sql`${currentWeek.date} + INTERVAL '28 days'`)
+          gte(dimDate.date, currentMonday),
+          lt(dimDate.date, sql`${currentMonday}::date + INTERVAL '28 days'`)
         )
       )
-      .groupBy(dimDate.week)
-      .orderBy(dimDate.week);
+      .groupBy(dimDate.dateId, dimDate.date, dimDate.week)
+      .orderBy(dimDate.date)
+      .limit(28); // Get all days for 4 weeks
 
-    return weeks.slice(0, 4); // Ensure we only return 4 weeks
+    // Group by week and take first day of each week
+    const uniqueWeeks = Array.from(
+      new Map(
+        weeks.map(week => [week.week.toISOString(), week])
+      ).values()
+    );
+
+    return uniqueWeeks.slice(0, 4); // Ensure we only return 4 weeks
   }
 
   async createBonusQuestion(question: InsertQuestion & { bonusPoints: number; availableFrom: Date; availableUntil: Date }): Promise<Question> {
