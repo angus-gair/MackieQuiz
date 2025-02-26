@@ -1,0 +1,107 @@
+-- Create the dim_date table
+CREATE TABLE dim_date (
+    date_id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    week DATE NOT NULL,  -- Week commencing Monday
+    day_of_week VARCHAR(10) NOT NULL,
+    calendar_month VARCHAR(3) NOT NULL,
+    financial_year INTEGER NOT NULL,
+    financial_week INTEGER NOT NULL,
+    week_identifier VARCHAR(10) NOT NULL
+);
+
+-- Generate date dimension data from 2025-01-01 to 2029-12-31
+WITH date_series AS (
+    SELECT 
+        generate_series('2025-01-01'::date, '2029-12-31'::date, '1 day'::interval)::date AS date
+)
+INSERT INTO dim_date (
+    date,
+    week,
+    day_of_week,
+    calendar_month,
+    financial_year,
+    financial_week,
+    week_identifier
+)
+SELECT
+    date,
+    -- Week commencing Monday (subtract days since Monday to get week start date)
+    date - EXTRACT(DOW FROM date - 1)::integer * INTERVAL '1 day' AS week,
+    -- Day of week abbreviated
+    CASE EXTRACT(DOW FROM date)
+        WHEN 1 THEN 'Mon'
+        WHEN 2 THEN 'Tue'
+        WHEN 3 THEN 'Wed'
+        WHEN 4 THEN 'Thu'
+        WHEN 5 THEN 'Fri'
+        WHEN 6 THEN 'Sat'
+        WHEN 0 THEN 'Sun'
+    END AS day_of_week,
+    -- Calendar month abbreviated
+    TO_CHAR(date, 'Mon') AS calendar_month,
+    -- Financial year (July 1st start)
+    CASE 
+        WHEN EXTRACT(MONTH FROM date) >= 7 THEN EXTRACT(YEAR FROM date) + 1
+        ELSE EXTRACT(YEAR FROM date)
+    END AS financial_year,
+    -- Financial week (July 1st = week 1)
+    CASE
+        -- For dates on or after July 1st
+        WHEN (EXTRACT(MONTH FROM date) > 7) OR 
+             (EXTRACT(MONTH FROM date) = 7 AND EXTRACT(DAY FROM date) >= 1)
+        THEN CEIL((date - DATE_TRUNC('year', date) + 
+                   (DATE_PART('doy', DATE_TRUNC('year', date) + '6 months'::interval) - 1))::integer / 7.0)
+        -- For dates before July 1st
+        ELSE CEIL((date - DATE_TRUNC('year', date - '6 months'::interval) - '6 months'::interval + 
+                   (DATE_PART('doy', DATE_TRUNC('year', date - '6 months'::interval) + '6 months'::interval) - 1))::integer / 7.0) + 26
+    END AS financial_week,
+    -- Dynamic week identifier based on current date
+    CASE
+        WHEN date - (EXTRACT(DOW FROM date - 1)::integer * INTERVAL '1 day') < 
+             CURRENT_DATE - (EXTRACT(DOW FROM CURRENT_DATE - 1)::integer * INTERVAL '1 day') 
+        THEN 'Past'
+        WHEN date - (EXTRACT(DOW FROM date - 1)::integer * INTERVAL '1 day') = 
+             CURRENT_DATE - (EXTRACT(DOW FROM CURRENT_DATE - 1)::integer * INTERVAL '1 day') 
+        THEN 'Current'
+        ELSE 'Future'
+    END AS week_identifier
+FROM date_series;
+
+-- Create an index on the date column for better performance
+CREATE INDEX idx_dim_date_date ON dim_date(date);
+
+-- Create a function to update the week_identifier column
+CREATE OR REPLACE FUNCTION update_week_identifier()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE dim_date
+    SET week_identifier = 
+        CASE
+            WHEN week < CURRENT_DATE - (EXTRACT(DOW FROM CURRENT_DATE - 1)::integer * INTERVAL '1 day') 
+            THEN 'Past'
+            WHEN week = CURRENT_DATE - (EXTRACT(DOW FROM CURRENT_DATE - 1)::integer * INTERVAL '1 day') 
+            THEN 'Current'
+            ELSE 'Future'
+        END;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a trigger to run daily to update the week_identifier
+CREATE TRIGGER trigger_update_week_identifier
+AFTER INSERT ON dim_date
+FOR EACH STATEMENT
+EXECUTE FUNCTION update_week_identifier();
+
+-- Create a scheduled job to update the week_identifier every day at midnight
+-- Note: This uses pg_cron extension which needs to be installed and enabled
+-- If pg_cron is not available, you can set up an external scheduler
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'
+    ) THEN
+        PERFORM cron.schedule('0 0 * * *', 'SELECT update_week_identifier()');
+    END IF;
+END $$;
