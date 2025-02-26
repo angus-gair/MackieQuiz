@@ -106,6 +106,18 @@ export const feedback = pgTable("feedback", {
   status: text("status").notNull().default('pending'),
 });
 
+// Add dim_date table definition
+export const dimDate = pgTable("dim_date", {
+  dateId: serial("date_id").primaryKey(),
+  date: date("date").notNull(),
+  week: date("week").notNull(),
+  dayOfWeek: text("day_of_week").notNull(),
+  calendarMonth: text("calendar_month").notNull(),
+  financialYear: integer("financial_year").notNull(),
+  financialWeek: integer("financial_week").notNull(),
+  weekIdentifier: text("week_identifier").notNull()
+});
+
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(),
@@ -115,7 +127,20 @@ export const questions = pgTable("questions", {
   explanation: text("explanation").notNull(),
   weekOf: date("week_of").notNull(),
   isArchived: boolean("is_archived").notNull().default(false),
+  weekStatus: text("week_status").notNull().default('future'), // 'past', 'current', 'future'
+  isBonus: boolean("is_bonus").notNull().default(false),
+  bonusPoints: integer("bonus_points").notNull().default(10),
+  availableFrom: timestamp("available_from"),
+  availableUntil: timestamp("available_until"),
 });
+
+// Define relations between questions and dim_date
+export const questionsRelations = relations(questions, ({ one }) => ({
+  dimDate: one(dimDate, {
+    fields: [questions.weekOf],
+    references: [dimDate.date],
+  }),
+}));
 
 export const answers = pgTable("answers", {
   id: serial("id").primaryKey(),
@@ -171,7 +196,14 @@ export const insertUserSchema = createInsertSchema(users).pick({
   teamAssigned: z.boolean().optional().default(false)
 });
 
-export const insertQuestionSchema = createInsertSchema(questions);
+export const insertQuestionSchema = createInsertSchema(questions).extend({
+  isBonus: z.boolean().optional().default(false),
+  bonusPoints: z.number().optional().default(10),
+  availableFrom: z.date().optional(),
+  availableUntil: z.date().optional(),
+  weekStatus: z.enum(['past', 'current', 'future']).optional().default('future'),
+});
+
 export const insertAnswerSchema = createInsertSchema(answers);
 export const insertSessionSchema = createInsertSchema(userSessions);
 export const insertPageViewSchema = createInsertSchema(pageViews);
@@ -204,6 +236,9 @@ export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   lastProfileUpdate: true
 });
 
+// Add insert schema for dim_date
+export const insertDimDateSchema = createInsertSchema(dimDate);
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
 export type InsertAnswer = z.infer<typeof insertAnswerSchema>;
@@ -230,3 +265,5 @@ export type UserStreak = typeof userStreaks.$inferSelect;
 export type TeamStat = typeof teamStats.$inferSelect;
 export type PowerUp = typeof powerUps.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
+export type InsertDimDate = z.infer<typeof insertDimDateSchema>;
+export type DimDate = typeof dimDate.$inferSelect;

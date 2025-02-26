@@ -1,12 +1,14 @@
-import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile, type AchievementProgress, type InsertAchievementProgress} from "@shared/schema";
-import { feedback, type Feedback, type InsertFeedback } from "@shared/schema";
+import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile} from "@shared/schema";
+import { feedback, type Feedback, type InsertFeedback, dimDate } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, gte } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lte, lt } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 import { log } from "./vite";
+import { DimDate } from "@shared/schema";
 
+// Existing methods
 const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
@@ -116,6 +118,16 @@ export interface IStorage {
   getCurrentWeekQuestions(): Promise<Question[]>;
   archivePastWeeks(): Promise<void>;
   updateQuestion(id: number, question: Partial<InsertQuestion>): Promise<Question>;
+
+  // New methods for week management and bonus questions
+  getCurrentWeek(): Promise<DimDate>;
+  getWeekStatus(date: Date): Promise<string>;
+  getQuestionsByWeekStatus(status: string): Promise<Question[]>;
+  updateQuestionWeekStatuses(): Promise<void>;
+  archivePastWeeks(): Promise<void>;
+  createBonusQuestion(question: InsertQuestion & { bonusPoints: number; availableFrom: Date; availableUntil: Date }): Promise<Question>;
+  getActiveBonusQuestions(): Promise<Question[]>;
+  getAvailableWeeks(): Promise<DimDate[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -167,7 +179,12 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(questions)
-      .where(eq(questions.isArchived, false))
+      .where(
+        and(
+          eq(questions.isArchived, false),
+          eq(questions.isBonus, false)
+        )
+      )
       .orderBy(questions.weekOf);
   }
 
@@ -177,7 +194,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
-    const [newQuestion] = await db.insert(questions).values(question).returning();
+    const weekStatus = await this.getWeekStatus(question.weekOf);
+
+    const [newQuestion] = await db
+      .insert(questions)
+      .values({
+        ...question,
+        weekStatus,
+        isArchived: weekStatus === 'past'
+      })
+      .returning();
+
     return newQuestion;
   }
 
@@ -833,7 +860,7 @@ export class DatabaseStorage implements IStorage {
       return existingStreak;
     }
 
-    const [newStreak] = await db.insert(userStreaks)
+    const [newStreak] = await db.insert(userStreks)
       .values({ userId, currentStreak: 0, longestStreak: 0 })
       .returning();
 
@@ -1266,6 +1293,118 @@ export class DatabaseStorage implements IStorage {
       .where(eq(questions.id, id))
       .returning();
     return question;
+  }
+
+  async getCurrentWeek(): Promise<DimDate> {
+    const today = new Date();
+    const [currentWeek] = await db
+      .select()
+      .from(dimDate)
+      .where(
+        and(
+          lte(dimDate.date, today),
+          gte(sql`${dimDate.date} + INTERVAL '6 days'`, today)
+        )
+      )
+      .limit(1);
+
+    if (!currentWeek) {
+      throw new Error('Could not determine current week');
+    }
+
+    return currentWeek;
+  }
+
+  async getWeekStatus(date: Date): Promise<string> {
+    const [week] = await db
+      .select()
+      .from(dimDate)
+      .where(eq(dimDate.date, date));
+
+    if (!week) {
+      return 'future'; // Default to future if week not found
+    }
+
+    return week.weekIdentifier.toLowerCase();
+  }
+
+  async getQuestionsByWeekStatus(status: string): Promise<Question[]> {
+    return await db
+      .select()
+      .from(questions)
+      .where(
+        and(
+          eq(questions.weekStatus, status.toLowerCase()),
+          eq(questions.isArchived, status === 'past'),
+          eq(questions.isBonus, false)
+        )
+      )
+      .orderBy(questions.weekOf);
+  }
+
+  async updateQuestionWeekStatuses(): Promise<void> {
+    const allQuestions = await this.getQuestions();
+
+    for (const question of allQuestions) {
+      const weekStatus = await this.getWeekStatus(question.weekOf);
+
+      await db
+        .update(questions)
+        .set({
+          weekStatus,
+          isArchived: weekStatus === 'past'
+        })
+        .where(eq(questions.id, question.id));
+    }
+  }
+
+  async getAvailableWeeks(): Promise<DimDate[]> {
+    // Get current week
+    const currentWeek = await this.getCurrentWeek();
+
+    // Get current week plus next 3 weeks
+    const weeks = await db
+      .select()
+      .from(dimDate)
+      .where(
+        and(
+          gte(dimDate.date, currentWeek.date),
+          lt(dimDate.date, sql`${currentWeek.date} + INTERVAL '28 days'`)
+        )
+      )
+      .groupBy(dimDate.week)
+      .orderBy(dimDate.week);
+
+    return weeks.slice(0, 4); // Ensure we only return 4 weeks
+  }
+
+  async createBonusQuestion(question: InsertQuestion & { bonusPoints: number; availableFrom: Date; availableUntil: Date }): Promise<Question> {
+    const [newQuestion] = await db
+      .insert(questions)
+      .values({
+        ...question,
+        isBonus: true,
+        weekStatus: 'current', // Bonus questions are always current
+      })
+      .returning();
+
+    return newQuestion;
+  }
+
+  async getActiveBonusQuestions(): Promise<Question[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(questions)
+      .where(
+        and(
+          eq(questions.isBonus, true),
+          eq(questions.isArchived, false),
+          lte(questions.availableFrom, now),
+          gte(questions.availableUntil, now)
+        )
+      )
+      .orderBy(questions.availableUntil);
   }
 }
 
