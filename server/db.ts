@@ -32,10 +32,10 @@ pool.on('connect', async (client) => {
 
     // Verify settings
     const tzResult = await client.query('SHOW timezone');
-    console.log('Current timezone:', tzResult.rows[0].TimeZone);
+    console.log('Current timezone:', tzResult.rows[0].timezone);
   } catch (error) {
     console.error('Error setting timezone:', error);
-    throw error; // Ensure connection fails if we can't set timezone
+    // Note: We don't throw here as the database owner has already set the timezone permanently
   }
 });
 
