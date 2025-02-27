@@ -431,6 +431,19 @@ export function registerRoutes(app: Express): Server {
     };
     res.json(stats);
   });
+  
+  // Get available weeks for admin question management
+  app.get("/api/weeks/available", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    try {
+      // Use the SQL query to get weeks starting on Monday
+      const weeks = await storage.getAvailableWeeks();
+      res.json(weeks);
+    } catch (error) {
+      console.error('Error fetching available weeks:', error);
+      res.status(500).json({ error: 'Failed to fetch available weeks' });
+    }
+  });
 
   app.post("/api/feedback", async (req, res) => {
     if (!req.isAuthenticated()) {

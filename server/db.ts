@@ -11,10 +11,8 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Create connection with timezone parameters
-const connectionString = process.env.DATABASE_URL.includes('timezone=') 
-  ? process.env.DATABASE_URL 
-  : process.env.DATABASE_URL + (process.env.DATABASE_URL.includes('?') ? '&' : '?') + 'options=timezone=Australia/Sydney';
+// Create connection
+const connectionString = process.env.DATABASE_URL;
 
 export const pool = new Pool({ connectionString });
 
@@ -22,10 +20,7 @@ export const pool = new Pool({ connectionString });
 pool.on('connect', async (client) => {
   try {
     await client.query("SET timezone TO 'Australia/Sydney'");
-
-    // Verify timezone was set correctly
-    const result = await client.query('SHOW timezone');
-    console.log('Connection timezone set to:', result.rows[0].timezone);
+    console.log('Connection timezone set successfully');
   } catch (error) {
     console.error('Failed to set timezone:', error);
   }

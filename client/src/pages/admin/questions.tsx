@@ -107,9 +107,30 @@ export default function AdminQuestionsPage() {
     if (!questions) return [];
     return questions.filter(q => {
       if (!q.weekOf || q.isArchived) return false;
-      const weekOf = format(parseISO(q.weekOf), 'yyyy-MM-dd');
-      const weekDate = format(weekData.week, 'yyyy-MM-dd');
-      return weekOf === weekDate;
+      
+      // Handle string date formats from both sources
+      let questionWeekOf: string;
+      let weekDataWeek: string;
+      
+      // Handle question.weekOf
+      if (typeof q.weekOf === 'string') {
+        // If it's already a string, format it consistently
+        questionWeekOf = format(parseISO(q.weekOf), 'yyyy-MM-dd');
+      } else {
+        // If it's a Date object, format it
+        questionWeekOf = format(q.weekOf, 'yyyy-MM-dd');
+      }
+      
+      // Handle weekData.week
+      if (typeof weekData.week === 'string') {
+        // If it's already a string, format it consistently
+        weekDataWeek = format(parseISO(weekData.week), 'yyyy-MM-dd');
+      } else {
+        // If it's a Date object, format it
+        weekDataWeek = format(weekData.week, 'yyyy-MM-dd');
+      }
+      
+      return questionWeekOf === weekDataWeek;
     });
   };
 
@@ -149,7 +170,7 @@ export default function AdminQuestionsPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h2 className="text-lg font-semibold">
-                        Week of {format(weekData.week, 'MMM dd')}
+                        Week of {format(new Date(weekData.week), 'MMM dd')}
                         {isCurrentWeek && (
                           <span className="ml-2 text-sm font-normal text-muted-foreground">
                             (Current)
@@ -161,7 +182,7 @@ export default function AdminQuestionsPage() {
                       <SheetTrigger asChild>
                         <Button
                           size="sm"
-                          onClick={() => setSelectedWeek(weekData.week)}
+                          onClick={() => setSelectedWeek(new Date(weekData.week))}
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Add Question
@@ -170,7 +191,7 @@ export default function AdminQuestionsPage() {
                       <SheetContent side="right" className="sm:max-w-xl">
                         <SheetHeader>
                           <SheetTitle>
-                            Add Question for Week of {format(weekData.week, 'MMM dd')}
+                            Add Question for Week of {format(new Date(weekData.week), 'MMM dd')}
                           </SheetTitle>
                         </SheetHeader>
                         <div className="mt-6">

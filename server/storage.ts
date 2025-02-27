@@ -194,18 +194,60 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
-    const weekStatus = await this.getWeekStatus(question.weekOf);
-
-    const [newQuestion] = await db
-      .insert(questions)
-      .values({
-        ...question,
-        weekStatus,
-        isArchived: weekStatus === 'past'
-      })
-      .returning();
-
-    return newQuestion;
+    try {
+      // Handle timezone issues by ensuring the weekOf date is always set to the beginning of the day
+      // and aligned to Monday of the week
+      let weekOfDate: Date;
+      
+      if (typeof question.weekOf === 'string') {
+        // Parse date string and ensure it's a valid date
+        weekOfDate = new Date(question.weekOf);
+      } else {
+        weekOfDate = new Date(question.weekOf);
+      }
+      
+      // Normalize to start of day to prevent timezone adjustments
+      weekOfDate.setHours(0, 0, 0, 0);
+      
+      // Ensure weekOf is a Monday (day 1)
+      const day = weekOfDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      if (day !== 1) {
+        // Adjust to the Monday of this week
+        const diff = weekOfDate.getDate() - day + (day === 0 ? -6 : 1);
+        weekOfDate.setDate(diff);
+      }
+      
+      // Format the date as YYYY-MM-DD to prevent timezone issues when stored in PostgreSQL
+      const formattedWeekOf = weekOfDate.toISOString().split('T')[0];
+      
+      // Get the week status for this date
+      const weekStatus = await this.getWeekStatus(weekOfDate);
+  
+      // Create the question with the normalized date
+      const [newQuestion] = await db
+        .insert(questions)
+        .values({
+          question: question.question,
+          correctAnswer: question.correctAnswer,
+          options: question.options,
+          category: question.category,
+          explanation: question.explanation,
+          weekOf: formattedWeekOf,
+          isArchived: weekStatus === 'past',
+          weekStatus: weekStatus as 'past' | 'current' | 'future',
+          isBonus: question.isBonus || false,
+          bonusPoints: question.bonusPoints || 10,
+          availableFrom: question.availableFrom,
+          availableUntil: question.availableUntil
+        })
+        .returning();
+      
+      console.log(`Created new question for week of ${formattedWeekOf}`);
+      return newQuestion;
+    } catch (error) {
+      console.error("Error creating question:", error);
+      throw new Error(`Failed to create question: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   async submitAnswer(answer: InsertAnswer): Promise<Answer> {
@@ -1360,40 +1402,80 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAvailableWeeks(): Promise<DimDate[]> {
-    // First get the current week
-    const [currentWeek] = await db
-      .select()
-      .from(dimDate)
-      .where(eq(dimDate.weekIdentifier, 'Current'))
-      .limit(1);
-
-    if (!currentWeek) {
-      throw new Error('Could not determine current week');
-    }
-
-    // Get current week plus next 3 weeks
-    const weeks = await db
-      .select()
-      .from(dimDate)
-      .where(
-        and(
-          gte(dimDate.date, currentWeek.week),
-          lt(dimDate.date, sql`${currentWeek.week}::date + INTERVAL '4 weeks'`)
-        )
+    // Use the SQL query provided to get week commencing dates precisely
+    // This query handles timezone adjustment correctly
+    const weeks = await db.execute<DimDate>(sql`
+      WITH WeeklyTable AS (
+        SELECT 
+          week,
+          week_identifier,
+          MAX(date) AS max_date,
+          MIN(date) AS week_commencing_date
+        FROM 
+          dim_date
+        GROUP BY 
+          week, 
+          week_identifier
+      ),
+      FutureWeeks AS (
+        -- Get current week based on current date
+        SELECT 
+          CURRENT_DATE AS current_date,
+          (SELECT week FROM dim_date WHERE date = CURRENT_DATE) AS current_week
       )
-      .groupBy(dimDate.dateId, dimDate.date, dimDate.week, dimDate.weekIdentifier)
-      .orderBy(dimDate.date);
-
-    // Process and return exactly 4 weeks
-    const uniqueWeeks = weeks.reduce((acc: DimDate[], week: DimDate) => {
-      const weekStart = startOfWeek(week.date).toISOString();
-      if (!acc.find(w => startOfWeek(w.date).toISOString() === weekStart)) {
-        acc.push(week);
+      SELECT 
+        w.date_id as "dateId",
+        wt.week_commencing_date as "date", 
+        wt.week,
+        wt.week_identifier as "weekIdentifier",
+        '' as "dayOfWeek",
+        '' as "calendarMonth",
+        0 as "financialYear",
+        0 as "financialWeek"
+      FROM 
+        WeeklyTable wt
+      JOIN 
+        FutureWeeks fw ON wt.week >= fw.current_week
+        -- Current week + 3 weeks ahead
+        AND wt.week <= (SELECT week FROM dim_date 
+                      WHERE date = (SELECT DATE(CURRENT_DATE + INTERVAL '21 days')))
+      JOIN
+        dim_date w ON w.date = wt.week_commencing_date
+      ORDER BY 
+        wt.week
+    `);
+    
+    if (!weeks || weeks.length === 0) {
+      console.warn("No available weeks found, falling back to default method");
+      
+      // Fallback to getting current week + next 3 weeks
+      const today = new Date();
+      const mondayOfThisWeek = new Date(today);
+      mondayOfThisWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+      mondayOfThisWeek.setHours(0, 0, 0, 0);
+      
+      // Generate the next 4 Mondays
+      const weekDates: Date[] = [];
+      for (let i = 0; i < 4; i++) {
+        const monday = new Date(mondayOfThisWeek);
+        monday.setDate(mondayOfThisWeek.getDate() + (i * 7));
+        weekDates.push(monday);
       }
-      return acc;
-    }, []);
-
-    return uniqueWeeks.slice(0, 4);
+      
+      // Map these dates to the format of DimDate
+      return weekDates.map((date, index) => ({
+        dateId: index + 1,
+        date: date,
+        week: date,
+        dayOfWeek: 'Monday',
+        calendarMonth: date.toLocaleString('default', { month: 'long' }),
+        financialYear: date.getFullYear(),
+        financialWeek: Math.ceil((date.getDate() + new Date(date.getFullYear(), date.getMonth(), 1).getDay()) / 7),
+        weekIdentifier: index === 0 ? 'Current' : 'Future'
+      }));
+    }
+    
+    return weeks;
   }
 
   async createBonusQuestion(question: InsertQuestion & { bonusPoints: number; availableFrom: Date; availableUntil: Date }): Promise<Question> {
