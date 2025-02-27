@@ -52,7 +52,7 @@ export default function AdminQuestionsPage() {
     queryKey: ["/api/weeks/available"],
   });
 
-  // Get questions for all weeks
+  // Get all questions
   const { data: questions, isLoading: isLoadingQuestions } = useQuery<Question[]>({
     queryKey: ["/api/questions"],
   });
@@ -104,10 +104,11 @@ export default function AdminQuestionsPage() {
     },
   });
 
+  // Modified getQuestionsForWeek to show all questions for debugging
   const getQuestionsForWeek = (weekData: DimDate, questions: Question[] = []) => {
     if (!questions) return [];
     return questions.filter(q => {
-      if (!q.weekOf || q.isArchived) return false;
+      if (!q.weekOf) return false;
       const weekOf = format(parseISO(q.weekOf), 'yyyy-MM-dd');
       const weekDate = format(weekData.week, 'yyyy-MM-dd');
       return weekOf === weekDate;
@@ -125,6 +126,9 @@ export default function AdminQuestionsPage() {
       </div>
     );
   }
+
+  console.log('Available Weeks:', availableWeeks); // Debug log
+  console.log('Questions:', questions); // Debug log
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -150,6 +154,9 @@ export default function AdminQuestionsPage() {
           {availableWeeks?.map((weekData) => {
             const weekQuestions = getQuestionsForWeek(weekData, questions);
             const isCurrentWeek = weekData.weekIdentifier === 'Current';
+
+            // Debug log for each week's questions
+            console.log(`Questions for week ${format(weekData.week, 'yyyy-MM-dd')}:`, weekQuestions);
 
             return (
               <Card key={weekData.week.toString()}>
