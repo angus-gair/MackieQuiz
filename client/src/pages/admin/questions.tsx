@@ -25,7 +25,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { format, parseISO, startOfWeek } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 const PREDEFINED_CATEGORIES = [
   "Operations",
@@ -68,7 +68,6 @@ export default function AdminQuestionsPage() {
         ...question,
         weekOf: formattedDate,
       };
-
       const res = await apiRequest("POST", "/api/questions", questionData);
       return await res.json();
     },
@@ -104,13 +103,13 @@ export default function AdminQuestionsPage() {
     },
   });
 
-  const getQuestionsForWeek = (week: Date, questions: Question[] = []) => {
+  const getQuestionsForWeek = (weekData: DimDate, questions: Question[] = []) => {
     if (!questions) return [];
-    const weekStart = startOfWeek(week);
     return questions.filter(q => {
       if (!q.weekOf || q.isArchived) return false;
-      const questionWeekStart = startOfWeek(parseISO(q.weekOf));
-      return format(weekStart, 'yyyy-MM-dd') === format(questionWeekStart, 'yyyy-MM-dd');
+      const weekOf = format(parseISO(q.weekOf), 'yyyy-MM-dd');
+      const weekDate = format(weekData.week, 'yyyy-MM-dd');
+      return weekOf === weekDate;
     });
   };
 
@@ -139,9 +138,9 @@ export default function AdminQuestionsPage() {
       </div>
 
       <div className="container max-w-4xl mx-auto pt-[72px] pb-8 px-4">
-        <div className="grid gap-4">
+        <div className="space-y-4">
           {availableWeeks?.map((weekData) => {
-            const weekQuestions = getQuestionsForWeek(weekData.week, questions);
+            const weekQuestions = getQuestionsForWeek(weekData, questions);
             const isCurrentWeek = weekData.weekIdentifier === 'Current';
 
             return (
@@ -175,21 +174,37 @@ export default function AdminQuestionsPage() {
                           </SheetTitle>
                         </SheetHeader>
                         <div className="mt-6">
-                          <form
-                            onSubmit={(e) => {
-                              e.preventDefault();
-                              if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
-                                toast({
-                                  title: "Error",
-                                  description: "Please fill in all fields",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                              createQuestionMutation.mutate(newQuestion as InsertQuestion);
-                            }}
-                            className="space-y-4"
-                          >
+                          <form onSubmit={(e) => {
+                            e.preventDefault();
+                            if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
+                              toast({
+                                title: "Error",
+                                description: "Please fill in all fields",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+
+                            if (newQuestion.options?.some(option => !option)) {
+                              toast({
+                                title: "Error",
+                                description: "Please fill in all options",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+
+                            if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
+                              toast({
+                                title: "Error",
+                                description: "Correct answer must be one of the options",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+
+                            createQuestionMutation.mutate(newQuestion as InsertQuestion);
+                          }} className="space-y-4">
                             <div>
                               <Label>Question Text</Label>
                               <Textarea
@@ -230,7 +245,7 @@ export default function AdminQuestionsPage() {
                                 <SelectContent>
                                   {newQuestion.options?.map((option, index) => (
                                     <SelectItem key={index} value={option || ""}>
-                                      Option {index + 1}
+                                      Option {index + 1}: {option || `Option ${index + 1}`}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>

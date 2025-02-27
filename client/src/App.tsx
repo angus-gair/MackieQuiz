@@ -26,6 +26,7 @@ const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
 const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
+const AdminArchivedQuestions = lazy(() => import("@/pages/admin/archived-questions"));
 const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
 const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/analytics"));
@@ -78,6 +79,9 @@ function Router() {
           </Route>
           <Route path="/admin/questions">
             {() => <AdminQuestions />}
+          </Route>
+          <Route path="/admin/questions/archived">
+            {() => <AdminArchivedQuestions />}
           </Route>
           <Route path="/admin/users">
             {() => <AdminUsersTeams />}
