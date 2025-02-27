@@ -1360,35 +1360,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAvailableWeeks(): Promise<DimDate[]> {
-    const today = new Date();
+    // First get the current week
+    const [currentWeek] = await db
+      .select()
+      .from(dimDate)
+      .where(eq(dimDate.weekIdentifier, 'Current'))
+      .limit(1);
 
-    // Get the current week's Monday
-    const currentMonday = new Date(today);
-    currentMonday.setDate(today.getDate() - today.getDay() + 1);
-    currentMonday.setHours(0, 0, 0, 0);
+    if (!currentWeek) {
+      throw new Error('Could not determine current week');
+    }
 
-    // Get exactly 4 weeks of data
+    // Get current week plus next 3 weeks
     const weeks = await db
       .select()
       .from(dimDate)
       .where(
         and(
-          gte(dimDate.date, currentMonday),
-          lt(dimDate.date, sql`${currentMonday}::date + INTERVAL '28 days'`)
+          gte(dimDate.date, currentWeek.week),
+          lt(dimDate.date, sql`${currentWeek.week}::date + INTERVAL '4 weeks'`)
         )
       )
-      .groupBy(dimDate.dateId, dimDate.date, dimDate.week)
-      .orderBy(dimDate.date)
-      .limit(28); // Get all days for 4 weeks
+      .groupBy(dimDate.dateId, dimDate.date, dimDate.week, dimDate.weekIdentifier)
+      .orderBy(dimDate.date);
 
-    // Group by week and take first day of each week
-    const uniqueWeeks = Array.from(
-      new Map(
-        weeks.map(week => [week.week.toISOString(), week])
-      ).values()
-    );
+    // Process and return exactly 4 weeks
+    const uniqueWeeks = weeks.reduce((acc: DimDate[], week: DimDate) => {
+      const weekStart = startOfWeek(week.date).toISOString();
+      if (!acc.find(w => startOfWeek(w.date).toISOString() === weekStart)) {
+        acc.push(week);
+      }
+      return acc;
+    }, []);
 
-    return uniqueWeeks.slice(0, 4); // Ensure we only return 4 weeks
+    return uniqueWeeks.slice(0, 4);
   }
 
   async createBonusQuestion(question: InsertQuestion & { bonusPoints: number; availableFrom: Date; availableUntil: Date }): Promise<Question> {
@@ -1397,7 +1402,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...question,
         isBonus: true,
-        weekStatus: 'current', // Bonus questions are always current
+        weekStatus: 'current', // Bonus questions are always current,
       })
       .returning();
 
