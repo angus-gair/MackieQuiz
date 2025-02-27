@@ -265,7 +265,7 @@ export default function AdminQuestionsPage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   {newQuestion.options?.map((option, index) => (
-                                    <SelectItem key={index} value={option || ""}>
+                                    <SelectItem key={index} value={option || `Option ${index + 1}`}>
                                       Option {index + 1}: {option || `Option ${index + 1}`}
                                     </SelectItem>
                                   ))}
