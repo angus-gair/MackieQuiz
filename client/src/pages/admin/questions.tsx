@@ -1,28 +1,42 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  Archive,
-  ArrowLeft,
-  Loader2,
-} from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "wouter";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question } from "@shared/schema";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 
 export default function AdminQuestionsPage() {
   const { user } = useAuth();
 
-  const { data: questions } = useQuery<Question[]>({
+  const { data: questions, isLoading, error } = useQuery<Question[]>({
     queryKey: ["/api/questions"],
+    enabled: !!user?.isAdmin, // Only run query if user is admin
   });
+
+  console.log("Auth state:", { user, isAdmin: user?.isAdmin });
+  console.log("Query state:", { questions, isLoading, error });
 
   if (!user?.isAdmin) {
     return <Link href="/" />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="p-6">
+          <p className="text-red-500">Error loading questions. Please try again.</p>
+        </Card>
+      </div>
+    );
   }
 
   return (
