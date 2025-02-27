@@ -17,7 +17,8 @@ export const users = pgTable("users", {
 
 // Define relations for users
 export const usersRelations = relations(users, ({ many }) => ({
-  achievements: many(achievements)
+  achievements: many(achievements),
+  userQuestions: many(userQuestions)
 }));
 
 // Updated achievements table with new fields
@@ -139,12 +140,23 @@ export const questions = pgTable("questions", {
 });
 
 // Define relations between questions and dim_date
-export const questionsRelations = relations(questions, ({ one }) => ({
+export const questionsRelations = relations(questions, ({ one, many }) => ({
   dimDate: one(dimDate, {
     fields: [questions.weekOf],
     references: [dimDate.date],
   }),
+  userQuestions: many(userQuestions)
 }));
+
+// Add user_questions table to track which questions users have answered
+export const userQuestions = pgTable("user_questions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  questionId: integer("question_id").notNull().references(() => questions.id),
+  correct: boolean("correct").notNull(),
+  answeredAt: timestamp("answered_at").notNull().defaultNow(),
+});
+
 
 export const answers = pgTable("answers", {
   id: serial("id").primaryKey(),
@@ -244,6 +256,12 @@ export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
 // Add insert schema for dim_date
 export const insertDimDateSchema = createInsertSchema(dimDate);
 
+// Add schema for user questions
+export const insertUserQuestionSchema = createInsertSchema(userQuestions).omit({
+  id: true,
+  answeredAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
 export type InsertAnswer = z.infer<typeof insertAnswerSchema>;
@@ -273,3 +291,5 @@ export type UserProfile = typeof userProfiles.$inferSelect;
 export type InsertDimDate = z.infer<typeof insertDimDateSchema>;
 export type DimDate = typeof dimDate.$inferSelect;
 export type WeekQuestion = typeof questions.$inferSelect;
+export type InsertUserQuestion = z.infer<typeof insertUserQuestionSchema>;
+export type UserQuestion = typeof userQuestions.$inferSelect;

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import {
   Plus,
-  Archive,
+  Edit2,
   ArrowLeft,
   Loader2,
 } from "lucide-react";
@@ -22,7 +22,6 @@ import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, InsertQuestion, DimDate } from "@shared/schema";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
@@ -43,6 +42,7 @@ export default function AdminQuestionsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
     options: ["", "", "", ""],
   });
@@ -89,15 +89,17 @@ export default function AdminQuestionsPage() {
     },
   });
 
-  const archiveQuestionMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("POST", `/api/questions/${id}/archive`);
+  const updateQuestionMutation = useMutation({
+    mutationFn: async (question: Question) => {
+      const res = await apiRequest("PATCH", `/api/questions/${question.id}`, question);
+      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
+      setEditingQuestion(null);
       toast({
         title: "Success",
-        description: "Question archived successfully",
+        description: "Question updated successfully",
       });
     },
   });
@@ -124,18 +126,124 @@ export default function AdminQuestionsPage() {
     );
   }
 
+  const QuestionForm = ({ question, onSubmit, isPending }: { 
+    question: Partial<InsertQuestion>, 
+    onSubmit: (e: React.FormEvent) => void,
+    isPending: boolean 
+  }) => (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div>
+        <Label>Question Text</Label>
+        <Textarea
+          value={question.question || ""}
+          onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
+          className="mt-2"
+          placeholder="Enter your question"
+        />
+      </div>
+
+      <div>
+        <Label>Options</Label>
+        <div className="mt-2 space-y-2">
+          {question.options?.map((option, index) => (
+            <Input
+              key={index}
+              value={option}
+              onChange={(e) => {
+                const newOptions = [...(question.options || [])];
+                newOptions[index] = e.target.value;
+                setNewQuestion(prev => ({ ...prev, options: newOptions }));
+              }}
+              placeholder={`Option ${index + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label>Correct Answer</Label>
+        <Select
+          value={question.correctAnswer}
+          onValueChange={(value) => setNewQuestion(prev => ({ ...prev, correctAnswer: value }))}
+        >
+          <SelectTrigger className="mt-2">
+            <SelectValue placeholder="Select correct option" />
+          </SelectTrigger>
+          <SelectContent>
+            {question.options?.map((option, index) => (
+              <SelectItem key={index} value={option || ""}>
+                Option {index + 1}: {option || `Option ${index + 1}`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Category</Label>
+        <Select
+          value={question.category}
+          onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category: value }))}
+        >
+          <SelectTrigger className="mt-2">
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent>
+            {PREDEFINED_CATEGORIES.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Explanation</Label>
+        <Textarea
+          value={question.explanation || ""}
+          onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
+          className="mt-2"
+          placeholder="Explain why this is the correct answer"
+        />
+      </div>
+
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isPending}
+      >
+        {isPending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {editingQuestion ? "Updating Question..." : "Adding Question..."}
+          </>
+        ) : (
+          editingQuestion ? "Update Question" : "Add Question"
+        )}
+      </Button>
+    </form>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50">
         <div className="container h-full">
-          <div className="flex items-center h-full px-4">
-            <Link href="/admin">
-              <Button variant="ghost" className="mr-3">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+          <div className="flex items-center justify-between h-full px-4">
+            <div className="flex items-center gap-3">
+              <Link href="/admin">
+                <Button variant="ghost">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+              </Link>
+              <h1 className="text-lg font-semibold">Question Management</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => {/* TODO: Implement CSV import */}}>
+                Import CSV
               </Button>
-            </Link>
-            <h1 className="text-lg font-semibold">Question Management</h1>
+            </div>
           </div>
         </div>
       </div>
@@ -177,128 +285,41 @@ export default function AdminQuestionsPage() {
                           </SheetTitle>
                         </SheetHeader>
                         <div className="mt-6">
-                          <form onSubmit={(e) => {
-                            e.preventDefault();
-                            if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
-                              toast({
-                                title: "Error",
-                                description: "Please fill in all fields",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
+                          <QuestionForm 
+                            question={newQuestion}
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
+                                toast({
+                                  title: "Error",
+                                  description: "Please fill in all fields",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
 
-                            if (newQuestion.options?.some(option => !option)) {
-                              toast({
-                                title: "Error",
-                                description: "Please fill in all options",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
+                              if (newQuestion.options?.some(option => !option)) {
+                                toast({
+                                  title: "Error",
+                                  description: "Please fill in all options",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
 
-                            if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
-                              toast({
-                                title: "Error",
-                                description: "Correct answer must be one of the options",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
+                              if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
+                                toast({
+                                  title: "Error",
+                                  description: "Correct answer must be one of the options",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
 
-                            createQuestionMutation.mutate(newQuestion as InsertQuestion);
-                          }} className="space-y-4">
-                            <div>
-                              <Label>Question Text</Label>
-                              <Textarea
-                                value={newQuestion.question || ""}
-                                onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
-                                className="mt-2"
-                                placeholder="Enter your question"
-                              />
-                            </div>
-
-                            <div>
-                              <Label>Options</Label>
-                              <div className="mt-2 space-y-2">
-                                {newQuestion.options?.map((option, index) => (
-                                  <Input
-                                    key={index}
-                                    value={option}
-                                    onChange={(e) => {
-                                      const newOptions = [...(newQuestion.options || [])];
-                                      newOptions[index] = e.target.value;
-                                      setNewQuestion(prev => ({ ...prev, options: newOptions }));
-                                    }}
-                                    placeholder={`Option ${index + 1}`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-
-                            <div>
-                              <Label>Correct Answer</Label>
-                              <Select
-                                value={newQuestion.correctAnswer}
-                                onValueChange={(value) => setNewQuestion(prev => ({ ...prev, correctAnswer: value }))}
-                              >
-                                <SelectTrigger className="mt-2">
-                                  <SelectValue placeholder="Select correct option" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {newQuestion.options?.map((option, index) => (
-                                    <SelectItem key={index} value={option || ""}>
-                                      Option {index + 1}: {option || `Option ${index + 1}`}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            <div>
-                              <Label>Category</Label>
-                              <Select
-                                value={newQuestion.category}
-                                onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category: value }))}
-                              >
-                                <SelectTrigger className="mt-2">
-                                  <SelectValue placeholder="Select a category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {PREDEFINED_CATEGORIES.map((category) => (
-                                    <SelectItem key={category} value={category}>
-                                      {category}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            <div>
-                              <Label>Explanation</Label>
-                              <Textarea
-                                value={newQuestion.explanation || ""}
-                                onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
-                                className="mt-2"
-                                placeholder="Explain why this is the correct answer"
-                              />
-                            </div>
-
-                            <Button
-                              type="submit"
-                              className="w-full"
-                              disabled={createQuestionMutation.isPending}
-                            >
-                              {createQuestionMutation.isPending ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Adding Question...
-                                </>
-                              ) : (
-                                "Add Question"
-                              )}
-                            </Button>
-                          </form>
+                              createQuestionMutation.mutate(newQuestion as InsertQuestion);
+                            }}
+                            isPending={createQuestionMutation.isPending}
+                          />
                         </div>
                       </SheetContent>
                     </Sheet>
@@ -330,19 +351,38 @@ export default function AdminQuestionsPage() {
                                 </div>
                               ))}
                             </div>
+                            <p className="text-sm text-muted-foreground mt-3">
+                              Explanation: {question.explanation}
+                            </p>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (window.confirm("Are you sure you want to archive this question?")) {
-                                archiveQuestionMutation.mutate(question.id);
-                              }
-                            }}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Archive className="h-4 w-4" />
-                          </Button>
+                          <Sheet>
+                            <SheetTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setEditingQuestion(question)}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="sm:max-w-xl">
+                              <SheetHeader>
+                                <SheetTitle>Edit Question</SheetTitle>
+                              </SheetHeader>
+                              <div className="mt-6">
+                                <QuestionForm
+                                  question={editingQuestion || {}}
+                                  onSubmit={(e) => {
+                                    e.preventDefault();
+                                    if (editingQuestion) {
+                                      updateQuestionMutation.mutate(editingQuestion);
+                                    }
+                                  }}
+                                  isPending={updateQuestionMutation.isPending}
+                                />
+                              </div>
+                            </SheetContent>
+                          </Sheet>
                         </div>
                       </div>
                     ))}
@@ -356,18 +396,6 @@ export default function AdminQuestionsPage() {
               </Card>
             );
           })}
-        </div>
-
-        <div className="mt-6">
-          <Link href="/admin/questions/archived">
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-            >
-              <Archive className="h-4 w-4" />
-              View Archived Questions
-            </Button>
-          </Link>
         </div>
       </div>
     </div>
