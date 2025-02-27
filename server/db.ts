@@ -11,18 +11,32 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+// Add timezone parameter to connection string if not present
+const connectionString = process.env.DATABASE_URL.includes('timezone=') 
+  ? process.env.DATABASE_URL 
+  : `${process.env.DATABASE_URL}?options=timezone=Australia/Sydney`;
+
 // Configure connection with timezone settings
 export const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
-  // Set timezone to UTC to prevent automatic conversions
-  options: '-c timezone=UTC -c datestyle=ISO,MDY'
+  connectionString,
+  options: '-c timezone=Australia/Sydney -c datestyle=ISO,MDY'
 });
 
 // Run session SET commands after connection
 pool.on('connect', async (client) => {
-  // Completely disable timezone adjustment
-  await client.query('SET timezone TO UTC');
-  await client.query('SET datestyle TO ISO, MDY');
+  try {
+    // Set timezone to Australia/Sydney
+    await client.query('SET timezone TO \'Australia/Sydney\'');
+    await client.query('SET datestyle TO ISO, MDY');
+    console.log('Successfully set timezone and datestyle for new connection');
+
+    // Verify settings
+    const tzResult = await client.query('SHOW timezone');
+    console.log('Current timezone:', tzResult.rows[0].TimeZone);
+  } catch (error) {
+    console.error('Error setting timezone:', error);
+    throw error; // Ensure connection fails if we can't set timezone
+  }
 });
 
 // Create a utility function to format dates for PostgreSQL
@@ -35,20 +49,15 @@ export function formatPgDate(date: Date | string): string {
     // Otherwise, convert to Date and format
     date = new Date(date);
   }
-  
-  // Format as YYYY-MM-DD
-  return date.toISOString().split('T')[0];
+
+  // Format as YYYY-MM-DD with respect to Australia/Sydney timezone
+  return date.toLocaleString('en-AU', { 
+    timeZone: 'Australia/Sydney',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).split('/').reverse().join('-');
 }
 
-export const db = drizzle({ 
-  client: pool, 
-  schema,
-  // Add custom type parsers to prevent PostgreSQL date conversion
-  typeMappers: {
-    // Ensure dates are handled consistently
-    date: {
-      from: (val) => val ? val.split('T')[0] : null,
-      to: (date) => date ? formatPgDate(date) : null,
-    }
-  }
-});
+// Configure drizzle with the pool
+export const db = drizzle(pool, { schema });
