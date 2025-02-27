@@ -1,0 +1,191 @@
+availableWeeks?.map is not a function. (In 'availableWeeks?.map((weekData) => {
+        const weekQuestions = getQuestionsForWeek(weekData, questions);
+        const isCurrentWeek = weekData.weekIdentifier === "Current";
+        return /* @__PURE__ */ jsxDEV(Card, { children: /* @__PURE__ */ jsxDEV("div", { className: "p-6", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between mb-4", children: [
+            /* @__PURE__ */ jsxDEV("div", { children: /* @__PURE__ */ jsxDEV("h2", { className: "text-lg font-semibold", children: [
+              "Week of ",
+              format(new Date(weekData.week), "MMM dd"),
+              isCurrentWeek && /* @__PURE__ */ jsxDEV("span", { className: "ml-2 text-sm font-normal text-muted-foreground", children: "(Current)" }, void 0, false, {
+                fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                lineNumber: 175,
+                columnNumber: 25
+              }, this)
+            ] }, void 0, true, {
+              fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+              lineNumber: 172,
+              columnNumber: 23
+            }, this) }, void 0, false, {
+              fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+              lineNumber: 171,
+              columnNumber: 21
+            }, this),
+            /* @__PURE__ */ jsxDEV(Sheet, { children: [
+              /* @__PURE__ */ jsxDEV(SheetTrigger, { asChild: true, children: /* @__PURE__ */ jsxDEV(
+                Button,
+                {
+                  size: "sm",
+                  onClick: () => setSelectedWeek(new Date(weekData.week)),
+                  children: [
+                    /* @__PURE__ */ jsxDEV(Plus, { className: "h-4 w-4 mr-2" }, void 0, false, {
+                      fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                      lineNumber: 187,
+                      columnNumber: 27
+                    }, this),
+                    "Add Question"
+                  ]
+                },
+                void 0,
+                true,
+                {
+                  fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                  lineNumber: 183,
+                  columnNumber: 25
+                },
+                this
+              ) }, void 0, false, {
+                fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                lineNumber: 182,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV(SheetContent, { side: "right", className: "sm:max-w-xl", children: [
+                /* @__PURE__ */ jsxDEV(SheetHeader, { children: /* @__PURE__ */ jsxDEV(SheetTitle, { children: [
+                  "Add Question for Week of ",
+                  format(new Date(weekData.week), "MMM dd")
+                ] }, void 0, true, {
+                  fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                  lineNumber: 193,
+                  columnNumber: 27
+                }, this) }, void 0, false, {
+                  fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                  lineNumber: 192,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { className: "mt-6", children: /* @__PURE__ */ jsxDEV("form", { onSubmit: (e) => {
+                  e.preventDefault();
+                  if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
+                    toast({
+                      title: "Error",
+                      description: "Please fill in all fields",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  if (newQuestion.options?.some((option) => !option)) {
+                    toast({
+                      title: "Error",
+                      description: "Please fill in all options",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
+                    toast({
+                      title: "Error",
+                      description: "Correct answer must be one of the options",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  createQuestionMutation.mutate(newQuestion);
+                }, className: "space-y-4", children: [
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV(Label, { children: "Question Text" }, void 0, false, {
+                      fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                      lineNumber: 230,
+                      columnNumber: 31
+                    }, this),
+                    /* @__PURE__ */ jsxDEV(
+                      Textarea,
+                      {
+                        value: newQuestion.question || "",
+                        onChange: (e) => setNewQuestion((prev) => ({ ...prev, question: e.target.value })),
+                        className: "mt-2",
+                        placeholder: "Enter your question"
+                      },
+                      void 0,
+                      false,
+                      {
+                        fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                        lineNumber: 231,
+                        columnNumber: 31
+                      },
+                      this
+                    )
+                  ] }, void 0, true, {
+                    fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                    lineNumber: 229,
+                    columnNumber: 29
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV(Label, { children: "Options" }, void 0, false, {
+                      fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                      lineNumber: 240,
+                      columnNumber: 31
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("div", { className: "mt-2 space-y-2", children: newQuestion.options?.map(
+                      (option, index) => /* @__PURE__ */ jsxDEV(
+                        Input,
+                        {
+                          value: option,
+                          onChange: (e) => {
+                            const newOptions = [...newQuestion.options || []];
+                            newOptions[index] = e.target.value;
+                            setNewQuestion((prev) => ({ ...prev, options: newOptions }));
+                          },
+                          placeholder: `Option ${index + 1}`
+                        },
+                        index,
+                        false,
+                        {
+                          fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                          lineNumber: 243,
+                          columnNumber: 33
+                        },
+                        this
+                      )
+                    ) }, void 0, false, {
+                      fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                      lineNumber: 241,
+                      columnNumber: 31
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                    lineNumber: 239,
+                    columnNumber: 29
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV(Label, { children: "Correct Answer" }, void 0, false, {
+                      fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                      lineNumber: 258,
+                      columnNumber: 31
+                    }, this),
+                    /* @__PURE__ */ jsxDEV(
+                      Select,
+                      {
+                        value: newQuestion.correctAnswer,
+                        onValueChange: (value) => setNewQuestion((prev) => ({ ...prev, correctAnswer: value })),
+                        children: [
+                          /* @__PURE__ */ jsxDEV(SelectTrigger, { className: "mt-2", children: /* @__PURE__ */ jsxDEV(SelectValue, { placeholder: "Select correct option" }, void 0, false, {
+                            fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                            lineNumber: 264,
+                            columnNumber: 35
+                          }, this) }, void 0, false, {
+                            fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                            lineNumber: 263,
+                            columnNumber: 33
+                          }, this),
+                          /* @__PURE__ */ jsxDEV(SelectContent, { children: newQuestion.options?.map(
+                            (option, index) => /* @__PURE__ */ jsxDEV(SelectItem, { value: option || "", children: [
+                              "Option ",
+                              index + 1,
+                              ": ",
+                              option || `Option ${index + 1}`
+                            ] }, index, true, {
+                              fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                              lineNumber: 268,
+                              columnNumber: 35
+                            }, this)
+                          ) }, void 0, false, {
+                            fileName: "/home/runner/workspace/client/src/pages/admin/questions.tsx",
+                            lineNumber: 266,
