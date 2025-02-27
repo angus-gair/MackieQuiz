@@ -1,10 +1,18 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import {
+  Plus,
+  Archive,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
 import { Link } from "wouter";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question } from "@shared/schema";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 export default function AdminQuestionsPage() {
   const { user } = useAuth();
@@ -37,14 +45,18 @@ export default function AdminQuestionsPage() {
         <Card className="p-6">
           <h2 className="text-lg font-semibold mb-4">Available Questions</h2>
           {questions && questions.length > 0 ? (
-            <div>
-              <div className="space-y-2">
-                <p><strong>Question:</strong> {questions[0].question}</p>
-                <p><strong>Options:</strong> {questions[0].options.join(", ")}</p>
-                <p><strong>Correct Answer:</strong> {questions[0].correctAnswer}</p>
-                <p><strong>Category:</strong> {questions[0].category}</p>
-                <p><strong>Explanation:</strong> {questions[0].explanation}</p>
-              </div>
+            <div className="space-y-4">
+              {questions.map((question) => (
+                <div key={question.id} className="border rounded-lg p-4">
+                  <div className="space-y-2">
+                    <p><strong>Question:</strong> {question.question}</p>
+                    <p><strong>Options:</strong> {question.options.join(", ")}</p>
+                    <p><strong>Correct Answer:</strong> {question.correctAnswer}</p>
+                    <p><strong>Category:</strong> {question.category}</p>
+                    <p><strong>Explanation:</strong> {question.explanation}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <p className="text-muted-foreground">No questions available</p>
