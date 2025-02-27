@@ -1402,53 +1402,88 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAvailableWeeks(): Promise<DimDate[]> {
-    // Use the SQL query provided to get week commencing dates precisely
-    // This query handles timezone adjustment correctly
-    const weeks = await db.execute<DimDate>(sql`
-      WITH WeeklyTable AS (
+    try {
+      // Use the SQL query provided to get week commencing dates precisely
+      // This query handles timezone adjustment correctly
+      const result = await db.execute<DimDate>(sql`
+        WITH WeeklyTable AS (
+          SELECT 
+            week,
+            week_identifier,
+            MAX(date) AS max_date,
+            MIN(date) AS week_commencing_date
+          FROM 
+            dim_date
+          GROUP BY 
+            week, 
+            week_identifier
+        ),
+        FutureWeeks AS (
+          -- Get current week based on current date
+          SELECT 
+            CURRENT_DATE AS current_date,
+            (SELECT week FROM dim_date WHERE date = CURRENT_DATE) AS current_week
+        )
         SELECT 
-          week,
-          week_identifier,
-          MAX(date) AS max_date,
-          MIN(date) AS week_commencing_date
+          w.date_id as "dateId",
+          wt.week_commencing_date as "date", 
+          wt.week,
+          wt.week_identifier as "weekIdentifier",
+          '' as "dayOfWeek",
+          '' as "calendarMonth",
+          0 as "financialYear",
+          0 as "financialWeek"
         FROM 
-          dim_date
-        GROUP BY 
-          week, 
-          week_identifier
-      ),
-      FutureWeeks AS (
-        -- Get current week based on current date
-        SELECT 
-          CURRENT_DATE AS current_date,
-          (SELECT week FROM dim_date WHERE date = CURRENT_DATE) AS current_week
-      )
-      SELECT 
-        w.date_id as "dateId",
-        wt.week_commencing_date as "date", 
-        wt.week,
-        wt.week_identifier as "weekIdentifier",
-        '' as "dayOfWeek",
-        '' as "calendarMonth",
-        0 as "financialYear",
-        0 as "financialWeek"
-      FROM 
-        WeeklyTable wt
-      JOIN 
-        FutureWeeks fw ON wt.week >= fw.current_week
-        -- Current week + 3 weeks ahead
-        AND wt.week <= (SELECT week FROM dim_date 
-                      WHERE date = (SELECT DATE(CURRENT_DATE + INTERVAL '21 days')))
-      JOIN
-        dim_date w ON w.date = wt.week_commencing_date
-      ORDER BY 
-        wt.week
-    `);
-    
-    if (!weeks || weeks.length === 0) {
-      console.warn("No available weeks found, falling back to default method");
+          WeeklyTable wt
+        JOIN 
+          FutureWeeks fw ON wt.week >= fw.current_week
+          -- Current week + 3 weeks ahead
+          AND wt.week <= (SELECT week FROM dim_date 
+                        WHERE date = (SELECT DATE(CURRENT_DATE + INTERVAL '21 days')))
+        JOIN
+          dim_date w ON w.date = wt.week_commencing_date
+        ORDER BY 
+          wt.week
+      `);
       
-      // Fallback to getting current week + next 3 weeks
+      // Ensure result is properly formatted as an array
+      const weeks = result?.rows || [];
+      
+      if (weeks.length === 0) {
+        console.warn("No available weeks found from SQL query, falling back to default method");
+        
+        // Fallback to getting current week + next 3 weeks
+        const today = new Date();
+        const mondayOfThisWeek = new Date(today);
+        mondayOfThisWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+        mondayOfThisWeek.setHours(0, 0, 0, 0);
+        
+        // Generate the next 4 Mondays
+        const weekDates: Date[] = [];
+        for (let i = 0; i < 4; i++) {
+          const monday = new Date(mondayOfThisWeek);
+          monday.setDate(mondayOfThisWeek.getDate() + (i * 7));
+          weekDates.push(monday);
+        }
+        
+        // Map these dates to the format of DimDate
+        return weekDates.map((date, index) => ({
+          dateId: index + 1,
+          date: date,
+          week: date,
+          dayOfWeek: 'Monday',
+          calendarMonth: date.toLocaleString('default', { month: 'long' }),
+          financialYear: date.getFullYear(),
+          financialWeek: Math.ceil((date.getDate() + new Date(date.getFullYear(), date.getMonth(), 1).getDay()) / 7),
+          weekIdentifier: index === 0 ? 'Current' : 'Future'
+        }));
+      }
+      
+      return weeks;
+    } catch (error) {
+      console.error("Error fetching available weeks:", error);
+      
+      // Fallback to getting current week + next 3 weeks on error
       const today = new Date();
       const mondayOfThisWeek = new Date(today);
       mondayOfThisWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
@@ -1474,8 +1509,6 @@ export class DatabaseStorage implements IStorage {
         weekIdentifier: index === 0 ? 'Current' : 'Future'
       }));
     }
-    
-    return weeks;
   }
 
   async createBonusQuestion(question: InsertQuestion & { bonusPoints: number; availableFrom: Date; availableUntil: Date }): Promise<Question> {
@@ -1484,7 +1517,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...question,
         isBonus: true,
-        weekStatus: 'current', // Bonus questions are always current,
+        weekStatus: 'current', // Bonus questions are always current
       })
       .returning();
 
