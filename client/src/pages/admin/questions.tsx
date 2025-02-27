@@ -87,15 +87,13 @@ export default function AdminQuestionsPage() {
         throw new Error('Week not selected');
       }
 
-      const endpoint = question.isBonus ? "/api/questions/bonus" : "/api/questions";
       const formattedDate = selectedWeek ? format(selectedWeek, 'yyyy-MM-dd') : undefined;
-
       const questionData = {
         ...question,
         weekOf: formattedDate,
       };
 
-      const res = await apiRequest("POST", endpoint, questionData);
+      const res = await apiRequest("POST", "/api/questions", questionData);
       return await res.json();
     },
     onSuccess: () => {
@@ -166,91 +164,39 @@ export default function AdminQuestionsPage() {
       </div>
 
       <div className="container pt-[72px] pb-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Bonus Questions Section */}
-          {bonusQuestions && bonusQuestions.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <Star className="h-5 w-5 text-yellow-500" />
-                Active Bonus Questions
-              </h2>
-              <div className="space-y-2">
-                {bonusQuestions.map((question) => (
-                  <Card key={question.id} className="relative border-yellow-500/20">
-                    <div className="p-4 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-medium leading-tight flex-1">
-                          {question.question}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-yellow-500">
-                            {question.bonusPoints} points
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (window.confirm("Are you sure you want to archive this bonus question?")) {
-                                archiveQuestionMutation.mutate(question.id);
-                              }
-                            }}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Archive className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Category: {question.category}
-                      </p>
-                      <div className="space-y-1">
-                        {question.options.map((option) => (
-                          <div
-                            key={option}
-                            className={cn(
-                              "text-sm px-3 py-1.5 rounded-md",
-                              option === question.correctAnswer
-                                ? "bg-primary/10 text-primary font-medium"
-                                : "bg-muted"
-                            )}
-                          >
-                            {option}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Weekly Questions Section */}
-          <Accordion type="single" collapsible className="space-y-2 mb-4">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Accordion type="single" collapsible className="space-y-4">
             {availableWeeks?.map((weekData) => {
               const weekQuestions = getQuestionsForWeek(weekData.week, questions);
               const isCurrentWeek = weekData.weekIdentifier === 'Current';
+              const weekCommencing = format(weekData.week, "MMM dd");
 
               return (
-                <AccordionItem key={weekData.week.toString()} value={weekData.week.toString()} className="border rounded-lg overflow-hidden">
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline data-[state=open]:border-b bg-muted/50">
-                    <div className="flex items-center gap-2 text-left">
-                      <span className="text-base font-medium">
-                        Week of {format(weekData.week, 'MMM dd')} {isCurrentWeek && "(Current)"}
-                      </span>
-                      {weekQuestions.length > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          ({weekQuestions.length} questions)
-                        </span>
-                      )}
+                <AccordionItem
+                  key={weekData.week.toString()}
+                  value={weekData.week.toString()}
+                  className="border rounded-lg overflow-hidden bg-card"
+                >
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <div className="text-left">
+                        <div className="font-semibold">
+                          Week Commencing {weekCommencing}
+                        </div>
+                        {isCurrentWeek && (
+                          <div className="text-sm text-muted-foreground">
+                            Current Week
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="p-4 space-y-4">
+                    <div className="px-6 pb-6 space-y-4">
                       <Sheet>
                         <SheetTrigger asChild>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             className="w-full border-dashed"
                             onClick={() => {
                               setSelectedWeek(weekData.week);
@@ -261,33 +207,35 @@ export default function AdminQuestionsPage() {
                             Add Question
                           </Button>
                         </SheetTrigger>
-                        <SheetContent className="sm:max-w-xl">
+                        <SheetContent side="right" className="sm:max-w-xl">
                           <SheetHeader>
                             <SheetTitle>
-                              Add Question for {format(weekData.week, 'MMM dd')}
+                              Add Question for Week Commencing {weekCommencing}
                             </SheetTitle>
                           </SheetHeader>
                           <div className="mt-6">
-                            <form onSubmit={(e) => {
-                              e.preventDefault();
-                              if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
-                                toast({
-                                  title: "Error",
-                                  description: "Please fill in all fields",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-
-                              createQuestionMutation.mutate({...newQuestion, isBonus: false} as InsertQuestion);
-                            }} 
-                            className="space-y-4">
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
+                                  toast({
+                                    title: "Error",
+                                    description: "Please fill in all fields",
+                                    variant: "destructive",
+                                  });
+                                  return;
+                                }
+                                createQuestionMutation.mutate({...newQuestion, isBonus: false} as InsertQuestion);
+                              }}
+                              className="space-y-4"
+                            >
                               <div>
                                 <Label>Question Text</Label>
                                 <Textarea
                                   value={newQuestion.question || ""}
                                   onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
                                   className="mt-1.5"
+                                  placeholder="Enter your question here"
                                 />
                               </div>
 
@@ -353,6 +301,7 @@ export default function AdminQuestionsPage() {
                                   value={newQuestion.explanation || ""}
                                   onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
                                   className="mt-1.5"
+                                  placeholder="Explain why this is the correct answer"
                                 />
                               </div>
 
@@ -375,21 +324,23 @@ export default function AdminQuestionsPage() {
                         </SheetContent>
                       </Sheet>
 
-                      {weekQuestions.map((question) => (
-                        <Card key={question.id} className="relative">
-                          <div className="p-4 space-y-2">
+                      <div className="space-y-4">
+                        {weekQuestions.map((question) => (
+                          <Card key={question.id} className="p-4">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1">
-                                <h3 className="font-medium">{question.question}</h3>
+                                <h3 className="font-medium text-base">
+                                  {question.question}
+                                </h3>
                                 <p className="text-sm text-muted-foreground mt-1">
                                   Category: {question.category}
                                 </p>
-                                <div className="mt-2 space-y-1">
+                                <div className="mt-3 space-y-2">
                                   {question.options.map((option) => (
                                     <div
                                       key={option}
                                       className={cn(
-                                        "text-sm px-3 py-1.5 rounded-md",
+                                        "text-sm px-3 py-2 rounded-md",
                                         option === question.correctAnswer
                                           ? "bg-primary/10 text-primary font-medium"
                                           : "bg-muted"
@@ -413,9 +364,14 @@ export default function AdminQuestionsPage() {
                                 <Archive className="h-4 w-4" />
                               </Button>
                             </div>
+                          </Card>
+                        ))}
+                        {weekQuestions.length === 0 && (
+                          <div className="text-center text-muted-foreground py-8">
+                            No questions added for this week yet
                           </div>
-                        </Card>
-                      ))}
+                        )}
+                      </div>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -428,7 +384,7 @@ export default function AdminQuestionsPage() {
             <SheetTrigger asChild>
               <Button 
                 variant="outline"
-                className="w-full mb-4 gap-2"
+                className="w-full gap-2"
                 onClick={() => {
                   setIsBonus(true);
                   setSelectedWeek(null);
@@ -438,99 +394,27 @@ export default function AdminQuestionsPage() {
                 Add Bonus Question
               </Button>
             </SheetTrigger>
-            <SheetContent className="sm:max-w-xl">
+            <SheetContent side="right" className="sm:max-w-xl">
               <SheetHeader>
                 <SheetTitle>Add Bonus Question</SheetTitle>
               </SheetHeader>
               <div className="mt-6">
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation || !newQuestion.bonusPoints) {
-                    toast({
-                      title: "Error",
-                      description: "Please fill in all fields",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-
-                  createQuestionMutation.mutate({...newQuestion, isBonus: true} as InsertQuestion);
-                }}
-                className="space-y-4">
-                  <div>
-                    <Label>Question Text</Label>
-                    <Textarea
-                      value={newQuestion.question || ""}
-                      onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Options</Label>
-                    <div className="mt-1.5 space-y-2">
-                      {newQuestion.options?.map((option, index) => (
-                        <Input
-                          key={index}
-                          value={option}
-                          onChange={(e) => {
-                            const newOptions = [...(newQuestion.options || [])];
-                            newOptions[index] = e.target.value;
-                            setNewQuestion(prev => ({ ...prev, options: newOptions }));
-                          }}
-                          placeholder={`Option ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Correct Answer</Label>
-                    <Select
-                      value={newQuestion.correctAnswer}
-                      onValueChange={(value) => setNewQuestion(prev => ({ ...prev, correctAnswer: value }))}
-                    >
-                      <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder="Select the correct option" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {newQuestion.options?.map((option, index) => (
-                          <SelectItem key={index} value={option}>
-                            Option {index + 1}: {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Category</Label>
-                    <Select
-                      value={newQuestion.category}
-                      onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category: value }))}
-                    >
-                      <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PREDEFINED_CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Explanation</Label>
-                    <Textarea
-                      value={newQuestion.explanation || ""}
-                      onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
-                      className="mt-1.5"
-                    />
-                  </div>
-
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation || !newQuestion.bonusPoints) {
+                      toast({
+                        title: "Error",
+                        description: "Please fill in all fields",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    createQuestionMutation.mutate({...newQuestion, isBonus: true} as InsertQuestion);
+                  }}
+                  className="space-y-4"
+                >
+                  {/* Same form fields as regular question plus bonus fields */}
                   <div>
                     <Label>Bonus Points</Label>
                     <Input
