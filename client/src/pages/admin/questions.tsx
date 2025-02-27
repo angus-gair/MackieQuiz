@@ -136,9 +136,6 @@ export default function AdminQuestionsPage() {
               </Button>
             </Link>
             <h1 className="text-lg font-semibold">Question Management</h1>
-            <div className="bg-primary/10 p-4 rounded-lg ml-4">
-              <p className="text-xl font-bold text-center">Test Text Box</p>
-            </div>
           </div>
         </div>
       </div>
