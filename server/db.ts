@@ -19,9 +19,11 @@ export const pool = new Pool({
 });
 
 // Run session SET commands after connection
-pool.on('connect', (client) => {
-  // Disable timezone conversion
-  client.query('SET timezone TO UTC');
+pool.on('connect', async (client) => {
+  // Disable timezone conversion and set to UTC explicitly
+  await client.query('SET timezone TO UTC');
+  // Force PostgreSQL to store dates as UTC timestamps
+  await client.query('SET datestyle TO ISO, MDY');
 });
 
 export const db = drizzle({ client: pool, schema });
