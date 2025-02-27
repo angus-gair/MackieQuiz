@@ -23,7 +23,6 @@ import {
   Archive,
   ArrowLeft,
   Star,
-  Calendar,
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -31,7 +30,6 @@ import type { Question, InsertQuestion, DimDate } from "@shared/schema";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, isEqual, startOfWeek } from "date-fns";
 import { Loader2 } from 'lucide-react';
@@ -49,7 +47,6 @@ const PREDEFINED_CATEGORIES = [
 ];
 
 export default function AdminQuestionsPage() {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [isBonus, setIsBonus] = useState(false);
@@ -169,7 +166,7 @@ export default function AdminQuestionsPage() {
       </div>
 
       <div className="container pt-[72px] pb-8 px-4">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Bonus Questions Section */}
           {bonusQuestions && bonusQuestions.length > 0 && (
             <div className="mb-6">
@@ -180,13 +177,13 @@ export default function AdminQuestionsPage() {
               <div className="space-y-2">
                 {bonusQuestions.map((question) => (
                   <Card key={question.id} className="relative border-yellow-500/20">
-                    <div className="p-2 sm:p-3 space-y-2">
+                    <div className="p-4 space-y-2">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-sm font-medium leading-tight flex-1">
+                        <h3 className="font-medium leading-tight flex-1">
                           {question.question}
                         </h3>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-yellow-500">
+                          <span className="text-sm font-medium text-yellow-500">
                             {question.bonusPoints} points
                           </span>
                           <Button
@@ -197,13 +194,13 @@ export default function AdminQuestionsPage() {
                                 archiveQuestionMutation.mutate(question.id);
                               }
                             }}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1 -mr-1"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           >
                             <Archive className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         Category: {question.category}
                       </p>
                       <div className="space-y-1">
@@ -211,7 +208,7 @@ export default function AdminQuestionsPage() {
                           <div
                             key={option}
                             className={cn(
-                              "text-xs px-2 py-1 rounded-md",
+                              "text-sm px-3 py-1.5 rounded-md",
                               option === question.correctAnswer
                                 ? "bg-primary/10 text-primary font-medium"
                                 : "bg-muted"
@@ -229,47 +226,87 @@ export default function AdminQuestionsPage() {
           )}
 
           {/* Weekly Questions Section */}
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Weekly Questions
-            </h2>
-            <div className="space-y-4">
-              {availableWeeks?.map((weekData) => {
-                const weekQuestions = getQuestionsForWeek(weekData.week, questions);
-                const isCurrentWeek = weekData.weekIdentifier === 'Current';
+          <Accordion type="single" collapsible className="space-y-2 mb-4">
+            {availableWeeks?.map((weekData) => {
+              const weekQuestions = getQuestionsForWeek(weekData.week, questions);
+              const isCurrentWeek = weekData.weekIdentifier === 'Current';
 
-                return (
-                  <Card key={weekData.week.toString()} className="overflow-hidden">
-                    <div className="bg-muted/50 px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base font-medium">
-                          {isCurrentWeek && "📍"} Week of {format(weekData.week, 'MMM d')}
+              return (
+                <AccordionItem key={weekData.week.toString()} value={weekData.week.toString()} className="border rounded-lg overflow-hidden">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline data-[state=open]:border-b bg-muted/50">
+                    <div className="flex items-center gap-2 text-left">
+                      <span className="text-base font-medium">
+                        Week of {format(weekData.week, 'MMM dd')} {isCurrentWeek && "(Current)"}
+                      </span>
+                      {weekQuestions.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          ({weekQuestions.length} questions)
                         </span>
-                        {isCurrentWeek && (
-                          <span className="text-xs text-muted-foreground">
-                            (Current)
-                          </span>
-                        )}
-                      </div>
+                      )}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="p-4 space-y-4">
+                      {weekQuestions.map((question) => (
+                        <Card key={question.id} className="relative">
+                          <div className="p-4 space-y-2">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <h3 className="font-medium">{question.question}</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Category: {question.category}
+                                </p>
+                                <div className="mt-2 space-y-1">
+                                  {question.options.map((option) => (
+                                    <div
+                                      key={option}
+                                      className={cn(
+                                        "text-sm px-3 py-1.5 rounded-md",
+                                        option === question.correctAnswer
+                                          ? "bg-primary/10 text-primary font-medium"
+                                          : "bg-muted"
+                                      )}
+                                    >
+                                      {option}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  if (window.confirm("Are you sure you want to archive this question?")) {
+                                    archiveQuestionMutation.mutate(question.id);
+                                  }
+                                }}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Archive className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+
                       <Sheet>
                         <SheetTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
+                          <Button 
+                            variant="outline" 
+                            className="w-full border-dashed"
                             onClick={() => {
                               setSelectedWeek(weekData.week);
                               setIsBonus(false);
                             }}
                           >
-                            <Plus className="h-4 w-4 mr-1" />
+                            <Plus className="h-4 w-4 mr-2" />
                             Add Question
                           </Button>
                         </SheetTrigger>
                         <SheetContent className="sm:max-w-xl">
                           <SheetHeader>
                             <SheetTitle>
-                              Add Question for {format(weekData.week, 'MMM d')}
+                              Add Question for {format(weekData.week, 'MMM dd')}
                             </SheetTitle>
                           </SheetHeader>
                           <div className="mt-6">
@@ -279,24 +316,6 @@ export default function AdminQuestionsPage() {
                                 toast({
                                   title: "Error",
                                   description: "Please fill in all fields",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-
-                              if (newQuestion.options?.some(option => !option)) {
-                                toast({
-                                  title: "Error",
-                                  description: "Please fill in all options",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-
-                              if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
-                                toast({
-                                  title: "Error",
-                                  description: "Correct answer must be one of the options",
                                   variant: "destructive",
                                 });
                                 return;
@@ -398,57 +417,11 @@ export default function AdminQuestionsPage() {
                         </SheetContent>
                       </Sheet>
                     </div>
-                    <div className="divide-y">
-                      {weekQuestions.map((question) => (
-                        <div key={question.id} className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <h3 className="font-medium">{question.question}</h3>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                Category: {question.category}
-                              </p>
-                              <div className="mt-2 space-y-1">
-                                {question.options.map((option) => (
-                                  <div
-                                    key={option}
-                                    className={cn(
-                                      "text-sm px-3 py-1.5 rounded-md",
-                                      option === question.correctAnswer
-                                        ? "bg-primary/10 text-primary font-medium"
-                                        : "bg-muted"
-                                    )}
-                                  >
-                                    {option}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                if (window.confirm("Are you sure you want to archive this question?")) {
-                                  archiveQuestionMutation.mutate(question.id);
-                                }
-                              }}
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            >
-                              <Archive className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      {weekQuestions.length === 0 && (
-                        <div className="p-4 text-center text-muted-foreground">
-                          No questions added for this week yet
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
 
           {/* Bonus Question Button */}
           <Sheet>
@@ -484,8 +457,80 @@ export default function AdminQuestionsPage() {
                   createQuestionMutation.mutate({...newQuestion, isBonus: true} as InsertQuestion);
                 }}
                 className="space-y-4">
-                  {/* Form fields are the same as regular questions plus bonus-specific fields */}
-                  {/* ... existing form fields ... */}
+                  <div>
+                    <Label>Question Text</Label>
+                    <Textarea
+                      value={newQuestion.question || ""}
+                      onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Options</Label>
+                    <div className="mt-1.5 space-y-2">
+                      {newQuestion.options?.map((option, index) => (
+                        <Input
+                          key={index}
+                          value={option}
+                          onChange={(e) => {
+                            const newOptions = [...(newQuestion.options || [])];
+                            newOptions[index] = e.target.value;
+                            setNewQuestion(prev => ({ ...prev, options: newOptions }));
+                          }}
+                          placeholder={`Option ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Correct Answer</Label>
+                    <Select
+                      value={newQuestion.correctAnswer}
+                      onValueChange={(value) => setNewQuestion(prev => ({ ...prev, correctAnswer: value }))}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select the correct option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {newQuestion.options?.map((option, index) => (
+                          <SelectItem key={index} value={option}>
+                            Option {index + 1}: {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Category</Label>
+                    <Select
+                      value={newQuestion.category}
+                      onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category: value }))}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PREDEFINED_CATEGORIES.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Explanation</Label>
+                    <Textarea
+                      value={newQuestion.explanation || ""}
+                      onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
+                      className="mt-1.5"
+                    />
+                  </div>
+
                   <div>
                     <Label>Bonus Points</Label>
                     <Input
@@ -495,6 +540,7 @@ export default function AdminQuestionsPage() {
                       className="mt-1.5"
                     />
                   </div>
+
                   <div>
                     <Label>Available From</Label>
                     <Input
@@ -504,6 +550,7 @@ export default function AdminQuestionsPage() {
                       className="mt-1.5"
                     />
                   </div>
+
                   <div>
                     <Label>Available Until</Label>
                     <Input
@@ -513,6 +560,7 @@ export default function AdminQuestionsPage() {
                       className="mt-1.5"
                     />
                   </div>
+
                   <Button
                     type="submit"
                     className="w-full"
@@ -533,7 +581,7 @@ export default function AdminQuestionsPage() {
           </Sheet>
 
           {/* View Archived Questions Link */}
-          <Link href="/admin/questions/archived" className="block">
+          <Link href="/admin/questions/archived">
             <Button 
               variant="outline"
               className="w-full gap-2"
