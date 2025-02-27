@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { CacheSettings } from "@/components/admin/cache-settings";
 import { FeedbackView } from "@/components/admin/feedback-view";
+import { CacheProvider } from "@/hooks/use-cache-settings";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -61,9 +62,11 @@ const AdminDashboard = () => {
           </div>
 
           {/* Cache Settings Section */}
-          <div className="mb-6 mt-8">
-            <CacheSettings />
-          </div>
+          <CacheProvider>
+            <div className="mb-6 mt-8">
+              <CacheSettings />
+            </div>
+          </CacheProvider>
 
           {/* Feedback Section */}
           <div className="mb-6">
