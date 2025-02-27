@@ -247,48 +247,6 @@ export default function AdminQuestionsPage() {
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="p-4 space-y-4">
-                      {weekQuestions.map((question) => (
-                        <Card key={question.id} className="relative">
-                          <div className="p-4 space-y-2">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                <h3 className="font-medium">{question.question}</h3>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  Category: {question.category}
-                                </p>
-                                <div className="mt-2 space-y-1">
-                                  {question.options.map((option) => (
-                                    <div
-                                      key={option}
-                                      className={cn(
-                                        "text-sm px-3 py-1.5 rounded-md",
-                                        option === question.correctAnswer
-                                          ? "bg-primary/10 text-primary font-medium"
-                                          : "bg-muted"
-                                      )}
-                                    >
-                                      {option}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  if (window.confirm("Are you sure you want to archive this question?")) {
-                                    archiveQuestionMutation.mutate(question.id);
-                                  }
-                                }}
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              >
-                                <Archive className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-
                       <Sheet>
                         <SheetTrigger asChild>
                           <Button 
@@ -416,6 +374,48 @@ export default function AdminQuestionsPage() {
                           </div>
                         </SheetContent>
                       </Sheet>
+
+                      {weekQuestions.map((question) => (
+                        <Card key={question.id} className="relative">
+                          <div className="p-4 space-y-2">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <h3 className="font-medium">{question.question}</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Category: {question.category}
+                                </p>
+                                <div className="mt-2 space-y-1">
+                                  {question.options.map((option) => (
+                                    <div
+                                      key={option}
+                                      className={cn(
+                                        "text-sm px-3 py-1.5 rounded-md",
+                                        option === question.correctAnswer
+                                          ? "bg-primary/10 text-primary font-medium"
+                                          : "bg-muted"
+                                      )}
+                                    >
+                                      {option}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  if (window.confirm("Are you sure you want to archive this question?")) {
+                                    archiveQuestionMutation.mutate(question.id);
+                                  }
+                                }}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Archive className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
                     </div>
                   </AccordionContent>
                 </AccordionItem>
