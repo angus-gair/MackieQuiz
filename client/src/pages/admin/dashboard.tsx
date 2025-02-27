@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { CacheSettings } from "@/components/admin/cache-settings";
 import { FeedbackView } from "@/components/admin/feedback-view";
 
-export default function AdminDashboard() {
+const AdminDashboard = () => {
   const { user } = useAuth();
 
   const modules = [
@@ -36,31 +36,21 @@ export default function AdminDashboard() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-bold text-primary mb-6">Admin Dashboard</h1>
 
-          {/* Cache Settings Section */}
-          <div className="mb-6">
-            <CacheSettings />
-          </div>
-
-          {/* Feedback Section */}
-          <div className="mb-6">
-            <FeedbackView />
-          </div>
-
           {/* Module Cards */}
           <div className="grid gap-4 md:grid-cols-3">
             {modules.map((module) => (
-              <Card key={module.href}>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
+              <Card key={module.href} className="hover:shadow-md transition-shadow">
+                <CardHeader className="space-y-1">
+                  <CardTitle className="text-base flex items-center gap-2">
                     {module.icon}
-                    <span>{module.title}</span>
+                    {module.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0 pb-3">
-                  <p className="text-xs text-muted-foreground mb-3">
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
                     {module.description}
                   </p>
-                  <Button asChild className="w-full h-8 text-xs">
+                  <Button asChild variant="outline" className="w-full">
                     <Link href={module.href}>
                       Open {module.title}
                     </Link>
@@ -69,8 +59,20 @@ export default function AdminDashboard() {
               </Card>
             ))}
           </div>
+
+          {/* Cache Settings Section */}
+          <div className="mb-6 mt-8">
+            <CacheSettings />
+          </div>
+
+          {/* Feedback Section */}
+          <div className="mb-6">
+            <FeedbackView />
+          </div>
         </div>
       </main>
     </div>
   );
-}
+};
+
+export default AdminDashboard;

@@ -5,8 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/use-auth";
-import { CacheProvider } from "@/hooks/use-cache-settings";
-import { ProtectedRoute } from "./lib/protected-route";
 import { AdminRoute } from "./lib/admin-route";
 import { HeaderNav } from "@/components/header-nav";
 
@@ -21,7 +19,7 @@ const SettingsPage = lazy(() => import("@/pages/settings-page"));
 const ProfilePage = lazy(() => import("@/pages/user/profile"));
 const TeamsPage = lazy(() => import("@/pages/teams-page"));
 const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
-const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
+
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
@@ -29,7 +27,6 @@ const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
 const AdminArchivedQuestions = lazy(() => import("@/pages/admin/archived-questions"));
 const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
 const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
-const AdminAnalytics = lazy(() => import("@/pages/admin/analytics"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -44,58 +41,21 @@ function Router() {
       <HeaderNav />
       <Suspense fallback={<LoadingSpinner />}>
         <Switch>
-          <Route path="/auth">
-            {(params) => <AuthPage {...params} />}
-          </Route>
-
-          {/* Public Routes */}
-          <Route path="/leaderboard">
-            {(params) => <LeaderboardPage {...params} />}
-          </Route>
-
-          {/* Protected User Routes */}
-          <Route path="/">
-            {() => <WelcomePage />}
-          </Route>
-          <Route path="/quiz">
-            {() => <HomePage />}
-          </Route>
-          <Route path="/settings">
-            {() => <SettingsPage />}
-          </Route>
-          <Route path="/profile">
-            {() => <ProfilePage />}
-          </Route>
-          <Route path="/teams">
-            {() => <TeamsPage />}
-          </Route>
-          <Route path="/team-allocation">
-            {() => <TeamAllocationPage />}
-          </Route>
+          <Route path="/auth" component={AuthPage} />
+          <Route path="/" component={WelcomePage} />
+          <Route path="/leaderboard" component={LeaderboardPage} />
+          <Route path="/teams" component={TeamsPage} />
+          <Route path="/profile" component={ProfilePage} />
+          <Route path="/settings" component={SettingsPage} />
 
           {/* Admin Routes */}
-          <Route path="/admin">
-            {() => <AdminDashboard />}
-          </Route>
-          <Route path="/admin/questions">
-            {() => <AdminQuestions />}
-          </Route>
-          <Route path="/admin/questions/archived">
-            {() => <AdminArchivedQuestions />}
-          </Route>
-          <Route path="/admin/users">
-            {() => <AdminUsersTeams />}
-          </Route>
-          <Route path="/admin/achievements">
-            {() => <AdminAchievements />}
-          </Route>
-          <Route path="/admin/analytics">
-            {() => <AdminAnalytics />}
-          </Route>
+          <AdminRoute path="/admin" component={AdminDashboard} />
+          <AdminRoute path="/admin/questions" component={AdminQuestions} />
+          <AdminRoute path="/admin/questions/archived" component={AdminArchivedQuestions} />
+          <AdminRoute path="/admin/users" component={AdminUsersTeams} />
+          <AdminRoute path="/admin/achievements" component={AdminAchievements} />
 
-          <Route>
-            {(params) => <NotFound {...params} />}
-          </Route>
+          <Route component={NotFound} />
         </Switch>
       </Suspense>
     </>
@@ -105,12 +65,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <CacheProvider>
-        <AuthProvider>
-          <Router />
-          <Toaster />
-        </AuthProvider>
-      </CacheProvider>
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
