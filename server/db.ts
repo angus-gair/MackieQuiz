@@ -11,5 +11,17 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Configure connection with timezone settings
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  // Set timezone to UTC to prevent automatic conversions
+  options: '-c timezone=UTC'
+});
+
+// Run session SET commands after connection
+pool.on('connect', (client) => {
+  // Disable timezone conversion
+  client.query('SET timezone TO UTC');
+});
+
 export const db = drizzle({ client: pool, schema });
