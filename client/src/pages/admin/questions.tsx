@@ -40,17 +40,18 @@ const PREDEFINED_CATEGORIES = [
 ];
 
 export default function AdminQuestionsPage() {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
     options: ["", "", "", ""],
   });
 
+  // Get available weeks from the dim_date table
   const { data: availableWeeks, isLoading: isLoadingWeeks } = useQuery<DimDate[]>({
     queryKey: ["/api/weeks/available"],
   });
 
+  // Get questions for all weeks
   const { data: questions, isLoading: isLoadingQuestions } = useQuery<Question[]>({
     queryKey: ["/api/questions"],
   });
@@ -105,16 +106,12 @@ export default function AdminQuestionsPage() {
   const getQuestionsForWeek = (weekData: DimDate, questions: Question[] = []) => {
     if (!questions) return [];
     return questions.filter(q => {
-      if (!q.weekOf) return false;
+      if (!q.weekOf || q.isArchived) return false;
       const weekOf = format(parseISO(q.weekOf), 'yyyy-MM-dd');
       const weekDate = format(weekData.week, 'yyyy-MM-dd');
       return weekOf === weekDate;
     });
   };
-
-  if (!user?.isAdmin) {
-    return <Link href="/" />;
-  }
 
   if (isLoading) {
     return (

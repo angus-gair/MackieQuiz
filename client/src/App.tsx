@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/use-auth";
-import { CacheProvider } from "@/hooks/use-cache-settings";
 import { AdminRoute } from "./lib/admin-route";
 import { HeaderNav } from "@/components/header-nav";
 
@@ -20,6 +19,7 @@ const SettingsPage = lazy(() => import("@/pages/settings-page"));
 const ProfilePage = lazy(() => import("@/pages/user/profile"));
 const TeamsPage = lazy(() => import("@/pages/teams-page"));
 const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
+
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
@@ -66,10 +66,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <CacheProvider>
-          <Router />
-          <Toaster />
-        </CacheProvider>
+        <Router />
+        <Toaster />
       </AuthProvider>
     </QueryClientProvider>
   );
