@@ -40,6 +40,7 @@ const PREDEFINED_CATEGORIES = [
 ];
 
 export default function AdminQuestionsPage() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
@@ -113,6 +114,10 @@ export default function AdminQuestionsPage() {
     });
   };
 
+  if (!user?.isAdmin) {
+    return <Link href="/" />;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -133,6 +138,9 @@ export default function AdminQuestionsPage() {
               </Button>
             </Link>
             <h1 className="text-lg font-semibold">Question Management</h1>
+            <div className="bg-primary/10 p-4 rounded-lg ml-4">
+              <p className="text-xl font-bold text-center">Test Text Box</p>
+            </div>
           </div>
         </div>
       </div>
