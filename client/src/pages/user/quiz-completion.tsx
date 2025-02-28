@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "wouter";
 import { Home, Trophy } from "lucide-react";
 
-export function QuizCompletionPage() {
+export default function QuizCompletionPage() {
   const navigate = useNavigate();
 
   // Query for latest achievement after quiz completion
