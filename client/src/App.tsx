@@ -1,13 +1,14 @@
-import { Switch, Route, RouteComponentProps } from "wouter";
+import { Switch, Route, RouteComponentProps, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { Suspense, lazy, ComponentType } from "react";
+import { Suspense, lazy, ComponentType, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/use-auth";
 import { AdminRoute } from "./lib/admin-route";
 import { ProtectedRoute } from "./lib/protected-route";
-import { BottomNav } from "@/components/bottom-nav";
+import { TopNav } from "./components/top-nav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Define a component type that accepts any props
 type AnyComponent = ComponentType<any>;
@@ -42,9 +43,20 @@ const LoadingSpinner = () => (
 );
 
 function Router() {
+  const [location] = useLocation();
+  const isMobile = useIsMobile();
+  
+  // Don't show navigation on auth page
+  const showNav = location !== '/auth';
+  
+  // Determine top padding based on navigation
+  const contentClasses = showNav ? "pt-16 pb-6" : "";
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <div className="flex-1 pb-16">
+      {showNav && <TopNav />}
+      
+      <div className={`flex-1 ${contentClasses}`}>
         <Suspense fallback={<LoadingSpinner />}>
           <Switch>
             <Route path="/auth" component={AuthPage as AnyComponent} />
@@ -70,7 +82,6 @@ function Router() {
           </Switch>
         </Suspense>
       </div>
-      <BottomNav />
     </div>
   );
 }

@@ -2,6 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom utility classes */
+@layer components {
+  /* Common icon circle styles */
+  .icon-circle {
+    @apply flex items-center justify-center rounded-full w-8 h-8;
+  }
+  
+  .icon-circle-primary {
+    @apply icon-circle bg-primary/10 text-primary;
+  }
+  
+  .icon-circle-secondary {
+    @apply icon-circle bg-secondary/10 text-secondary;
+  }
+  
+  /* Card styles */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:border-primary/20;
+  }
+  
+  /* Button enhancements */
+  .btn-primary-gradient {
+    @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white;
+  }
+  
+  /* Team colors */
+  .team-red {
+    @apply bg-red-100 text-red-800 border-red-200;
+  }
+  
+  .team-blue {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+  
+  .team-green {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+  
+  .team-purple {
+    @apply bg-purple-100 text-purple-800 border-purple-200;
+  }
+  
+  .team-yellow {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+  }
+  
+  /* Badge variants */
+  .badge-outline-primary {
+    @apply border border-primary/20 text-primary bg-primary/5 hover:bg-primary/10;
+  }
+  
+  /* Quiz related styles */
+  .quiz-option {
+    @apply p-4 border rounded-lg mb-2 hover:border-primary/30 hover:bg-primary/5 transition-colors cursor-pointer;
+  }
+  
+  .quiz-option-selected {
+    @apply border-primary bg-primary/10 font-medium;
+  }
+  
+  .quiz-option-correct {
+    @apply border-green-500 bg-green-50 text-green-700;
+  }
+  
+  .quiz-option-incorrect {
+    @apply border-red-500 bg-red-50 text-red-700;
+  }
+  
+  /* Admin panel styles */
+  .admin-sidebar-item {
+    @apply flex items-center gap-2 px-3 py-2 rounded-md hover:bg-secondary/10 transition-colors;
+  }
+  
+  .admin-sidebar-item-active {
+    @apply bg-primary/10 text-primary font-medium;
+  }
+  
+  /* Profile and achievement styles */
+  .achievement-card {
+    @apply bg-white rounded-lg p-4 border shadow-sm hover:shadow-md transition-all;
+  }
+  
+  .profile-stat {
+    @apply flex flex-col items-center justify-center p-3 rounded-lg bg-background border;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
