@@ -4,7 +4,7 @@ import { Route } from "wouter";
 
 type AdminRouteProps = {
   path: string;
-  component: React.ComponentType;
+  component: React.ComponentType<any>;
 };
 
 export function AdminRoute({
@@ -15,11 +15,11 @@ export function AdminRoute({
 
   return (
     <Route path={path}>
-      {() => {
+      {(params) => {
         if (isLoading) {
           return (
             <div className="flex items-center justify-center min-h-screen">
-              <Loader2 className="h-8 w-8 animate-spin text-border" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           );
         }
@@ -29,7 +29,7 @@ export function AdminRoute({
           return null;
         }
 
-        return <Component />;
+        return <Component {...params} />;
       }}
     </Route>
   );
