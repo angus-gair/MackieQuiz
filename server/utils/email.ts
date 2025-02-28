@@ -1,23 +1,23 @@
-import { MailService } from '@sendgrid/mail';
+// Import removed to disable SendGrid functionality
 
-if (!process.env.SENDGRID_API_KEY) {
-  throw new Error("SENDGRID_API_KEY environment variable must be set");
-}
-
-const mailService = new MailService();
-mailService.setApiKey(process.env.SENDGRID_API_KEY);
+// SendGrid is disabled as per user request
+// No need for SENDGRID_API_KEY environment variable
 
 const ADMIN_EMAILS = ["angus@gair.com.au", "belinda.mackie26@gmail.com"];
 
+/**
+ * Dummy implementation of the sendFeedbackNotification function
+ * This simply logs the feedback to the console and returns true
+ * without actually sending any emails, removing the SendGrid dependency
+ */
 export async function sendFeedbackNotification(feedback: {
   category: string;
   content: string;
   rating: number;
   username?: string;
 }) {
-  console.log('Preparing to send feedback notification email'); // Debug log
-
-  const emailContent = `
+  console.log('SendGrid disabled - Feedback would have been sent:'); 
+  console.log(`
     New Feedback Received
 
     Category: ${feedback.category}
@@ -26,24 +26,10 @@ export async function sendFeedbackNotification(feedback: {
 
     Message:
     ${feedback.content}
-  `;
-
-  try {
-    console.log('Sending email to admins:', ADMIN_EMAILS); // Debug log
-    const response = await mailService.send({
-      to: ADMIN_EMAILS,
-      from: 'no-reply@projectroundtable.com',
-      subject: `New Feedback: ${feedback.category}`,
-      text: emailContent,
-    });
-    console.log('Email sent successfully:', response); // Enhanced logging
-    return true;
-  } catch (error) {
-    console.error('SendGrid email error:', {
-      error,
-      feedback,
-      timestamp: new Date().toISOString()
-    });
-    return false;
-  }
+  `);
+  
+  console.log('To admins:', ADMIN_EMAILS);
+  
+  // Return true to indicate success even though no email was sent
+  return true;
 }
