@@ -1,6 +1,6 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { PlusCircle, BarChart2, Activity, Users, Archive } from "lucide-react";
+import { PlusCircle, BarChart2, Activity, Users, Archive, ClipboardCheck } from "lucide-react";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 
@@ -32,6 +32,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       icon: <Users className="h-4 w-4" />,
       label: "Users & Teams",
       href: "/admin/users",
+    },
+    {
+      icon: <ClipboardCheck className="h-4 w-4" />,
+      label: "Deployment Checklist",
+      href: "/admin/deployment-checklist",
     },
     ...(user.username === "gair" ? [
       {

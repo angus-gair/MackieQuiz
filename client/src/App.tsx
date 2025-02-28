@@ -27,6 +27,7 @@ const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
 const AdminArchivedQuestions = lazy(() => import("@/pages/admin/archived-questions"));
 const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
 const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
+const DeploymentChecklist = lazy(() => import("@/pages/admin/deployment-checklist"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -54,6 +55,7 @@ function Router() {
           <AdminRoute path="/admin/questions/archived" component={AdminArchivedQuestions} />
           <AdminRoute path="/admin/users" component={AdminUsersTeams} />
           <AdminRoute path="/admin/achievements" component={AdminAchievements} />
+          <AdminRoute path="/admin/deployment-checklist" component={DeploymentChecklist} />
 
           <Route component={NotFound} />
         </Switch>
