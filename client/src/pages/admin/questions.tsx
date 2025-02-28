@@ -292,27 +292,27 @@ export default function AdminQuestionsPage() {
                 Add Question
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="sm:max-w-xl">
-              <SheetHeader>
-                <SheetTitle>
+            <SheetContent side="right" className="w-full p-4 sm:p-6 md:max-w-xl overflow-y-auto max-h-screen">
+              <SheetHeader className="mb-5">
+                <SheetTitle className="text-xl">
                   Add New Question
                 </SheetTitle>
               </SheetHeader>
               
               {/* Week selection dropdown in the form */}
-              <div className="mt-6">
-                <form onSubmit={handleSubmitQuestion} className="space-y-4">
+              <div className="mt-4">
+                <form onSubmit={handleSubmitQuestion} className="space-y-5">
                   {/* Week selection */}
                   <div>
-                    <Label>Select Week</Label>
+                    <Label className="text-sm font-medium">Select Week</Label>
                     <Select
                       value={selectedWeek && !isNaN(selectedWeek.getTime()) ? format(selectedWeek, 'yyyy-MM-dd') : undefined}
                       onValueChange={(value) => setSelectedWeek(parseISO(value))}
                     >
-                      <SelectTrigger className="mt-2">
+                      <SelectTrigger className="mt-1.5 w-full">
                         <SelectValue placeholder="Select week" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" className="w-full min-w-[200px]">
                         {availableWeeks?.map((weekData) => {
                           const weekDate = new Date(weekData.week);
                           return (
@@ -330,18 +330,18 @@ export default function AdminQuestionsPage() {
                   </div>
                   
                   <div>
-                    <Label>Question Text</Label>
+                    <Label className="text-sm font-medium">Question Text</Label>
                     <Textarea
                       value={newQuestion.question || ""}
                       onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
-                      className="mt-2"
+                      className="mt-1.5 min-h-[80px]"
                       placeholder="Enter your question"
                     />
                   </div>
 
                   <div>
-                    <Label>Options</Label>
-                    <div className="mt-2 space-y-2">
+                    <Label className="text-sm font-medium">Options</Label>
+                    <div className="mt-1.5 space-y-2">
                       {newQuestion.options?.map((option, index) => (
                         <Input
                           key={index}
@@ -352,21 +352,22 @@ export default function AdminQuestionsPage() {
                             setNewQuestion(prev => ({ ...prev, options: newOptions }));
                           }}
                           placeholder={`Option ${index + 1}`}
+                          className="text-sm"
                         />
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <Label>Correct Answer</Label>
+                    <Label className="text-sm font-medium">Correct Answer</Label>
                     <Select
                       value={newQuestion.correctAnswer}
                       onValueChange={(value) => setNewQuestion(prev => ({ ...prev, correctAnswer: value }))}
                     >
-                      <SelectTrigger className="mt-2">
+                      <SelectTrigger className="mt-1.5 w-full">
                         <SelectValue placeholder="Select correct option" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" className="w-full min-w-[200px]">
                         {newQuestion.options?.map((option, index) => (
                           <SelectItem key={index} value={option || `Option ${index + 1}`}>
                             Option {index + 1}: {option || `Option ${index + 1}`}
@@ -377,15 +378,15 @@ export default function AdminQuestionsPage() {
                   </div>
 
                   <div>
-                    <Label>Category</Label>
+                    <Label className="text-sm font-medium">Category</Label>
                     <Select
                       value={newQuestion.category}
                       onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category: value }))}
                     >
-                      <SelectTrigger className="mt-2">
+                      <SelectTrigger className="mt-1.5 w-full">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" className="w-full min-w-[200px]">
                         {PREDEFINED_CATEGORIES.map((category) => (
                           <SelectItem key={category} value={category}>
                             {category}
@@ -396,18 +397,18 @@ export default function AdminQuestionsPage() {
                   </div>
 
                   <div>
-                    <Label>Explanation</Label>
+                    <Label className="text-sm font-medium">Explanation</Label>
                     <Textarea
                       value={newQuestion.explanation || ""}
                       onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
-                      className="mt-2"
+                      className="mt-1.5 min-h-[80px]"
                       placeholder="Explain why this is the correct answer"
                     />
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full mt-6"
                     disabled={createQuestionMutation.isPending}
                   >
                     {createQuestionMutation.isPending ? (
@@ -426,29 +427,29 @@ export default function AdminQuestionsPage() {
 
           {/* Edit Question Sheet */}
           <Sheet open={isEditQuestionSheetOpen} onOpenChange={setIsEditQuestionSheetOpen}>
-            <SheetContent side="right" className="sm:max-w-xl">
-              <SheetHeader>
-                <SheetTitle>
+            <SheetContent side="right" className="w-full p-4 sm:p-6 md:max-w-xl overflow-y-auto max-h-screen">
+              <SheetHeader className="mb-5">
+                <SheetTitle className="text-xl">
                   Edit Question
                 </SheetTitle>
               </SheetHeader>
               
-              <div className="mt-6">
+              <div className="mt-4">
                 {editingQuestion && (
-                  <form onSubmit={handleSubmitQuestionEdit} className="space-y-4">
+                  <form onSubmit={handleSubmitQuestionEdit} className="space-y-5">
                     <div>
-                      <Label>Question Text</Label>
+                      <Label className="text-sm font-medium">Question Text</Label>
                       <Textarea
                         value={editingQuestion.question || ""}
                         onChange={(e) => setEditingQuestion(prev => prev ? { ...prev, question: e.target.value } : null)}
-                        className="mt-2"
+                        className="mt-1.5 min-h-[80px]"
                         placeholder="Enter your question"
                       />
                     </div>
 
                     <div>
-                      <Label>Options</Label>
-                      <div className="mt-2 space-y-2">
+                      <Label className="text-sm font-medium">Options</Label>
+                      <div className="mt-1.5 space-y-2">
                         {editingQuestion.options?.map((option, index) => (
                           <Input
                             key={index}
@@ -460,21 +461,22 @@ export default function AdminQuestionsPage() {
                               setEditingQuestion({ ...editingQuestion, options: newOptions });
                             }}
                             placeholder={`Option ${index + 1}`}
+                            className="text-sm"
                           />
                         ))}
                       </div>
                     </div>
 
                     <div>
-                      <Label>Correct Answer</Label>
+                      <Label className="text-sm font-medium">Correct Answer</Label>
                       <Select
                         value={editingQuestion.correctAnswer}
                         onValueChange={(value) => setEditingQuestion(prev => prev ? { ...prev, correctAnswer: value } : null)}
                       >
-                        <SelectTrigger className="mt-2">
+                        <SelectTrigger className="mt-1.5 w-full">
                           <SelectValue placeholder="Select correct option" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper" className="w-full min-w-[200px]">
                           {editingQuestion.options?.map((option, index) => (
                             <SelectItem key={index} value={option}>
                               Option {index + 1}: {option}
@@ -485,15 +487,15 @@ export default function AdminQuestionsPage() {
                     </div>
 
                     <div>
-                      <Label>Category</Label>
+                      <Label className="text-sm font-medium">Category</Label>
                       <Select
                         value={editingQuestion.category}
                         onValueChange={(value) => setEditingQuestion(prev => prev ? { ...prev, category: value } : null)}
                       >
-                        <SelectTrigger className="mt-2">
+                        <SelectTrigger className="mt-1.5 w-full">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper" className="w-full min-w-[200px]">
                           {PREDEFINED_CATEGORIES.map((category) => (
                             <SelectItem key={category} value={category}>
                               {category}
@@ -504,18 +506,18 @@ export default function AdminQuestionsPage() {
                     </div>
 
                     <div>
-                      <Label>Explanation</Label>
+                      <Label className="text-sm font-medium">Explanation</Label>
                       <Textarea
                         value={editingQuestion.explanation || ""}
                         onChange={(e) => setEditingQuestion(prev => prev ? { ...prev, explanation: e.target.value } : null)}
-                        className="mt-2"
+                        className="mt-1.5 min-h-[80px]"
                         placeholder="Explain why this is the correct answer"
                       />
                     </div>
 
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full mt-6"
                       disabled={updateQuestionMutation.isPending}
                     >
                       {updateQuestionMutation.isPending ? (
