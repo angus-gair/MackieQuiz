@@ -6,6 +6,7 @@ import { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/use-auth";
 import { AdminRoute } from "./lib/admin-route";
+import { ProtectedRoute } from "./lib/protected-route";
 import { HeaderNav } from "@/components/header-nav";
 
 // Import WelcomePage directly to avoid dynamic import issues
@@ -46,12 +47,14 @@ function Router() {
         <Switch>
           <Route path="/auth" component={AuthPage} />
           <Route path="/" component={WelcomePage} />
-          <Route path="/leaderboard" component={LeaderboardPage} />
-          <Route path="/teams" component={TeamsPage} />
-          <Route path="/profile" component={ProfilePage} />
-          <Route path="/settings" component={SettingsPage} />
-          <Route path="/quiz" component={QuizPage} />
-          <Route path="/quiz-completion" component={QuizCompletionPage} />
+          
+          {/* Protected Routes */}
+          <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
+          <ProtectedRoute path="/teams" component={TeamsPage} />
+          <ProtectedRoute path="/profile" component={ProfilePage} />
+          <ProtectedRoute path="/settings" component={SettingsPage} />
+          <ProtectedRoute path="/quiz" component={QuizPage} />
+          <ProtectedRoute path="/quiz-completion" component={QuizCompletionPage} />
 
           {/* Admin Routes */}
           <AdminRoute path="/admin" component={AdminDashboard} />
