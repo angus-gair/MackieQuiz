@@ -3,11 +3,11 @@ import { Achievement } from "@shared/schema";
 import { AchievementNotification } from "@/components/ui/achievement-notification";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Home, Trophy } from "lucide-react";
 
 export default function QuizCompletionPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   // Query for latest achievement after quiz completion
   const { data: latestAchievement } = useQuery<Achievement>({
@@ -31,7 +31,7 @@ export default function QuizCompletionPage() {
           </p>
           <div className="pt-4">
             <Button
-              onClick={() => navigate("/")}
+              onClick={() => setLocation("/")}
               className="w-full"
             >
               <Home className="mr-2 h-4 w-4" />

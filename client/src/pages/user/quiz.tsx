@@ -18,7 +18,7 @@ export default function QuizPage() {
   const [quizKey, setQuizKey] = useState(Date.now()); // Used to force re-render of quiz component
 
   // Fetch weekly questions
-  const { data: questions, isLoading, error } = useQuery({
+  const { data: questions = [], isLoading, error } = useQuery<Question[]>({
     queryKey: ["/api/questions/weekly"],
   });
 
@@ -43,7 +43,7 @@ export default function QuizPage() {
         setLocation("/quiz-completion");
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: `Failed to submit answer: ${error.message}`,
@@ -52,7 +52,7 @@ export default function QuizPage() {
     },
   });
 
-  const currentQuestion = questions?.[currentQuestionIndex];
+  const currentQuestion = questions[currentQuestionIndex];
   const isLastQuestion = currentQuestion && questions ? 
     currentQuestionIndex === questions.length - 1 : false;
   const canGoNext = currentQuestion ? !!selectedAnswers[currentQuestion.id] : false;
@@ -120,7 +120,7 @@ export default function QuizPage() {
         <p className="text-muted-foreground text-center mt-2">
           There are no quiz questions available for this week yet.
         </p>
-        <Button onClick={() => navigate("/")} className="mt-4">
+        <Button onClick={() => setLocation("/")} className="mt-4">
           Return Home
         </Button>
       </div>
@@ -156,7 +156,7 @@ export default function QuizPage() {
                   }
                   className="space-y-2"
                 >
-                  {currentQuestion.options.map((option) => (
+                  {currentQuestion.options.map((option: string) => (
                     <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
                       <RadioGroupItem
                         value={option}
