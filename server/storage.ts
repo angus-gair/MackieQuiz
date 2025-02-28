@@ -222,7 +222,9 @@ export class DatabaseStorage implements IStorage {
       
       // Get the week status for this date
       const weekStatus = await this.getWeekStatus(weekOfDate);
-  
+      
+      console.log(`Creating question for week of ${formattedWeekOf} with status: ${weekStatus}`);
+      
       // Create the question with the normalized date
       const [newQuestion] = await db
         .insert(questions)
@@ -233,7 +235,7 @@ export class DatabaseStorage implements IStorage {
           category: question.category,
           explanation: question.explanation,
           weekOf: formattedWeekOf,
-          isArchived: weekStatus === 'past',
+          isArchived: false, // Never archive new questions by default
           weekStatus: weekStatus as 'past' | 'current' | 'future',
           isBonus: question.isBonus || false,
           bonusPoints: question.bonusPoints || 10,
@@ -1359,16 +1361,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getWeekStatus(date: Date): Promise<string> {
-    const [week] = await db
-      .select()
-      .from(dimDate)
-      .where(eq(dimDate.date, date));
+    try {
+      // Format date as YYYY-MM-DD string for proper PostgreSQL date comparison
+      const formattedDate = date.toISOString().split('T')[0];
+      console.log(`Getting week status for date: ${formattedDate}`);
+      
+      const [week] = await db
+        .select()
+        .from(dimDate)
+        .where(eq(dimDate.date, formattedDate));
 
-    if (!week) {
-      return 'future'; // Default to future if week not found
+      if (!week) {
+        console.log(`No week found for date ${formattedDate}, defaulting to 'future'`);
+        return 'future'; // Default to future if week not found
+      }
+
+      console.log(`Found week with identifier: ${week.weekIdentifier}`);
+      return week.weekIdentifier.toLowerCase();
+    } catch (error) {
+      console.error(`Error in getWeekStatus: ${error}`);
+      return 'future'; // Default to future on error
     }
-
-    return week.weekIdentifier.toLowerCase();
   }
 
   async getQuestionsByWeekStatus(status: string): Promise<Question[]> {

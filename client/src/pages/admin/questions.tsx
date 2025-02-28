@@ -106,11 +106,12 @@ export default function AdminQuestionsPage() {
   const getQuestionsForWeek = (weekData: DimDate, questions: Question[] = []) => {
     if (!questions) return [];
     
+    // Debug logging to understand what we're working with
     console.log("All questions:", questions);
     console.log("Current weekData:", weekData);
     
     return questions.filter(q => {
-      // Don't filter out archived questions for debugging purposes
+      // We need the weekOf date to match and ensure question is not archived
       if (!q.weekOf) return false;
       
       // Handle string date formats from both sources
@@ -141,7 +142,8 @@ export default function AdminQuestionsPage() {
         console.log("Question archived status:", q.isArchived);
       }
       
-      return matches && !q.isArchived; // Only show non-archived questions
+      // Only show non-archived questions that match the week
+      return matches && !q.isArchived;
     });
   };
 
