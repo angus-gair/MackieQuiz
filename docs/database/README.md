@@ -4,6 +4,26 @@
 
 The Business Knowledge Enhancement Platform uses PostgreSQL as its relational database system. The database schema is managed through Drizzle ORM, which provides type-safe schema definitions and query builders.
 
+## Visual Database Schema
+
+To help visualize the database structure, we've created CSV files that can be imported into Lucid Chart:
+
+1. [Database Schema Overview](./lucidchart_database_schema.csv) - Basic entity-relationship diagram showing database tables and their relationships
+2. [Detailed Database Schema](./lucidchart_detailed_schema.csv) - Comprehensive schema with table columns, data types, and constraints
+
+### Importing Into Lucid Chart
+
+To create professional database diagrams:
+
+1. Log in to your Lucid Chart account
+2. Create a new Entity Relationship Diagram
+3. Click on "File" > "Import" > "Import from CSV"
+4. Select one of the CSV files above
+5. Configure the diagram settings as needed
+6. Click "Import"
+
+This will generate an interactive diagram that can be customized further within Lucid Chart.
+
 ## Schema Structure
 
 The database schema is defined in `shared/schema.ts` and includes the following key tables:
