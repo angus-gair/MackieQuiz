@@ -18,6 +18,7 @@ import {
   ArrowLeft,
   Loader2,
   CalendarIcon,
+  Pencil,
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -44,6 +45,8 @@ export default function AdminQuestionsPage() {
   const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [isAddQuestionSheetOpen, setIsAddQuestionSheetOpen] = useState(false);
+  const [isEditQuestionSheetOpen, setIsEditQuestionSheetOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
     options: ["", "", "", ""],
   });
@@ -102,6 +105,30 @@ export default function AdminQuestionsPage() {
       toast({
         title: "Success",
         description: "Question archived successfully",
+      });
+    },
+  });
+  
+  const updateQuestionMutation = useMutation({
+    mutationFn: async (question: Partial<Question> & { id: number }) => {
+      const res = await apiRequest("PATCH", `/api/questions/${question.id}`, question);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
+      setEditingQuestion(null);
+      setIsEditQuestionSheetOpen(false);
+      toast({
+        title: "Success",
+        description: "Question updated successfully",
+        duration: 2000,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });
@@ -179,6 +206,45 @@ export default function AdminQuestionsPage() {
     }
 
     createQuestionMutation.mutate(newQuestion as InsertQuestion);
+  };
+
+  const handleSubmitQuestionEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingQuestion) return;
+    
+    if (!editingQuestion.question || !editingQuestion.correctAnswer || !editingQuestion.category || !editingQuestion.explanation) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (editingQuestion.options.some(option => !option)) {
+      toast({
+        title: "Error",
+        description: "Please fill in all options",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!editingQuestion.options.includes(editingQuestion.correctAnswer)) {
+      toast({
+        title: "Error",
+        description: "Correct answer must be one of the options",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateQuestionMutation.mutate(editingQuestion);
+  };
+  
+  const handleEditQuestion = (question: Question) => {
+    setEditingQuestion({...question});
+    setIsEditQuestionSheetOpen(true);
   };
 
   if (isLoading) {
@@ -357,6 +423,115 @@ export default function AdminQuestionsPage() {
               </div>
             </SheetContent>
           </Sheet>
+
+          {/* Edit Question Sheet */}
+          <Sheet open={isEditQuestionSheetOpen} onOpenChange={setIsEditQuestionSheetOpen}>
+            <SheetContent side="right" className="sm:max-w-xl">
+              <SheetHeader>
+                <SheetTitle>
+                  Edit Question
+                </SheetTitle>
+              </SheetHeader>
+              
+              <div className="mt-6">
+                {editingQuestion && (
+                  <form onSubmit={handleSubmitQuestionEdit} className="space-y-4">
+                    <div>
+                      <Label>Question Text</Label>
+                      <Textarea
+                        value={editingQuestion.question || ""}
+                        onChange={(e) => setEditingQuestion(prev => prev ? { ...prev, question: e.target.value } : null)}
+                        className="mt-2"
+                        placeholder="Enter your question"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Options</Label>
+                      <div className="mt-2 space-y-2">
+                        {editingQuestion.options?.map((option, index) => (
+                          <Input
+                            key={index}
+                            value={option}
+                            onChange={(e) => {
+                              if (!editingQuestion) return;
+                              const newOptions = [...editingQuestion.options];
+                              newOptions[index] = e.target.value;
+                              setEditingQuestion({ ...editingQuestion, options: newOptions });
+                            }}
+                            placeholder={`Option ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Correct Answer</Label>
+                      <Select
+                        value={editingQuestion.correctAnswer}
+                        onValueChange={(value) => setEditingQuestion(prev => prev ? { ...prev, correctAnswer: value } : null)}
+                      >
+                        <SelectTrigger className="mt-2">
+                          <SelectValue placeholder="Select correct option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {editingQuestion.options?.map((option, index) => (
+                            <SelectItem key={index} value={option}>
+                              Option {index + 1}: {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Category</Label>
+                      <Select
+                        value={editingQuestion.category}
+                        onValueChange={(value) => setEditingQuestion(prev => prev ? { ...prev, category: value } : null)}
+                      >
+                        <SelectTrigger className="mt-2">
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PREDEFINED_CATEGORIES.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Explanation</Label>
+                      <Textarea
+                        value={editingQuestion.explanation || ""}
+                        onChange={(e) => setEditingQuestion(prev => prev ? { ...prev, explanation: e.target.value } : null)}
+                        className="mt-2"
+                        placeholder="Explain why this is the correct answer"
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={updateQuestionMutation.isPending}
+                    >
+                      {updateQuestionMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Updating Question...
+                        </>
+                      ) : (
+                        "Update Question"
+                      )}
+                    </Button>
+                  </form>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         <div className="space-y-4">
@@ -412,18 +587,28 @@ export default function AdminQuestionsPage() {
                               ))}
                             </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (window.confirm("Are you sure you want to archive this question?")) {
-                                archiveQuestionMutation.mutate(question.id);
-                              }
-                            }}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Archive className="h-4 w-4" />
-                          </Button>
+                          <div className="flex flex-col space-y-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditQuestion(question)}
+                              className="text-primary hover:text-primary hover:bg-primary/10"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to archive this question?")) {
+                                  archiveQuestionMutation.mutate(question.id);
+                                }
+                              }}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Archive className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
