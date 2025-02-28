@@ -43,7 +43,6 @@ const PREDEFINED_CATEGORIES = [
 export default function AdminQuestionsPage() {
   const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
-  const [isAddQuestionSheetOpen, setIsAddQuestionSheetOpen] = useState(false);
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
     options: ["", "", "", ""],
   });
@@ -77,7 +76,6 @@ export default function AdminQuestionsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
       setNewQuestion({ options: ["", "", "", ""] });
       setSelectedWeek(null);
-      setIsAddQuestionSheetOpen(false);
       toast({
         title: "Success",
         description: "Question created successfully",
@@ -109,6 +107,10 @@ export default function AdminQuestionsPage() {
   const getQuestionsForWeek = (weekData: DimDate, questions: Question[] = []) => {
     if (!questions) return [];
     
+    // Debug logging to understand what we're working with
+    console.log("All questions:", questions);
+    console.log("Current weekData:", weekData);
+    
     return questions.filter(q => {
       // We need the weekOf date to match and ensure question is not archived
       if (!q.weekOf) return false;
@@ -135,50 +137,15 @@ export default function AdminQuestionsPage() {
         weekDataWeek = format(weekData.week, 'yyyy-MM-dd');
       }
       
+      const matches = questionWeekOf === weekDataWeek;
+      if (matches) {
+        console.log("Matched question:", q, "for week:", weekDataWeek);
+        console.log("Question archived status:", q.isArchived);
+      }
+      
       // Only show non-archived questions that match the week
-      return questionWeekOf === weekDataWeek && !q.isArchived;
+      return matches && !q.isArchived;
     });
-  };
-
-  const handleSubmitQuestion = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedWeek) {
-      toast({
-        title: "Error",
-        description: "Please select a week",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newQuestion.options?.some(option => !option)) {
-      toast({
-        title: "Error",
-        description: "Please fill in all options",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
-      toast({
-        title: "Error",
-        description: "Correct answer must be one of the options",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    createQuestionMutation.mutate(newQuestion as InsertQuestion);
   };
 
   if (isLoading) {
@@ -208,16 +175,12 @@ export default function AdminQuestionsPage() {
       <div className="container max-w-4xl mx-auto pt-[72px] pb-8 px-4">
         {/* Add Question Button at the top */}
         <div className="mb-6">
-          <Sheet open={isAddQuestionSheetOpen} onOpenChange={setIsAddQuestionSheetOpen}>
+          <Sheet>
             <SheetTrigger asChild>
               <Button
                 size="sm"
                 className="w-full md:w-auto"
-                onClick={() => {
-                  if (availableWeeks && availableWeeks.length > 0) {
-                    setSelectedWeek(new Date(availableWeeks[0].week));
-                  }
-                }}
+                onClick={() => setSelectedWeek(availableWeeks && availableWeeks.length > 0 ? new Date(availableWeeks[0].week) : null)}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Question
@@ -232,7 +195,46 @@ export default function AdminQuestionsPage() {
               
               {/* Week selection dropdown in the form */}
               <div className="mt-6">
-                <form onSubmit={handleSubmitQuestion} className="space-y-4">
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!newQuestion.question || !newQuestion.correctAnswer || !newQuestion.category || !newQuestion.explanation) {
+                    toast({
+                      title: "Error",
+                      description: "Please fill in all fields",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  if (!selectedWeek) {
+                    toast({
+                      title: "Error",
+                      description: "Please select a week",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  if (newQuestion.options?.some(option => !option)) {
+                    toast({
+                      title: "Error",
+                      description: "Please fill in all options",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  if (!newQuestion.options?.includes(newQuestion.correctAnswer)) {
+                    toast({
+                      title: "Error",
+                      description: "Correct answer must be one of the options",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  createQuestionMutation.mutate(newQuestion as InsertQuestion);
+                }} className="space-y-4">
                   {/* Week selection */}
                   <div>
                     <Label>Select Week</Label>
@@ -255,7 +257,6 @@ export default function AdminQuestionsPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
                   
                   <div>
                     <Label>Question Text</Label>
@@ -347,31 +348,8 @@ export default function AdminQuestionsPage() {
                       "Add Question"
                     )}
                   </Button>
-                </form>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        <div className="space-y-4">
-          {availableWeeks?.map((weekData) => {
-            const weekQuestions = getQuestionsForWeek(weekData, questions);
-            const isCurrentWeek = weekData.weekIdentifier === 'Current';
-
-            return (
-              <Card key={weekData.week.toString()}>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h2 className="text-lg font-semibold">
-                        Week of {format(new Date(weekData.week), 'MMM dd')}
-                        {isCurrentWeek && (
-                          <span className="ml-2 text-sm font-normal text-muted-foreground">
-                            (Current)
-                          </span>
-                        )}
-                      </h2>
-                    </div>
+                      </SheetContent>
+                    </Sheet>
                   </div>
 
                   <div className="space-y-4">
