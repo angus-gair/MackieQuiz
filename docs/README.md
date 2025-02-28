@@ -83,3 +83,5 @@ For more detailed documentation, please refer to:
 - [Backend Documentation](./backend/README.md)
 - [Frontend Documentation](./frontend/README.md)
 - [Database Documentation](./database/README.md)
+- [Testing Guide](./testing/README.md)
+- [Archive](./archive/) - Historical and reference documents

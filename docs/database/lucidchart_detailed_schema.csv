@@ -1,0 +1,95 @@
+Table Name,Column Name,Data Type,PK,FK,Required,Description
+Users,id,integer,Y,N,Y,Unique identifier for user
+Users,username,text,N,N,Y,User's login name
+Users,password,text,N,N,Y,Hashed password
+Users,team,text,N,N,N,Team name the user belongs to
+Users,isAdmin,boolean,N,N,Y,Administrator privileges flag
+Users,score,integer,N,N,Y,User's accumulated score
+Achievements,id,text,Y,N,Y,Unique identifier for achievement
+Achievements,name,text,N,N,Y,Achievement name
+Achievements,description,text,N,N,Y,Achievement description
+Achievements,criteria,text,N,N,Y,Criteria to earn achievement
+Achievements,badge,text,N,N,Y,Badge image identifier
+Achievements,category,text,N,N,Y,Achievement category
+Achievements,tier,text,N,N,Y,Achievement tier level
+Achievement Progress,id,integer,Y,N,Y,Unique identifier
+Achievement Progress,userId,integer,N,Y,Y,Reference to user
+Achievement Progress,achievementId,text,N,Y,Y,Reference to achievement
+Achievement Progress,progress,integer,N,N,Y,Progress toward achievement
+Achievement Progress,awarded,boolean,N,N,Y,Whether achievement is awarded
+Achievement Progress,awardedAt,timestamp,N,N,N,When achievement was awarded
+Answers,id,integer,Y,N,Y,Unique identifier for answer
+Answers,userId,integer,N,Y,Y,Reference to user
+Answers,questionId,integer,N,Y,Y,Reference to question
+Answers,answer,text,N,N,Y,User's submitted answer
+Answers,isCorrect,boolean,N,N,Y,Whether answer is correct
+Answers,submittedAt,timestamp,N,N,Y,When answer was submitted
+Questions,id,integer,Y,N,Y,Unique identifier for question
+Questions,question,text,N,N,Y,Question text
+Questions,options,text[],N,N,Y,Possible answers as array
+Questions,correctAnswer,text,N,N,Y,Correct answer
+Questions,explanation,text,N,N,Y,Explanation of answer
+Questions,category,text,N,N,Y,Question category
+Questions,createdAt,timestamp,N,N,Y,When question was created
+Questions,weekOf,date,N,N,Y,Week the question belongs to
+Questions,isArchived,boolean,N,N,Y,Whether question is archived
+DimDate,id,integer,Y,N,Y,Unique identifier for date dimension
+DimDate,date,date,N,N,Y,Calendar date
+DimDate,day,integer,N,N,Y,Day of month
+DimDate,month,integer,N,N,Y,Month number
+DimDate,year,integer,N,N,Y,Year
+DimDate,dayOfWeek,integer,N,N,Y,Day of week (0-6)
+DimDate,weekOfYear,integer,N,N,Y,Week number in year
+DimDate,quarter,integer,N,N,Y,Quarter (1-4)
+DimDate,isWeekday,boolean,N,N,Y,Whether date is weekday
+DimDate,isHoliday,boolean,N,N,Y,Whether date is holiday
+DimDate,weekStatus,text,N,N,Y,Status (past/current/future)
+UserStreaks,id,integer,Y,N,Y,Unique identifier for streak
+UserStreaks,userId,integer,N,Y,Y,Reference to user
+UserStreaks,currentStreak,integer,N,N,Y,Current consecutive days
+UserStreaks,longestStreak,integer,N,N,Y,Longest streak achieved
+UserStreaks,lastActivity,timestamp,N,N,Y,Last activity date
+TeamStats,id,integer,Y,N,Y,Unique identifier for team stats
+TeamStats,teamName,text,N,N,Y,Team name
+TeamStats,wins,integer,N,N,Y,Number of team wins
+TeamStats,losses,integer,N,N,Y,Number of team losses
+TeamStats,totalScore,integer,N,N,Y,Total team score
+TeamStats,avgScore,float,N,N,Y,Average team score
+TeamStats,members,integer,N,N,Y,Number of team members
+PowerUps,id,integer,Y,N,Y,Unique identifier for power up
+PowerUps,userId,integer,N,Y,Y,Reference to user
+PowerUps,type,text,N,N,Y,Type of power up
+PowerUps,count,integer,N,N,Y,Number of power ups available
+PowerUps,lastRefill,timestamp,N,N,Y,Last refill date
+UserProfiles,id,integer,Y,N,Y,Unique identifier for profile
+UserProfiles,userId,integer,N,Y,Y,Reference to user
+UserProfiles,avatarPreference,text,N,N,Y,Avatar preference
+UserProfiles,avatarColor,text,N,N,N,Avatar color
+UserProfiles,showcasedAchievements,text[],N,N,N,Featured achievements
+UserSessions,id,integer,Y,N,Y,Unique identifier for session
+UserSessions,userId,integer,N,Y,N,Reference to user (nullable)
+UserSessions,startTime,timestamp,N,N,Y,Session start time
+UserSessions,endTime,timestamp,N,N,N,Session end time
+UserSessions,device,text,N,N,Y,User device information
+UserSessions,browser,text,N,N,Y,Browser information
+UserSessions,entryPage,text,N,N,Y,First page visited
+UserSessions,exitPage,text,N,N,N,Last page visited
+PageViews,id,integer,Y,N,Y,Unique identifier for page view
+PageViews,sessionId,integer,N,Y,Y,Reference to session
+PageViews,path,text,N,N,Y,URL path viewed
+PageViews,viewTime,timestamp,N,N,Y,Time page was viewed
+PageViews,timeOnPage,integer,N,N,N,Seconds spent on page
+PageViews,referrer,text,N,N,N,Referring URL
+Feedback,id,integer,Y,N,Y,Unique identifier for feedback
+Feedback,userId,integer,N,Y,Y,Reference to user
+Feedback,category,text,N,N,Y,Feedback category
+Feedback,message,text,N,N,Y,Feedback message
+Feedback,rating,integer,N,N,N,Numerical rating
+Feedback,submittedAt,timestamp,N,N,Y,Submission time
+AuthEvents,id,integer,Y,N,Y,Unique identifier for auth event
+AuthEvents,userId,integer,N,Y,N,Reference to user (nullable)
+AuthEvents,event,text,N,N,Y,Event type (login/logout/fail)
+AuthEvents,timestamp,timestamp,N,N,Y,Event time
+AuthEvents,ipAddress,text,N,N,Y,IP address
+AuthEvents,country,text,N,N,N,Country based on IP
+AuthEvents,failReason,text,N,N,N,Reason for failure if any
