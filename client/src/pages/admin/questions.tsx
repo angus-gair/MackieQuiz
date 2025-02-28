@@ -215,7 +215,10 @@ export default function AdminQuestionsPage() {
                 className="w-full md:w-auto"
                 onClick={() => {
                   if (availableWeeks && availableWeeks.length > 0) {
-                    setSelectedWeek(new Date(availableWeeks[0].week));
+                    const weekDate = new Date(availableWeeks[0].week);
+                    if (!isNaN(weekDate.getTime())) {
+                      setSelectedWeek(weekDate);
+                    }
                   }
                 }}
               >
@@ -237,22 +240,25 @@ export default function AdminQuestionsPage() {
                   <div>
                     <Label>Select Week</Label>
                     <Select
-                      value={selectedWeek ? format(selectedWeek, 'yyyy-MM-dd') : undefined}
+                      value={selectedWeek && !isNaN(selectedWeek.getTime()) ? format(selectedWeek, 'yyyy-MM-dd') : undefined}
                       onValueChange={(value) => setSelectedWeek(parseISO(value))}
                     >
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="Select week" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableWeeks?.map((weekData) => (
-                          <SelectItem 
-                            key={weekData.week.toString()} 
-                            value={format(new Date(weekData.week), 'yyyy-MM-dd')}
-                          >
-                            Week of {format(new Date(weekData.week), 'MMM dd')}
-                            {weekData.weekIdentifier === 'Current' && " (Current)"}
-                          </SelectItem>
-                        ))}
+                        {availableWeeks?.map((weekData) => {
+                          const weekDate = new Date(weekData.week);
+                          return (
+                            <SelectItem 
+                              key={weekData.week.toString()} 
+                              value={!isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : ''}
+                            >
+                              Week of {!isNaN(weekDate.getTime()) ? format(weekDate, 'MMM dd') : 'Unknown'}
+                              {weekData.weekIdentifier === 'Current' && " (Current)"}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -364,7 +370,12 @@ export default function AdminQuestionsPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h2 className="text-lg font-semibold">
-                        Week of {format(new Date(weekData.week), 'MMM dd')}
+                        {(() => {
+                          const weekDate = new Date(weekData.week);
+                          return !isNaN(weekDate.getTime()) 
+                            ? `Week of ${format(weekDate, 'MMM dd')}` 
+                            : 'Week of Unknown Date';
+                        })()}
                         {isCurrentWeek && (
                           <span className="ml-2 text-sm font-normal text-muted-foreground">
                             (Current)
