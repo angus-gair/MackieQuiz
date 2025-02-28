@@ -587,7 +587,7 @@ export default function AdminQuestionsPage() {
                               ))}
                             </div>
                           </div>
-                          <div className="flex flex-col space-y-2">
+                          <div className="flex space-x-2">
                             <Button
                               variant="ghost"
                               size="icon"
