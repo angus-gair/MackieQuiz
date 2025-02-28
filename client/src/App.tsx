@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { AdminRoute } from "./lib/admin-route";
 import { ProtectedRoute } from "./lib/protected-route";
 import { TopNav } from "./components/top-nav";
+import { BottomNav } from "./components/bottom-nav";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Define a component type that accepts any props
@@ -82,6 +83,9 @@ function Router() {
           </Switch>
         </Suspense>
       </div>
+      
+      {/* Show BottomNav conditionally */}
+      {showNav && <BottomNav />}
     </div>
   );
 }

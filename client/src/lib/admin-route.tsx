@@ -1,6 +1,6 @@
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "../hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { Route } from "wouter";
+import { Route, Redirect } from "wouter";
 
 type AdminRouteProps = {
   path: string;
@@ -25,8 +25,7 @@ export function AdminRoute({
         }
 
         if (!user?.isAdmin) {
-          window.location.href = "/";
-          return null;
+          return <Redirect to="/" />;
         }
 
         return <Component {...params} />;
