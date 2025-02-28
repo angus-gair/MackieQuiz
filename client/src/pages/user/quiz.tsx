@@ -25,13 +25,14 @@ export default function QuizPage() {
   // Submit answer mutation
   const submitAnswerMutation = useMutation({
     mutationFn: async (answer: { questionId: number; selectedOption: string }) => {
-      return apiRequest("/api/answers", {
-        method: "POST",
-        body: JSON.stringify({
+      return apiRequest(
+        "POST",
+        "/api/answers",
+        {
           questionId: answer.questionId,
-          selectedOption: answer.selectedOption,
-        }),
-      });
+          answer: answer.selectedOption,
+        }
+      );
     },
     onSuccess: () => {
       // Move to next question or complete quiz

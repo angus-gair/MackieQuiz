@@ -194,6 +194,21 @@ export function registerRoutes(app: Express): Server {
     res.sendStatus(200);
   });
 
+  // General weekly question endpoint for users
+  app.get("/api/questions/weekly", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      // Get current week's questions for the user
+      const questions = await storage.getCurrentWeekQuestions();
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching current week questions:", error);
+      res.status(500).json({ error: "Failed to fetch this week's questions" });
+    }
+  });
+
+  // Admin endpoint for getting questions for a specific week
   app.get("/api/questions/weekly/:date", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
     try {
