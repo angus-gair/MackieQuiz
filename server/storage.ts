@@ -195,8 +195,7 @@ export class DatabaseStorage implements IStorage {
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
     try {
-      // Handle timezone issues by ensuring the weekOf date is always set to the beginning of the day
-      // and aligned to Monday of the week
+      // Handle timezone issues by ensuring the weekOf date is always a Monday
       let weekOfDate: Date;
       
       if (typeof question.weekOf === 'string') {
@@ -206,24 +205,23 @@ export class DatabaseStorage implements IStorage {
         weekOfDate = new Date(question.weekOf);
       }
       
-      // Normalize to start of day to prevent timezone adjustments
-      weekOfDate.setHours(0, 0, 0, 0);
-      
-      // Ensure weekOf is a Monday (day 1)
-      const day = weekOfDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      if (day !== 1) {
-        // Adjust to the Monday of this week
-        const diff = weekOfDate.getDate() - day + (day === 0 ? -6 : 1);
-        weekOfDate.setDate(diff);
-      }
+      // Use our helper function to normalize the date to Monday of the week
+      weekOfDate = normalizeToMonday(weekOfDate);
       
       // Format the date as YYYY-MM-DD to prevent timezone issues when stored in PostgreSQL
-      const formattedWeekOf = weekOfDate.toISOString().split('T')[0];
+      const formattedWeekOf = formatDateString(weekOfDate);
+      
+      // Verify we have a Monday date (extra validation)
+      if (!isMonday(weekOfDate)) {
+        console.warn(`Warning: Date ${formattedWeekOf} is not a Monday after normalization, forcing correction`);
+        // Force correction (should never happen but just in case)
+        weekOfDate = normalizeToMonday(weekOfDate);
+      }
       
       // Get the week status for this date
       const weekStatus = await this.getWeekStatus(weekOfDate);
       
-      console.log(`Creating question for week of ${formattedWeekOf} with status: ${weekStatus}`);
+      console.log(`Creating question for week of ${formattedWeekOf} (Monday) with status: ${weekStatus}`);
       
       // Create the question with the normalized date
       const [newQuestion] = await db
@@ -244,7 +242,7 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
       
-      console.log(`Created new question for week of ${formattedWeekOf}`);
+      console.log(`Successfully created new question for week of ${formattedWeekOf} (Monday)`);
       return newQuestion;
     } catch (error) {
       console.error("Error creating question:", error);
@@ -1566,10 +1564,48 @@ function differenceInDays(date1: Date, date2: Date): number {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
+/**
+ * Normalizes any date to the Monday of its week
+ * @param date Date to normalize
+ * @returns Date object set to the Monday of the same week
+ */
+function normalizeToMonday(date: Date): Date {
+  const newDate = new Date(date);
+  // Set time to start of day to prevent timezone issues
+  newDate.setHours(0, 0, 0, 0);
+  
+  // Get day of week (0 = Sunday, 1 = Monday, etc.)
+  const day = newDate.getDay();
+  
+  // Calculate difference to Monday
+  // If Sunday (0), go back 6 days, otherwise go back (day - 1) days
+  const diff = newDate.getDate() - day + (day === 0 ? -6 : 1);
+  
+  // Set date to Monday
+  newDate.setDate(diff);
+  return newDate;
+}
+
+/**
+ * Formats a date as YYYY-MM-DD string
+ * @param date Date to format
+ * @returns Formatted date string
+ */
+function formatDateString(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Checks if a date is a Monday
+ * @param date Date to check
+ * @returns True if the date is a Monday, false otherwise
+ */
+function isMonday(date: Date): boolean {
+  return date.getDay() === 1; // 1 = Monday in JavaScript
+}
+
 function startOfWeek(date: Date): Date {
-  const day = date.getDay();
-  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust to make Monday = 0
-  return new Date(date.setDate(diff));
+  return normalizeToMonday(date);
 }
 
 function isBefore(date1: Date, date2: Date): boolean {
