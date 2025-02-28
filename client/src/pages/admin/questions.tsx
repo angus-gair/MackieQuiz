@@ -105,8 +105,13 @@ export default function AdminQuestionsPage() {
 
   const getQuestionsForWeek = (weekData: DimDate, questions: Question[] = []) => {
     if (!questions) return [];
+    
+    console.log("All questions:", questions);
+    console.log("Current weekData:", weekData);
+    
     return questions.filter(q => {
-      if (!q.weekOf || q.isArchived) return false;
+      // Don't filter out archived questions for debugging purposes
+      if (!q.weekOf) return false;
       
       // Handle string date formats from both sources
       let questionWeekOf: string;
@@ -130,7 +135,13 @@ export default function AdminQuestionsPage() {
         weekDataWeek = format(weekData.week, 'yyyy-MM-dd');
       }
       
-      return questionWeekOf === weekDataWeek;
+      const matches = questionWeekOf === weekDataWeek;
+      if (matches) {
+        console.log("Matched question:", q, "for week:", weekDataWeek);
+        console.log("Question archived status:", q.isArchived);
+      }
+      
+      return matches && !q.isArchived; // Only show non-archived questions
     });
   };
 
