@@ -13,11 +13,11 @@
 
   /* Dynamic font scaling */
   h1 {
-    @apply text-lg sm:text-xl md:text-2xl font-bold;
+    @apply text-lg sm:text-xl md:text-2xl font-bold text-primary;
   }
 
   h2 {
-    @apply text-base sm:text-lg md:text-xl font-semibold;
+    @apply text-base sm:text-lg md:text-xl font-semibold text-primary;
   }
 
   p {
@@ -26,14 +26,29 @@
 }
 
 @layer components {
+  /* Card styles */
   .card {
-    @apply transition-shadow hover:shadow-lg;
+    @apply transition-shadow hover:shadow-md rounded-lg overflow-hidden;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-white transition-all;
+  }
+
+  .btn-outline {
+    @apply border-primary/30 text-primary hover:bg-primary/5 transition-all;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-800 transition-all;
   }
 
   .button-hover {
-    @apply transition-all duration-200 hover:translate-y-[-2px];
+    @apply transition-all duration-200 hover:translate-y-[-2px] hover:shadow-sm;
   }
 
+  /* Form and input styles */
   .radio-label {
     @apply transition-colors duration-200;
   }
@@ -42,8 +57,13 @@
     @apply transition-all duration-200 data-[state=checked]:scale-105;
   }
 
+  .form-input {
+    @apply border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary/30;
+  }
+
+  /* Animation and transition styles */
   .progress-bar {
-    @apply transition-all duration-500 ease-out;
+    @apply transition-all duration-500 ease-out bg-primary;
   }
 
   .card-answer {
@@ -51,11 +71,42 @@
   }
 
   .quiz-card {
-    @apply transition-all duration-300 hover:translate-y-[-1px];
+    @apply transition-all duration-300 hover:translate-y-[-1px] hover:shadow-md border border-primary/10;
   }
 
   .explanation-panel {
     @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Icon container styles */
+  .icon-circle {
+    @apply h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center;
+  }
+
+  .icon-circle-white {
+    @apply h-10 w-10 rounded-full bg-white text-primary flex items-center justify-center;
+  }
+
+  .icon-circle-primary {
+    @apply h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center;
+  }
+
+  /* Page header styles */
+  .page-title {
+    @apply text-xl font-bold text-primary mb-4 flex items-center gap-2;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-muted-foreground mb-6;
+  }
+
+  /* Container styles */
+  .content-container {
+    @apply max-w-md mx-auto px-4 py-6;
+  }
+
+  .admin-container {
+    @apply max-w-4xl mx-auto px-4 py-6;
   }
 
   /* Dynamic text utilities */
@@ -74,8 +125,36 @@
   .text-dynamic-xl {
     @apply text-lg sm:text-xl md:text-2xl;
   }
+
+  /* Navigation indicators */
+  .nav-indicator {
+    @apply text-primary bg-primary/10 font-medium;
+  }
+
+  /* Stats card */
+  .stats-card {
+    @apply border-primary/20 shadow-sm bg-white hover:shadow-md transition-shadow;
+  }
+
+  /* Badge styles */
+  .badge-primary {
+    @apply bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium;
+  }
 }
 
+/* Animations */
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -98,10 +177,36 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .slide-down {
   animation: slideDown 0.3s ease-out;
 }
 
 .slide-up {
   animation: slideUp 0.3s ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
 }
