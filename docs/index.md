@@ -63,3 +63,18 @@ The documentation includes several diagrams to visualize the application structu
 - Database schema relationships
 
 These visualizations help understand the relationships between different parts of the application and aid in debugging and development.
+
+### Lucid Chart Integration
+
+For professional diagramming, we've included CSV files throughout the documentation that can be imported directly into Lucid Chart:
+
+- **Architecture**: CSV files for system architecture, authentication flow, quiz flow, and admin dashboard structure
+- **Database**: CSV files for database schema with relationships and detailed column information
+- **Project Management**: CSV file for project roadmap and timeline visualization
+
+To use these files:
+1. Find the relevant CSV file in the documentation section
+2. Import it into Lucid Chart using the "Import from CSV" feature
+3. Customize the generated diagram as needed
+
+This approach allows team members to maintain and update professional diagrams without starting from scratch.

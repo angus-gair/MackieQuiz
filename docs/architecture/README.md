@@ -1,5 +1,30 @@
 # Architecture Overview
 
+## Visual Architecture Diagrams
+
+To help visualize the application architecture, we've created CSV files that can be imported into Lucid Chart for professional diagramming:
+
+1. [Application Architecture](./lucidchart_app_architecture.csv) - Overall system architecture with components
+2. [Authentication Flow](./lucidchart_auth_flow.csv) - User authentication process diagram
+3. [Quiz Flow](./lucidchart_quiz_flow.csv) - Quiz submission and processing flow
+4. [Admin Dashboard Structure](./lucidchart_admin_structure.csv) - Admin interface organization
+5. [Project Roadmap](./lucidchart_project_roadmap.csv) - Development timeline with milestones
+
+More detailed visualizations can be found in the [Application Structure](./application-structure.md) document.
+
+### Importing Into Lucid Chart
+
+To create professional architecture diagrams:
+
+1. Log in to your Lucid Chart account
+2. Create a new diagram (flowchart recommended for architecture diagrams)
+3. Click on "File" > "Import" > "Import from CSV"
+4. Select one of the CSV files above
+5. Configure the diagram settings as needed
+6. Click "Import"
+
+The imported diagram will serve as a starting point that can be further customized with colors, styles, and additional elements.
+
 ## System Architecture
 
 The Business Knowledge Enhancement Platform follows a modern client-server architecture with clear separation of concerns:

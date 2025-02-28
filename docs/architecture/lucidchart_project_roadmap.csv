@@ -1,0 +1,20 @@
+Id,Name,Start Date,End Date,Duration,Resources,Dependencies,Status,Description,Shape Library,Page ID,Group
+1,Project Planning,2025-01-01,2025-01-15,15,Team Lead,,Completed,Initial project scope and planning,flowchart,1,Phase 1
+2,Requirements Gathering,2025-01-16,2025-01-31,16,Business Analyst,1,Completed,Gathering business requirements,flowchart,1,Phase 1
+3,Database Schema Design,2025-02-01,2025-02-10,10,Database Engineer,2,Completed,Design and implementation of database schema,flowchart,1,Phase 1
+4,UI/UX Design,2025-02-01,2025-02-15,15,UI Designer,2,Completed,Design of user interface and experience,flowchart,1,Phase 1
+5,Frontend Core Development,2025-02-16,2025-03-15,28,Frontend Team,4,In Progress,Development of core frontend components,flowchart,1,Phase 2
+6,Backend API Development,2025-02-16,2025-03-15,28,Backend Team,3,In Progress,Development of RESTful API endpoints,flowchart,1,Phase 2
+7,Authentication System,2025-02-20,2025-03-10,19,Security Engineer,6,In Progress,Implementation of user authentication,flowchart,1,Phase 2
+8,Quiz Module Development,2025-03-16,2025-04-05,21,Full Stack Team,"5,6",Planned,Development of quiz functionality,flowchart,1,Phase 3
+9,Leaderboard & Statistics,2025-03-20,2025-04-10,22,Full Stack Team,"5,6",Planned,Implementation of leaderboard and statistics,flowchart,1,Phase 3
+10,Achievement System,2025-04-06,2025-04-20,15,Full Stack Team,8,Planned,Implementation of achievements,flowchart,1,Phase 3
+11,Admin Dashboard,2025-04-11,2025-04-30,20,Full Stack Team,"9,10",Planned,Development of admin dashboard,flowchart,1,Phase 4
+12,Analytics Integration,2025-04-21,2025-05-05,15,Data Engineer,10,Planned,Integration of analytics capabilities,flowchart,1,Phase 4
+13,Testing & QA,2025-05-01,2025-05-20,20,QA Team,"11,12",Planned,Quality assurance and testing,flowchart,1,Phase 4
+14,Documentation,2025-05-06,2025-05-25,20,Technical Writer,"11,12",Planned,Creation of user and developer documentation,flowchart,1,Phase 4
+15,User Acceptance Testing,2025-05-21,2025-05-31,11,Business Stakeholders,13,Planned,Final validation with business users,flowchart,1,Phase 5
+16,Performance Optimization,2025-05-26,2025-06-10,16,Performance Engineer,"13,14",Planned,Optimization for performance and scalability,flowchart,1,Phase 5
+17,Deployment Preparation,2025-06-01,2025-06-10,10,DevOps Engineer,15,Planned,Preparation for production deployment,flowchart,1,Phase 5
+18,Launch,2025-06-11,2025-06-15,5,Full Team,"16,17",Planned,Production launch and monitoring,flowchart,1,Phase 5
+19,Post-Launch Support,2025-06-16,2025-06-30,15,Support Team,18,Planned,Post-launch support and bug fixes,flowchart,1,Phase 5
