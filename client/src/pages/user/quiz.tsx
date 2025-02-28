@@ -25,13 +25,12 @@ export default function QuizPage() {
   // Submit answer mutation
   const submitAnswerMutation = useMutation({
     mutationFn: async (answer: { questionId: number; selectedOption: string }) => {
-      return apiRequest({
-        url: "/api/answers",
+      return apiRequest("/api/answers", {
         method: "POST",
-        body: {
+        body: JSON.stringify({
           questionId: answer.questionId,
           selectedOption: answer.selectedOption,
-        },
+        }),
       });
     },
     onSuccess: () => {
