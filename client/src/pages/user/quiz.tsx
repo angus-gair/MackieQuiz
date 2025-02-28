@@ -25,12 +25,17 @@ export default function QuizPage() {
   // Submit answer mutation
   const submitAnswerMutation = useMutation({
     mutationFn: async (answer: { questionId: number; selectedOption: string }) => {
+      // Find the current question to check if the answer is correct
+      const question = questions.find(q => q.id === answer.questionId);
+      const isCorrect = question ? question.correctAnswer === answer.selectedOption : false;
+      
       return apiRequest(
         "POST",
         "/api/answers",
         {
           questionId: answer.questionId,
           answer: answer.selectedOption,
+          correct: isCorrect, // Add the correct field
         }
       );
     },
