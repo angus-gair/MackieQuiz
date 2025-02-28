@@ -177,6 +177,14 @@
   .icon-circle-primary {
     @apply h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center;
   }
+  
+  .icon-circle-sm {
+    @apply h-8 w-8 rounded-full flex items-center justify-center;
+  }
+  
+  .icon-circle-lg {
+    @apply h-12 w-12 rounded-full flex items-center justify-center;
+  }
 
   /* Page header styles */
   .page-title {

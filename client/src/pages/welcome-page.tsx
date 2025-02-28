@@ -1,6 +1,6 @@
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { useAuth } from "../hooks/use-auth";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../components/ui/card";
 import { Link } from "wouter";
 import { 
   Check, 
@@ -21,11 +21,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { FeedbackForm } from "@/components/ui/feedback-form";
-import { cn } from "@/lib/utils";
+} from "../components/ui/dialog";
+import { FeedbackForm } from "../components/ui/feedback-form";
+import { cn } from "../lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "../components/ui/skeleton";
 
 export default function WelcomePage() {
   const { user } = useAuth();
@@ -44,8 +44,8 @@ export default function WelcomePage() {
   });
 
   return (
-    <div className="min-h-screen pt-16 pb-24 bg-gradient-to-b from-background to-muted/10">
-      <div className="content-container fade-in">
+    <div className="min-h-screen pb-24">
+      <div className="max-w-5xl mx-auto px-4 py-8 fade-in">
         {/* Welcome Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
@@ -53,10 +53,10 @@ export default function WelcomePage() {
               <BrainCircuit className="h-10 w-10" />
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-primary">
+          <h1 className="text-dynamic-xl font-bold mb-3 text-primary">
             Welcome, {user?.username || 'Guest'}! 🎉
           </h1>
-          <p className="text-muted-foreground max-w-md mx-auto text-sm sm:text-base">
+          <p className="text-muted-foreground max-w-md mx-auto text-dynamic-sm">
             Ready to enhance your professional knowledge and compete with your team?
           </p>
         </div>
@@ -64,8 +64,8 @@ export default function WelcomePage() {
         {/* Quick Stats Cards (if logged in) */}
         {user && (
           <div className="mb-8">
-            <Card className="stats-card">
-              <CardHeader className="pb-2">
+            <Card className="shadow-sm border border-primary/10 overflow-hidden">
+              <CardHeader className="pb-2 bg-primary/5">
                 <CardTitle className="text-base font-medium text-primary flex items-center">
                   <Users className="h-4 w-4 mr-2" />
                   Team: <span className="ml-1 font-bold">{user.team || 'Unassigned'}</span>
@@ -75,11 +75,11 @@ export default function WelcomePage() {
                 </CardDescription>
               </CardHeader>
               
-              <CardContent className="pb-3">
+              <CardContent className="pb-3 pt-4">
                 {statsLoading ? (
                   <div className="grid grid-cols-2 gap-3">
                     {[0,1,2,3].map(i => (
-                      <div key={i} className="bg-gray-50 rounded p-2">
+                      <div key={i} className="profile-stat">
                         <Skeleton className="h-3 w-16 mb-1" />
                         <Skeleton className="h-5 w-10" />
                       </div>
@@ -87,19 +87,19 @@ export default function WelcomePage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-primary/5 rounded p-2">
+                    <div className="profile-stat">
                       <div className="text-xs text-muted-foreground">Completed Quizzes</div>
                       <div className="text-lg font-semibold text-primary">{userStats?.completedQuizzes || 0}</div>
                     </div>
-                    <div className="bg-primary/5 rounded p-2">
+                    <div className="profile-stat">
                       <div className="text-xs text-muted-foreground">Correct Answers</div>
                       <div className="text-lg font-semibold text-primary">{userStats?.correctAnswers || 0}</div>
                     </div>
-                    <div className="bg-primary/5 rounded p-2">
+                    <div className="profile-stat">
                       <div className="text-xs text-muted-foreground">Achievements</div>
                       <div className="text-lg font-semibold text-primary">{userStats?.achievementCount || 0}</div>
                     </div>
-                    <div className="bg-primary/5 rounded p-2">
+                    <div className="profile-stat">
                       <div className="text-xs text-muted-foreground">Rank</div>
                       <div className="text-lg font-semibold text-primary">#{userStats?.rank || '-'}</div>
                     </div>
@@ -109,7 +109,7 @@ export default function WelcomePage() {
               
               <CardFooter className="pt-0">
                 <Link href="/quiz" className="w-full">
-                  <Button className="w-full btn-primary button-hover gap-1 justify-center">
+                  <Button className="w-full bg-primary text-white hover:bg-primary/90 gap-1 button-hover">
                     Take Weekly Quiz
                     <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
@@ -120,12 +120,15 @@ export default function WelcomePage() {
         )}
 
         {/* Features Grid */}
-        <h2 className="text-base font-semibold text-primary mb-4">Platform Features</h2>
+        <h2 className="text-dynamic-lg font-semibold text-primary mb-4 flex items-center gap-2">
+          <div className="h-6 w-1 bg-primary rounded"></div>
+          Platform Features
+        </h2>
         <div className="grid gap-4 md:grid-cols-2 mb-8">
-          <Card className="card quiz-card">
+          <Card className="border border-primary/10 hover:shadow-md transition-all">
             <CardContent className="p-5">
               <div className="flex items-start gap-4">
-                <div className="icon-circle">
+                <div className="icon-circle-primary">
                   <BookOpen className="h-5 w-5" />
                 </div>
                 <div>
@@ -138,10 +141,10 @@ export default function WelcomePage() {
             </CardContent>
           </Card>
 
-          <Card className="card quiz-card">
+          <Card className="border border-primary/10 hover:shadow-md transition-all">
             <CardContent className="p-5">
               <div className="flex items-start gap-4">
-                <div className="icon-circle">
+                <div className="icon-circle-primary">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
@@ -154,10 +157,10 @@ export default function WelcomePage() {
             </CardContent>
           </Card>
 
-          <Card className="card quiz-card">
+          <Card className="border border-primary/10 hover:shadow-md transition-all">
             <CardContent className="p-5">
               <div className="flex items-start gap-4">
-                <div className="icon-circle">
+                <div className="icon-circle-primary">
                   <Award className="h-5 w-5" />
                 </div>
                 <div>
@@ -170,10 +173,10 @@ export default function WelcomePage() {
             </CardContent>
           </Card>
 
-          <Card className="card quiz-card">
+          <Card className="border border-primary/10 hover:shadow-md transition-all">
             <CardContent className="p-5">
               <div className="flex items-start gap-4">
-                <div className="icon-circle">
+                <div className="icon-circle-primary">
                   <Star className="h-5 w-5" />
                 </div>
                 <div>
@@ -188,55 +191,63 @@ export default function WelcomePage() {
         </div>
 
         {/* Quick Actions */}
-        <h2 className="text-base font-semibold text-primary mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 gap-2 mb-8">
+        <h2 className="text-dynamic-lg font-semibold text-primary mb-4 flex items-center gap-2">
+          <div className="h-6 w-1 bg-primary rounded"></div>
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 gap-3 mb-8">
           <Link href="/quiz">
-            <Button variant="outline" className="w-full justify-between btn-outline button-hover h-12">
+            <Button variant="outline" className="w-full justify-between bg-white border border-primary/20 hover:border-primary hover:bg-primary/5 transition-all h-14">
               <div className="flex items-center">
                 <div className="icon-circle-primary mr-3">
                   <BookOpen className="h-4 w-4" />
                 </div>
-                <span>Take Weekly Quiz</span>
+                <span className="font-medium">Take Weekly Quiz</span>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronRight className="h-5 w-5 text-primary/60" />
             </Button>
           </Link>
           
           <Link href="/leaderboard">
-            <Button variant="outline" className="w-full justify-between btn-outline button-hover h-12">
+            <Button variant="outline" className="w-full justify-between bg-white border border-primary/20 hover:border-primary hover:bg-primary/5 transition-all h-14">
               <div className="flex items-center">
                 <div className="icon-circle-primary mr-3">
                   <Trophy className="h-4 w-4" />
                 </div>
-                <span>View Leaderboard</span>
+                <span className="font-medium">View Leaderboard</span>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronRight className="h-5 w-5 text-primary/60" />
             </Button>
           </Link>
           
           <Link href="/profile">
-            <Button variant="outline" className="w-full justify-between btn-outline button-hover h-12">
+            <Button variant="outline" className="w-full justify-between bg-white border border-primary/20 hover:border-primary hover:bg-primary/5 transition-all h-14">
               <div className="flex items-center">
                 <div className="icon-circle-primary mr-3">
                   <Award className="h-4 w-4" />
                 </div>
-                <span>Your Achievements</span>
+                <span className="font-medium">Your Achievements</span>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronRight className="h-5 w-5 text-primary/60" />
             </Button>
           </Link>
         </div>
 
         {/* Feedback Section */}
-        <div className="mt-8 bg-gray-50 rounded-lg p-5 text-center">
-          <h3 className="font-medium text-primary mb-2">Have feedback or suggestions?</h3>
-          <p className="text-sm text-muted-foreground mb-4">
+        <div className="mt-8 bg-primary/5 border border-primary/10 rounded-lg p-6 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+              <MessageSquare className="h-6 w-6" />
+            </div>
+          </div>
+          <h3 className="font-medium text-primary mb-2 text-dynamic-md">Have feedback or suggestions?</h3>
+          <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
             We're constantly improving the platform and would love to hear from you!
           </p>
           
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="secondary" className="btn-secondary button-hover">
+              <Button className="bg-primary text-white hover:bg-primary/90 transition-colors">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Send Feedback
               </Button>
