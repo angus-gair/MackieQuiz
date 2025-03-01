@@ -58,7 +58,7 @@ export default function AuthPage() {
 
       {/* Auth Form Section */}
       <div className="flex-1 flex items-start justify-center px-4 pt-4">
-        <Card className="w-full max-w-sm border-0 sm:border shadow-none sm:shadow-md">
+        <Card className="w-full max-w-md border-0 sm:border shadow-none sm:shadow-md">
           <CardContent className="p-0 sm:p-6">
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 h-12">
