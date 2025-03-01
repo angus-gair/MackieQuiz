@@ -153,8 +153,14 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values({
       ...insertUser,
-      teamAssigned: false // Ensure new users start with teamAssigned as false
+      teamAssigned: false, // Ensure new users start with teamAssigned as false
+      weeklyScore: 0, // Explicitly set default values to avoid data issues
+      weeklyQuizzes: 0 // Explicitly set default values to avoid data issues
     }).returning();
+    
+    // Log user creation for debugging
+    log(`Created new user (${user.id}): ${user.username} with weeklyScore: ${user.weeklyScore}, weeklyQuizzes: ${user.weeklyQuizzes}`);
+    
     return user;
   }
 
