@@ -24,24 +24,9 @@ import {
 } from "../components/ui/dialog";
 import { FeedbackForm } from "../components/ui/feedback-form";
 import { cn } from "../lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "../components/ui/skeleton";
 
 export default function WelcomePage() {
   const { user } = useAuth();
-  
-  // Additional user stats - could be extended with actual API calls
-  const { data: userStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/users/stats', user?.id],
-    enabled: !!user,
-    // This is a placeholder, you would typically fetch from your API
-    queryFn: async () => ({
-      completedQuizzes: Math.floor(Math.random() * 10) + 1,
-      correctAnswers: Math.floor(Math.random() * 50) + 10,
-      achievementCount: Math.floor(Math.random() * 5),
-      rank: Math.floor(Math.random() * 20) + 1
-    })
-  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
@@ -65,71 +50,6 @@ export default function WelcomePage() {
             Enhance your knowledge and collaborate with your team to excel together.
           </p>
         </div>
-
-        {/* User Stats Card (if logged in) */}
-        {user && (
-          <div className="mb-8">
-            <Card className="border shadow-sm overflow-hidden bg-white">
-              <CardHeader className="pb-3 border-b">
-                <CardTitle className="text-[#3a474e] flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-3">
-                      <Users className="h-4 w-4" />
-                    </div>
-                    <span className="font-medium">Team: <span className="text-primary">{user.team || 'Unassigned'}</span></span>
-                  </div>
-                  <div className="bg-muted rounded-full px-3 py-1 text-xs font-medium text-[#3a474e]">
-                    Performance Overview
-                  </div>
-                </CardTitle>
-                <CardDescription className="text-muted-foreground mt-1">
-                  Track your progress and contributions to your team's success.
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent className="pt-4 pb-3">
-                {statsLoading ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    {[0,1,2,3].map(i => (
-                      <div key={i} className="bg-muted rounded-lg p-4 text-center">
-                        <Skeleton className="h-3 w-16 mb-2 mx-auto" />
-                        <Skeleton className="h-6 w-12 mx-auto" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white rounded-lg p-3 text-center border shadow-sm">
-                      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Quizzes</div>
-                      <div className="text-xl font-semibold text-primary">{userStats?.completedQuizzes || 0}</div>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 text-center border shadow-sm">
-                      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Correct</div>
-                      <div className="text-xl font-semibold text-primary">{userStats?.correctAnswers || 0}</div>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 text-center border shadow-sm">
-                      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Badges</div>
-                      <div className="text-xl font-semibold text-primary">{userStats?.achievementCount || 0}</div>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 text-center border shadow-sm">
-                      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Rank</div>
-                      <div className="text-xl font-semibold text-primary">#{userStats?.rank || '-'}</div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-              
-              <CardFooter className="pt-2 pb-4 px-6 bg-muted border-t">
-                <Link href="/quiz" className="w-full">
-                  <Button className="w-full bg-[#18365a] hover:bg-[#18365a]/90 text-white shadow-sm">
-                    Start This Week's Challenge
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          </div>
-        )}
 
         {/* Features Grid */}
         <h2 className="text-lg font-semibold mb-4 text-[#3a474e] text-center">
