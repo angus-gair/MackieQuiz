@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, Trophy, Medal, Award, Users, User } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Trophy, Medal, Award, Users, User } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -42,16 +42,8 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
       <div className="container max-w-md mx-auto">
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 mr-3"
-            onClick={() => setLocation("/")}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="text-dynamic-sm">Back</span>
-          </Button>
+        {/* Centered Page Title */}
+        <div className="text-center mb-4 mt-2">
           <h1 className="text-dynamic-lg font-bold text-foreground">Weekly Leaderboard</h1>
         </div>
 
