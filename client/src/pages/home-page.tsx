@@ -55,11 +55,6 @@ export default function HomePage() {
     queryKey: ["/api/answers"],
   });
   
-  // Fetch team stats
-  const { data: teamStats = [] } = useQuery<TeamStats[]>({
-    queryKey: ["/api/analytics/teams"],
-  });
-
   const answerMutation = useMutation({
     mutationFn: async (data: { questionId: number; answer: string }) => {
       const res = await apiRequest("POST", "/api/answers", {
@@ -232,63 +227,6 @@ export default function HomePage() {
             </CardContent>
           </Card>
           
-          {/* Team Performance Card */}
-          {user?.team && teamStats.length > 0 && (
-            <Card className="overflow-hidden">
-              <CardHeader className="py-4 flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                  <CardTitle className="text-lg font-bold">{user.team}</CardTitle>
-                </div>
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm">
-                  {user.team.substring(0, 2)}
-                </div>
-              </CardHeader>
-              <CardContent className="pb-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-muted/30 p-3 rounded-md">
-                    <p className="text-sm text-muted-foreground">Total Score</p>
-                    <p className="text-lg font-bold text-primary">
-                      {teamStats.find(t => t.teamName === user.team)?.totalScore || 0}
-                    </p>
-                  </div>
-                  <div className="bg-muted/30 p-3 rounded-md">
-                    <p className="text-sm text-muted-foreground">Avg Score</p>
-                    <p className="text-lg font-bold text-primary">
-                      {Math.round(teamStats.find(t => t.teamName === user.team)?.averageScore || 0)}
-                    </p>
-                  </div>
-                  <div className="bg-muted/30 p-3 rounded-md">
-                    <p className="text-sm text-muted-foreground">Members</p>
-                    <p className="text-lg font-bold text-primary">
-                      {teamStats.find(t => t.teamName === user.team)?.members || 0}
-                    </p>
-                  </div>
-                  <div className={cn(
-                    "p-3 rounded-md",
-                    (teamStats.find(t => t.teamName === user.team)?.weeklyCompletionPercentage || 0) >= 80 
-                      ? "bg-emerald-50" 
-                      : (teamStats.find(t => t.teamName === user.team)?.weeklyCompletionPercentage || 0) >= 50
-                        ? "bg-amber-50"
-                        : "bg-red-50"
-                  )}>
-                    <p className="text-sm text-muted-foreground">Completion</p>
-                    <p className={cn(
-                      "text-lg font-bold",
-                      (teamStats.find(t => t.teamName === user.team)?.weeklyCompletionPercentage || 0) >= 80 
-                        ? "text-emerald-600" 
-                        : (teamStats.find(t => t.teamName === user.team)?.weeklyCompletionPercentage || 0) >= 50
-                          ? "text-amber-500"
-                          : "text-destructive"
-                    )}>
-                      {Math.round(teamStats.find(t => t.teamName === user.team)?.weeklyCompletionPercentage || 0)}%
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {!submitted && questions && (
             <Card className="quiz-card">
               <CardContent className="py-4">
