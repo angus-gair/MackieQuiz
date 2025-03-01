@@ -28,7 +28,7 @@ export default function TeamsPage() {
           <h1 className="text-dynamic-lg font-bold text-foreground">Teams</h1>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {teamGroups && Object.entries(teamGroups).map(([team, members]) => (
             <Card key={team} className="shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
