@@ -197,11 +197,11 @@
 
   /* Container styles */
   .content-container {
-    @apply max-w-md mx-auto px-4 py-6;
+    @apply max-w-5xl mx-auto px-4 py-6;
   }
 
   .admin-container {
-    @apply max-w-4xl mx-auto px-4 py-6;
+    @apply max-w-5xl mx-auto px-4 py-6;
   }
 
   /* Dynamic text utilities */

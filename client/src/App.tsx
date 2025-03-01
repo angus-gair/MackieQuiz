@@ -57,7 +57,7 @@ function Router() {
     <div className="flex flex-col min-h-screen bg-background">
       {showNav && <TopNav />}
       
-      <div className={`flex-1 ${contentClasses}`}>
+      <div className={`flex-1 ${contentClasses} max-w-5xl mx-auto`}>
         <Suspense fallback={<LoadingSpinner />}>
           <Switch>
             <Route path="/auth" component={AuthPage as AnyComponent} />

@@ -180,7 +180,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <HeaderNav />
       <main className="pt-16 pb-24 px-4">
-        <div className="max-w-md mx-auto space-y-4">
+        <div className="max-w-5xl mx-auto space-y-4">
           <Card className="quiz-card">
             <CardContent className="pt-4">
               <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>

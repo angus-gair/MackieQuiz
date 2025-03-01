@@ -45,7 +45,7 @@ export default function WelcomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
-      <div className="container max-w-md mx-auto">
+      <div className="container max-w-5xl mx-auto">
         {/* Centered Page Title */}
         <div className="text-center mb-4 mt-2">
           <h1 className="text-dynamic-lg font-bold text-foreground">Welcome Dashboard</h1>
