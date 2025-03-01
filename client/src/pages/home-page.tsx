@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import confetti from 'canvas-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeaderNav } from "@/components/header-nav";
+import { FaGlassCheers } from "react-icons/fa";
 
 // Team stats type
 type TeamStats = {
@@ -221,8 +222,11 @@ export default function HomePage() {
       <main className="pt-16 pb-24 px-4">
         <div className="max-w-5xl mx-auto space-y-4">
           <Card className="quiz-card">
-            <CardContent className="pt-4">
-              <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>
+            <CardContent className="pt-4 relative">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>
+                <FaGlassCheers className="h-7 w-7 text-amber-500 animate-bounce" />
+              </div>
               <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
             </CardContent>
           </Card>
