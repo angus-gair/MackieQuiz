@@ -97,11 +97,11 @@ export function TopNav() {
             ) : (
               <Link href="/">
                 <div className="flex items-center">
-                  <div className="mr-2 h-8 w-12 rounded-lg overflow-hidden">
+                  <div className="mr-2">
                     <img 
                       src="/images/roundtable.png" 
                       alt="Round Table Logo" 
-                      className="h-full w-full object-cover"
+                      className="h-7 w-auto"
                     />
                   </div>
                   <h1 className="text-lg font-semibold text-primary hidden sm:block">
