@@ -34,7 +34,7 @@ export default function HomePage() {
   const [quizKey, setQuizKey] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const isMobile = useIsMobile();
-  
+
   // Redirect to team allocation if user hasn't been assigned a team
   useEffect(() => {
     if (user && !user.teamAssigned) {
@@ -54,7 +54,7 @@ export default function HomePage() {
   const { data: answers } = useQuery<Answer[]>({
     queryKey: ["/api/answers"],
   });
-  
+
   const answerMutation = useMutation({
     mutationFn: async (data: { questionId: number; answer: string }) => {
       const res = await apiRequest("POST", "/api/answers", {
@@ -137,25 +137,25 @@ export default function HomePage() {
   };
 
   const today = new Date();
-  
+
   // Safety check - if no answers yet or user is new, return empty set
   if (!answers || answers.length === 0) {
     console.log("No answers available or new user detected");
   }
-  
+
   const answeredQuestions = new Set(answers?.filter(a => {
     // First check if answer has a valid date
     if (!a.answeredAt) {
       console.log("Answer missing timestamp, skipping:", a);
       return false;
     }
-    
+
     const answerDate = new Date(a.answeredAt);
     return answerDate.toDateString() === today.toDateString();
   }).filter(a => {
     // Safety check for answer
     if (!a || !a.answeredAt) return false;
-    
+
     const answerTime = new Date(a.answeredAt).getTime();
     const todaysAnswers = answers?.filter(a => {
       if (!a.answeredAt) return false;
@@ -226,7 +226,7 @@ export default function HomePage() {
               <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
             </CardContent>
           </Card>
-          
+
           {!submitted && questions && (
             <Card className="quiz-card">
               <CardContent className="py-4">
@@ -362,6 +362,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
           )}
+          <p className="text-sm italic text-muted-foreground">Project Round Table is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please drop a note through the feedback form or reach out directly—I'd love to chat!</p>
         </div>
       </main>
     </div>
