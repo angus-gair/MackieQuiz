@@ -20,7 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { TeamLogo } from "@/components/ui/team-logo";
+import { TeamCard } from "@/components/ui/team-card";
 
 // Types
 type TeamStats = {
