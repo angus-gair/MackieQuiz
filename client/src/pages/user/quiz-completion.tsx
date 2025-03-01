@@ -47,8 +47,8 @@ export default function QuizCompletionPage() {
           </div>
         </Card>
 
-        {/* Achievement notification will show automatically if there's a new achievement */}
-        <AchievementNotification achievement={latestAchievement} />
+        {/* Only show achievement notification when a new achievement exists */}
+        {latestAchievement && <AchievementNotification achievement={latestAchievement} />}
       </div>
     </div>
   );
