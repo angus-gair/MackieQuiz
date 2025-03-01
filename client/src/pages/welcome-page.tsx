@@ -19,14 +19,12 @@ import {
   DialogTrigger,
 } from "../components/ui/dialog";
 import { FeedbackForm } from "../components/ui/feedback-form";
-import { HeaderNav } from "@/components/header-nav";
 
 export default function WelcomePage() {
   const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
-      <HeaderNav />
       <main className="container max-w-4xl mx-auto pt-6 pb-20 px-4">
         {/* Welcome Header */}
         <div className="text-center mb-8">
