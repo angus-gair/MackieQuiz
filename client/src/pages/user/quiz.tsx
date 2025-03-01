@@ -133,20 +133,21 @@ export default function QuizPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex flex-col">
-      <main className="flex-1 container max-w-screen-xl px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Weekly Quiz</h1>
-          <p className="text-muted-foreground">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
+      <div className="container max-w-md mx-auto">
+        {/* Centered Page Title */}
+        <div className="text-center mb-4 mt-2">
+          <h1 className="text-dynamic-lg font-bold text-foreground">Weekly Quiz</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Question {currentQuestionIndex + 1} of {questions.length}
           </p>
         </div>
 
         <div className="w-full">
           {currentQuestion && (
-            <Card key={quizKey} className="quiz-card">
+            <Card key={quizKey} className="quiz-card shadow-sm">
               <CardHeader className="py-3">
-                <CardTitle className="text-base font-medium leading-relaxed">
+                <CardTitle className="text-base font-medium leading-relaxed text-[#3a474e]">
                   {currentQuestion.question}
                 </CardTitle>
               </CardHeader>
@@ -193,7 +194,7 @@ export default function QuizPage() {
                       onClick={handleSubmit}
                       disabled={!canGoNext}
                       size="sm"
-                      className="h-8"
+                      className="h-8 bg-[#18365a] hover:bg-[#18365a]/90"
                     >
                       Submit Quiz
                     </Button>
@@ -202,7 +203,7 @@ export default function QuizPage() {
                       onClick={handleNext}
                       disabled={!canGoNext}
                       size="sm"
-                      className="h-8"
+                      className="h-8 bg-[#18365a] hover:bg-[#18365a]/90"
                     >
                       <span className="text-sm">Next</span>
                       <ArrowRight className="h-4 w-4 ml-1" />
@@ -213,7 +214,7 @@ export default function QuizPage() {
             </Card>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
