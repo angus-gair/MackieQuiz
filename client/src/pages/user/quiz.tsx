@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, ClipboardCheck } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { HeaderNav } from "@/components/header-nav";
 
 export default function QuizPage() {
   const [, setLocation] = useLocation();
@@ -92,7 +91,6 @@ export default function QuizPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <HeaderNav />
         <main className="pt-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </main>
@@ -103,7 +101,6 @@ export default function QuizPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <HeaderNav />
         <main className="pt-16 px-4">
           <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto">
             <div className="text-red-500 mb-4">
@@ -127,7 +124,6 @@ export default function QuizPage() {
   if (!questions || questions.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <HeaderNav />
         <main className="pt-16 px-4">
           <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto">
             <div className="text-amber-500 mb-4">
@@ -148,7 +144,6 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <HeaderNav />
       <main className="pt-16 pb-24 px-4">
         <div className="container max-w-md mx-auto space-y-4">
           {/* Progress indicator */}
