@@ -44,7 +44,8 @@ export function HeaderNav() {
     location !== '/leaderboard' && 
     location !== '/teams' && 
     location !== '/profile' && 
-    location !== '/settings';
+    location !== '/settings' &&
+    location !== '/quiz';
 
   // Check if it's an admin page
   const isAdminPage = location.startsWith('/admin');
@@ -56,7 +57,7 @@ export function HeaderNav() {
     if (location === '/teams') return 'Teams';
     if (location === '/profile') return 'Your Profile';
     if (location === '/settings') return 'Settings';
-    if (location === '/quiz') return 'Round Table';
+    if (location === '/quiz') return 'Take Quiz';
     if (location.startsWith('/admin')) return 'Admin Dashboard';
     return 'Round Table';
   };
@@ -144,6 +145,17 @@ export function HeaderNav() {
                   )}>
                     <Trophy className="h-4 w-4" />
                     <span>Leaderboard</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                {/* Quiz link */}
+                <Link href="/quiz">
+                  <DropdownMenuItem className={cn(
+                    "cursor-pointer flex items-center gap-2",
+                    location === '/quiz' && "bg-primary/5 text-primary font-medium"
+                  )}>
+                    <BookOpen className="h-4 w-4" />
+                    <span>Take Quiz</span>
                   </DropdownMenuItem>
                 </Link>
                 
