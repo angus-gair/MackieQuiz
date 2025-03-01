@@ -119,15 +119,36 @@ export default function HomePage() {
   };
 
   const today = new Date();
+  
+  // Safety check - if no answers yet or user is new, return empty set
+  if (!answers || answers.length === 0) {
+    console.log("No answers available or new user detected");
+  }
+  
   const answeredQuestions = new Set(answers?.filter(a => {
+    // First check if answer has a valid date
+    if (!a.answeredAt) {
+      console.log("Answer missing timestamp, skipping:", a);
+      return false;
+    }
+    
     const answerDate = new Date(a.answeredAt);
     return answerDate.toDateString() === today.toDateString();
   }).filter(a => {
+    // Safety check for answer
+    if (!a || !a.answeredAt) return false;
+    
     const answerTime = new Date(a.answeredAt).getTime();
     const todaysAnswers = answers?.filter(a => {
+      if (!a.answeredAt) return false;
       const date = new Date(a.answeredAt);
       return date.toDateString() === today.toDateString();
     }) ?? [];
+
+    // Safety check - if no answers today, return empty
+    if (todaysAnswers.length === 0) {
+      return false;
+    }
 
     const quizzes = [];
     let currentQuiz = [];
