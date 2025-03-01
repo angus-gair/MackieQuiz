@@ -88,8 +88,12 @@ export default function TeamAllocationPage() {
   };
 
   useEffect(() => {
+    // Check if user is authenticated first
+    if (!user) return;
+    
     const hasSpun = sessionStorage.getItem('hasSpun');
     if (!user?.teamAssigned && !spinning && !selectedTeam && !showConfetti && !hasSpun) {
+      console.log("Team not assigned yet, starting team allocation spin");
       sessionStorage.setItem('hasSpun', 'true');
       startSpinning();
     }

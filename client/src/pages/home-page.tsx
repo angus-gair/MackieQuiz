@@ -24,6 +24,14 @@ export default function HomePage() {
   const [quizKey, setQuizKey] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const isMobile = useIsMobile();
+  
+  // Redirect to team allocation if user hasn't been assigned a team
+  useEffect(() => {
+    if (user && !user.teamAssigned) {
+      console.log("User not assigned to a team yet, redirecting to team allocation");
+      setLocation('/team-allocation');
+    }
+  }, [user, setLocation]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
