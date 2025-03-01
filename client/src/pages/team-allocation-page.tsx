@@ -55,6 +55,9 @@ export default function TeamAllocationPage() {
           const updatedUser = await userResponse.json();
           queryClient.setQueryData(["/api/user"], updatedUser);
 
+          // Reset the user's progress since they're a new user
+          await apiRequest("POST", "/api/user/reset-progress");
+          
           // After successful team assignment, automatically redirect to home
           setTimeout(() => {
             setLocation("/");

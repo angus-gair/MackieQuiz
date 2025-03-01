@@ -129,7 +129,11 @@ export function setupAuth(app: Express) {
           log(`Login after registration failed: ${err}`);
           return next(err);
         }
-        res.status(201).json(user);
+        // Include a redirect flag in the response to indicate the client should redirect to team allocation
+        res.status(201).json({
+          ...user,
+          shouldRedirectToTeamAllocation: true
+        });
       });
     } catch (err) {
       log(`Registration error: ${err}`);

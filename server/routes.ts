@@ -434,6 +434,24 @@ export function registerRoutes(app: Express): Server {
     res.json(latestAchievement);
   });
 
+  // New endpoint to reset quiz data for new users
+  app.post("/api/user/reset-progress", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      // Reset the user's weekly score and quizzes
+      await storage.updateUser(req.user.id, {
+        weeklyScore: 0,
+        weeklyQuizzes: 0
+      });
+      
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("Error resetting user progress:", error);
+      res.status(500).json({ error: "Failed to reset user progress" });
+    }
+  });
+
   app.get("/api/analytics/navigation", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
     // Add test data
