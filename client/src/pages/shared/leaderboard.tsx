@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { TeamCard } from "@/components/ui/team-card";
 
 // Types
 type TeamStats = {
@@ -210,8 +211,15 @@ export default function LeaderboardPage() {
                   {sortedTeams[1] && (
                     <Card className="text-center border-gray-200 hover:shadow-md transition-shadow h-full">
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
-                        <div className="h-10 w-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-2">
-                          <Medal className="h-6 w-6" />
+                        <div className="flex items-center gap-1 mb-2">
+                          <img 
+                            src={`/images/team-logos/${sortedTeams[1]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
+                            alt={`${sortedTeams[1]?.teamName} logo`}
+                            className="h-10 w-10"
+                          />
+                          <div className="h-7 w-7 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
+                            <Medal className="h-4 w-4" />
+                          </div>
                         </div>
                         <p className="font-semibold text-sm truncate w-full">
                           {sortedTeams[1]?.teamName}
@@ -253,8 +261,15 @@ export default function LeaderboardPage() {
                         1st Place
                       </div>
                       <CardContent className="pt-6 pb-4 px-2 flex flex-col items-center">
-                        <div className="h-12 w-12 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center mb-2">
-                          <Trophy className="h-7 w-7" />
+                        <div className="flex items-center gap-2 mb-2">
+                          <img 
+                            src={`/images/team-logos/${sortedTeams[0]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
+                            alt={`${sortedTeams[0]?.teamName} logo`}
+                            className="h-12 w-12"
+                          />
+                          <div className="h-8 w-8 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center">
+                            <Trophy className="h-5 w-5" />
+                          </div>
                         </div>
                         <p className="font-bold text-primary truncate w-full mt-1">
                           {sortedTeams[0]?.teamName}
@@ -290,8 +305,15 @@ export default function LeaderboardPage() {
                   {sortedTeams[2] && (
                     <Card className="text-center border-amber-200 hover:shadow-md transition-shadow h-full">
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
-                        <div className="h-10 w-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
-                          <Award className="h-6 w-6" />
+                        <div className="flex items-center gap-1 mb-2">
+                          <img 
+                            src={`/images/team-logos/${sortedTeams[2]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
+                            alt={`${sortedTeams[2]?.teamName} logo`}
+                            className="h-10 w-10"
+                          />
+                          <div className="h-7 w-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                            <Award className="h-4 w-4" />
+                          </div>
                         </div>
                         <p className="font-semibold text-sm truncate w-full">
                           {sortedTeams[2]?.teamName}
@@ -442,84 +464,15 @@ export default function LeaderboardPage() {
               </p>
             )}
 
-            {/* Team Card List */}
-            {sortedTeams.map((team, index) => {
-              const Badge = BADGES[index]?.icon ?? null;
-              const color = BADGES[index]?.color ?? "text-muted-foreground";
-              const bgColor = BADGES[index]?.bgColor ?? "bg-gray-50";
-
-              return (
-                <Card
-                  key={team.teamName}
-                  className={cn(
-                    "overflow-hidden hover:shadow-md transition-shadow",
-                    index < 3 ? "border-primary/20" : "border-gray-200"
-                  )}
-                >
-                  <CardContent className="p-4">
-                    {/* Team Name and Badge */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-primary">
-                          {team.teamName}
-                        </span>
-                      </div>
-                      
-                      {/* Team Ranking Badge (replacing avatar) */}
-                      {Badge ? (
-                        <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", bgColor)}>
-                          <Badge className={cn("h-5 w-5", color)} />
-                        </div>
-                      ) : (
-                        <div className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-500">{index + 1}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-3 mt-1">
-                      <div className="bg-gray-50 p-2 rounded">
-                        <div className="text-xs text-gray-500">Total Score</div>
-                        <div className="text-sm font-semibold text-primary">
-                          {team.totalScore}
-                        </div>
-                      </div>
-                      <div className="bg-gray-50 p-2 rounded">
-                        <div className="text-xs text-gray-500">Avg Score</div>
-                        <div className="text-sm font-semibold text-primary">
-                          {Math.round(team.averageScore)}
-                        </div>
-                      </div>
-                      <div className="bg-gray-50 p-2 rounded">
-                        <div className="text-xs text-gray-500">Members</div>
-                        <div className="text-sm font-semibold text-primary">
-                          {team.members}
-                        </div>
-                      </div>
-                      
-                      {/* Completion Rate - Highlighted */}
-                      <div className={cn(
-                        "p-2 rounded",
-                        team.weeklyCompletionPercentage >= 80 ? "bg-green-50" :
-                        team.weeklyCompletionPercentage >= 50 ? "bg-yellow-50" :
-                        "bg-red-50"
-                      )}>
-                        <div className="text-xs text-gray-600 font-medium">Completion</div>
-                        <div className={cn(
-                          "text-sm font-bold",
-                          team.weeklyCompletionPercentage >= 80 ? "text-green-600" :
-                          team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
-                          "text-red-500"
-                        )}>
-                          {Math.round(team.weeklyCompletionPercentage)}%
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {/* Team Card List - Using new TeamCard component */}
+            {sortedTeams.map((team, index) => (
+              <TeamCard 
+                key={team.teamName}
+                team={team}
+                index={index}
+                isTopThree={index < 3}
+              />
+            ))}
           </TabsContent>
         </Tabs>
 
