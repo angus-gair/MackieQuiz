@@ -97,7 +97,7 @@ export function TopNav() {
             ) : (
               <Link href="/">
                 <div className="flex items-center">
-                  <div className="mr-2 h-8 w-8 rounded-full overflow-hidden">
+                  <div className="mr-2 h-8 w-12 rounded-lg overflow-hidden">
                     <img 
                       src="/images/roundtable.png" 
                       alt="Round Table Logo" 
