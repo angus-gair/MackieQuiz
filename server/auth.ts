@@ -201,6 +201,12 @@ export function setupAuth(app: Express) {
     }
     
     try {
+      // Check if sessionStore exists
+      if (!storage.sessionStore) {
+        log('Session store not available');
+        return res.status(500).json({ error: 'Session store not available' });
+      }
+      
       // Clear all sessions in the session store
       storage.sessionStore.clear((err) => {
         if (err) {
