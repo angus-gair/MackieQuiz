@@ -107,7 +107,7 @@ export default function WelcomePage() {
         </div>
 
         {/* Maintainer Note */}
-        <div className="text-center text-sm text-muted-foreground mt-16">
+        <div className="text-center text-xs italic text-muted-foreground mt-16">
           <p>
             Project Round Table is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please reach out directly—I'd love to chat!
           </p>
