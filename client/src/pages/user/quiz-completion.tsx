@@ -26,7 +26,7 @@ export default function QuizCompletionPage() {
           <h1 className="text-dynamic-lg font-bold text-foreground">Quiz Completed</h1>
         </div>
         
-        <Card className="shadow-sm p-6">
+        <Card className="shadow-sm p-6 w-full" style={{ minHeight: '400px' }}>
           <div className="text-center space-y-4">
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
               <Trophy className="w-8 h-8 text-primary" />

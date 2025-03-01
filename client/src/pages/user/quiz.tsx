@@ -145,7 +145,7 @@ export default function QuizPage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="pt-16 pb-24 px-4">
-        <div className="container max-w-5xl mx-auto space-y-4">
+        <div className="container max-w-5xl mx-auto space-y-4 w-full">
           {/* Progress indicator */}
           <Card className="shadow-sm">
             <CardContent className="py-4">
@@ -164,9 +164,9 @@ export default function QuizPage() {
             </CardContent>
           </Card>
 
-          <div className="w-full">
+          <div className="w-full" style={{ minHeight: '400px' }}>
             {currentQuestion && (
-              <Card key={quizKey} className="quiz-card shadow-sm">
+              <Card key={quizKey} className="quiz-card shadow-sm w-full" style={{ minHeight: '400px' }}>
                 <CardHeader className="py-3">
                   <CardTitle className="text-base font-medium leading-relaxed text-[#3a474e]">
                     {currentQuestion.question}
@@ -181,17 +181,18 @@ export default function QuizPage() {
                         [currentQuestion.id]: value,
                       }))
                     }
-                    className="space-y-2"
+                    className="space-y-2 w-full"
+                    style={{ minHeight: '240px' }}
                   >
                     {currentQuestion.options.map((option: string) => (
-                      <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
+                      <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30 w-full">
                         <RadioGroupItem
                           value={option}
                           id={`${currentQuestion.id}-${option}`}
                         />
                         <Label
                           htmlFor={`${currentQuestion.id}-${option}`}
-                          className="text-sm cursor-pointer text-[#3a474e]"
+                          className="text-sm cursor-pointer text-[#3a474e] w-full"
                         >
                           {option}
                         </Label>
