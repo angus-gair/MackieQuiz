@@ -51,14 +51,14 @@ export function HeaderNav() {
   
   // Determine page title based on current route
   const getPageTitle = () => {
-    if (location === '/') return 'Weekly Quiz';
+    if (location === '/') return 'Round Table';
     if (location === '/leaderboard') return 'Leaderboard';
     if (location === '/teams') return 'Teams';
     if (location === '/profile') return 'Your Profile';
     if (location === '/settings') return 'Settings';
-    if (location === '/quiz') return 'Quiz';
+    if (location === '/quiz') return 'Round Table';
     if (location.startsWith('/admin')) return 'Admin Dashboard';
-    return 'Weekly Quiz';
+    return 'Round Table';
   };
 
   return (

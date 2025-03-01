@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, ClipboardCheck } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { HeaderNav } from "@/components/header-nav";
 
 export default function QuizPage() {
   const [, setLocation] = useLocation();
@@ -90,131 +91,157 @@ export default function QuizPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      <div className="min-h-screen bg-background">
+        <HeaderNav />
+        <main className="pt-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        </main>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="text-red-500 mb-4">
-          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-bold text-center">Error Loading Quiz</h1>
-        <p className="text-muted-foreground text-center mt-2">
-          {error instanceof Error ? error.message : "An unknown error occurred"}
-        </p>
-        <Button onClick={() => window.location.reload()} className="mt-4">
-          Try Again
-        </Button>
+      <div className="min-h-screen bg-background">
+        <HeaderNav />
+        <main className="pt-16 px-4">
+          <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto">
+            <div className="text-red-500 mb-4">
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-center">Error Loading Quiz</h1>
+            <p className="text-muted-foreground text-center mt-2">
+              {error instanceof Error ? error.message : "An unknown error occurred"}
+            </p>
+            <Button onClick={() => window.location.reload()} className="mt-4 bg-[#18365a] hover:bg-[#18365a]/90">
+              Try Again
+            </Button>
+          </div>
+        </main>
       </div>
     );
   }
 
   if (!questions || questions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="text-amber-500 mb-4">
-          <ClipboardCheck className="w-12 h-12" />
-        </div>
-        <h1 className="text-2xl font-bold text-center">No Questions Available</h1>
-        <p className="text-muted-foreground text-center mt-2">
-          There are no quiz questions available for this week yet.
-        </p>
-        <Button onClick={() => setLocation("/")} className="mt-4">
-          Return Home
-        </Button>
+      <div className="min-h-screen bg-background">
+        <HeaderNav />
+        <main className="pt-16 px-4">
+          <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto">
+            <div className="text-amber-500 mb-4">
+              <ClipboardCheck className="w-12 h-12" />
+            </div>
+            <h1 className="text-2xl font-bold text-center">No Questions Available</h1>
+            <p className="text-muted-foreground text-center mt-2">
+              There are no quiz questions available for this week yet.
+            </p>
+            <Button onClick={() => setLocation("/")} className="mt-4 bg-[#18365a] hover:bg-[#18365a]/90">
+              Return Home
+            </Button>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
-      <div className="container max-w-md mx-auto">
-        {/* Centered Page Title */}
-        <div className="text-center mb-4 mt-2">
-          <h1 className="text-dynamic-lg font-bold text-foreground">Weekly Quiz</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Question {currentQuestionIndex + 1} of {questions.length}
-          </p>
-        </div>
+    <div className="min-h-screen bg-background">
+      <HeaderNav />
+      <main className="pt-16 pb-24 px-4">
+        <div className="container max-w-md mx-auto space-y-4">
+          {/* Progress indicator */}
+          <Card className="shadow-sm">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-[#3a474e]">Question Progress</p>
+                <span className="text-sm text-muted-foreground">
+                  {currentQuestionIndex + 1}/{questions.length}
+                </span>
+              </div>
+              <div className="w-full bg-muted/50 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#18365a]" 
+                  style={{width: `${((currentQuestionIndex + 1) / questions.length) * 100}%`}}
+                ></div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <div className="w-full">
-          {currentQuestion && (
-            <Card key={quizKey} className="quiz-card shadow-sm">
-              <CardHeader className="py-3">
-                <CardTitle className="text-base font-medium leading-relaxed text-[#3a474e]">
-                  {currentQuestion.question}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup
-                  value={selectedAnswers[currentQuestion.id]}
-                  onValueChange={(value) =>
-                    setSelectedAnswers(prev => ({
-                      ...prev,
-                      [currentQuestion.id]: value,
-                    }))
-                  }
-                  className="space-y-2"
-                >
-                  {currentQuestion.options.map((option: string) => (
-                    <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
-                      <RadioGroupItem
-                        value={option}
-                        id={`${currentQuestion.id}-${option}`}
-                      />
-                      <Label
-                        htmlFor={`${currentQuestion.id}-${option}`}
-                        className="text-sm cursor-pointer text-[#3a474e]"
-                      >
-                        {option}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-
-                <div className="flex justify-between mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={currentQuestionIndex === 0}
-                    size="sm"
-                    className="h-8"
+          <div className="w-full">
+            {currentQuestion && (
+              <Card key={quizKey} className="quiz-card shadow-sm">
+                <CardHeader className="py-3">
+                  <CardTitle className="text-base font-medium leading-relaxed text-[#3a474e]">
+                    {currentQuestion.question}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup
+                    value={selectedAnswers[currentQuestion.id]}
+                    onValueChange={(value) =>
+                      setSelectedAnswers(prev => ({
+                        ...prev,
+                        [currentQuestion.id]: value,
+                      }))
+                    }
+                    className="space-y-2"
                   >
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    <span className="text-sm">Previous</span>
-                  </Button>
-                  {isLastQuestion ? (
+                    {currentQuestion.options.map((option: string) => (
+                      <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
+                        <RadioGroupItem
+                          value={option}
+                          id={`${currentQuestion.id}-${option}`}
+                        />
+                        <Label
+                          htmlFor={`${currentQuestion.id}-${option}`}
+                          className="text-sm cursor-pointer text-[#3a474e]"
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+
+                  <div className="flex justify-between mt-4">
                     <Button
-                      onClick={handleSubmit}
-                      disabled={!canGoNext}
+                      variant="outline"
+                      onClick={handlePrevious}
+                      disabled={currentQuestionIndex === 0}
                       size="sm"
-                      className="h-8 bg-[#18365a] hover:bg-[#18365a]/90"
+                      className="h-8"
                     >
-                      Submit Quiz
+                      <ArrowLeft className="h-4 w-4 mr-1" />
+                      <span className="text-sm">Previous</span>
                     </Button>
-                  ) : (
-                    <Button
-                      onClick={handleNext}
-                      disabled={!canGoNext}
-                      size="sm"
-                      className="h-8 bg-[#18365a] hover:bg-[#18365a]/90"
-                    >
-                      <span className="text-sm">Next</span>
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    {isLastQuestion ? (
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={!canGoNext}
+                        size="sm"
+                        className="h-8 bg-[#18365a] hover:bg-[#18365a]/90"
+                      >
+                        Submit Quiz
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleNext}
+                        disabled={!canGoNext}
+                        size="sm"
+                        className="h-8 bg-[#18365a] hover:bg-[#18365a]/90"
+                      >
+                        <span className="text-sm">Next</span>
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
