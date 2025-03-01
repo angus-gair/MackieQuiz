@@ -102,7 +102,7 @@ export default function QuizPage() {
     return (
       <div className="min-h-screen bg-background">
         <main className="pt-16 px-4">
-          <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center p-4 max-w-5xl mx-auto">
             <div className="text-red-500 mb-4">
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -125,7 +125,7 @@ export default function QuizPage() {
     return (
       <div className="min-h-screen bg-background">
         <main className="pt-16 px-4">
-          <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center p-4 max-w-5xl mx-auto">
             <div className="text-amber-500 mb-4">
               <ClipboardCheck className="w-12 h-12" />
             </div>
@@ -145,7 +145,7 @@ export default function QuizPage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="pt-16 pb-24 px-4">
-        <div className="container max-w-md mx-auto space-y-4">
+        <div className="container max-w-5xl mx-auto space-y-4">
           {/* Progress indicator */}
           <Card className="shadow-sm">
             <CardContent className="py-4">
