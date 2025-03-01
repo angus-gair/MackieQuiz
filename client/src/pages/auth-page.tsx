@@ -39,14 +39,14 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       {/* Hero Section */}
-      <div className="w-full bg-[#1e293b] text-white py-6 px-4">
+      <div className="w-full bg-[#1e293b] text-white py-12 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="mb-3">
             <span className="text-2xl sm:text-3xl font-bold block text-white">The Round Table:</span>
             <span className="text-lg sm:text-xl font-light italic mt-1 block text-white">Kingsford Edition</span>
           </h1>
-          <p className="text-sm mb-4">Test your wine knowledge, compete with your team, and win weekly prizes!</p>
-          <div className="rounded-lg shadow-xl overflow-hidden max-h-48">
+          <p className="text-sm mb-6">Test your wine knowledge, compete with your team, and win weekly prizes!</p>
+          <div className="rounded-lg shadow-xl overflow-hidden max-h-64">
             <img
               src="/wine.jpg"
               alt="Wine cellar"
