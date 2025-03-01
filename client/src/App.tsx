@@ -27,6 +27,7 @@ const TeamsPage = lazy(() => import("@/pages/teams-page"));
 const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
 const QuizPage = lazy(() => import("@/pages/user/quiz"));
 const QuizCompletionPage = lazy(() => import("@/pages/user/quiz-completion"));
+const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
