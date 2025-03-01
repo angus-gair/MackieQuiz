@@ -192,4 +192,27 @@ export function setupAuth(app: Express) {
     log(`User check: Authenticated as ${req.user.id}`);
     res.json(req.user);
   });
+  
+  // Endpoint to sign out all users by clearing all sessions
+  app.post("/api/admin/logout-all-users", (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      log('Logout all users: Unauthorized access attempt');
+      return res.sendStatus(401);
+    }
+    
+    try {
+      // Clear all sessions in the session store
+      storage.sessionStore.clear((err) => {
+        if (err) {
+          log('Error clearing session store: ' + err);
+          return res.status(500).json({ error: 'Failed to logout all users' });
+        }
+        log('All user sessions have been cleared successfully');
+        res.json({ success: true, message: 'All users have been logged out' });
+      });
+    } catch (error) {
+      log('Error in logout-all-users endpoint: ' + error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 }
