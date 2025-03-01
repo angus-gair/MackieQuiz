@@ -81,8 +81,12 @@ export function HeaderNav() {
             ) : (
               <Link href="/">
                 <div className="flex items-center">
-                  <div className="icon-circle-primary mr-2">
-                    <BookOpen className="h-4 w-4" />
+                  <div className="mr-2 h-8 w-8 rounded-full overflow-hidden">
+                    <img 
+                      src="/images/roundtable.png" 
+                      alt="Round Table Logo" 
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                   <h1 className="text-lg font-semibold text-primary">
                     {getPageTitle()}
