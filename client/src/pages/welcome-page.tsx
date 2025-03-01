@@ -7,18 +7,8 @@ import {
   Users, 
   Award, 
   CheckCircle,
-  MessageSquare,
   PartyPopper
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../components/ui/dialog";
-import { FeedbackForm } from "../components/ui/feedback-form";
 
 export default function WelcomePage() {
   const { user } = useAuth();
@@ -114,32 +104,12 @@ export default function WelcomePage() {
               View Leaderboard
             </Button>
           </Link>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="px-6 py-2">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Provide Feedback
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Share Your Feedback</DialogTitle>
-                <DialogDescription>
-                  Your insights help us improve the platform for everyone.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-4 px-1">
-                {user && <FeedbackForm userId={user.id} />}
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
 
         {/* Maintainer Note */}
         <div className="text-center text-sm text-muted-foreground mt-16">
           <p>
-            Project Round Table is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please drop a note through the feedback form or reach out directly—I'd love to chat!
+            Project Round Table is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please reach out directly—I'd love to chat!
           </p>
         </div>
       </main>
