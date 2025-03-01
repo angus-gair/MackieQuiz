@@ -85,7 +85,7 @@ export default function LeaderboardPage() {
           }
         </p>
 
-        <div className="space-y-3">
+        <div className="space-y-3 max-w-3xl mx-auto">
           {showTeams ? (
             // Teams View
             teamStats.map((team, index) => {
@@ -94,19 +94,19 @@ export default function LeaderboardPage() {
 
               return (
                 <Card key={`team-${index}`} className={cn(
-                  "overflow-hidden transition-all duration-200 hover:shadow-md",
+                  "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
                   index === 0 && "border-yellow-500/50"
                 )}>
                   <CardHeader className="py-3">
                     <CardTitle className="flex items-center justify-between text-dynamic-base">
                       <div className="flex items-center gap-2 min-w-0">
-                        {Badge && <Badge className={cn("h-5 w-5", color)} />}
+                        {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
                         <span className="text-[#3a474e] font-semibold truncate">
                           {index + 1}. {team.teamName}
                         </span>
                       </div>
                       <span className={cn(
-                        "text-dynamic-base font-bold ml-2",
+                        "text-dynamic-base font-bold ml-2 flex-shrink-0",
                         team.weeklyCompletionPercentage >= 80 ? "text-emerald-600" :
                           team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
                             "text-destructive"
@@ -126,18 +126,18 @@ export default function LeaderboardPage() {
 
               return (
                 <Card key={`user-${index}`} className={cn(
-                  "overflow-hidden transition-all duration-200 hover:shadow-md",
+                  "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
                   index === 0 && "border-yellow-500/50"
                 )}>
                   <CardHeader className="py-3">
                     <CardTitle className="flex items-center justify-between text-dynamic-base">
                       <div className="flex items-center gap-2 min-w-0">
-                        {Badge && <Badge className={cn("h-5 w-5", color)} />}
+                        {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
                         <span className="text-[#3a474e] font-semibold truncate">
                           {index + 1}. {user.username}
                         </span>
                       </div>
-                      <span className="text-dynamic-base font-bold text-emerald-600">{user.weeklyScore ?? 0} pts</span>
+                      <span className="text-dynamic-base font-bold text-emerald-600 flex-shrink-0">{user.weeklyScore ?? 0} pts</span>
                     </CardTitle>
                   </CardHeader>
                 </Card>
