@@ -1,18 +1,14 @@
 import { useAuth } from "../hooks/use-auth";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Link } from "wouter";
 import { 
-  Check, 
-  Award, 
-  Users, 
   BookOpen, 
-  MessageSquare, 
-  ArrowRight, 
-  Trophy, 
-  ChevronRight,
-  Star,
-  BrainCircuit
+  Users, 
+  Award, 
+  CheckCircle,
+  MessageSquare,
+  PartyPopper
 } from "lucide-react";
 import {
   Dialog,
@@ -23,81 +19,83 @@ import {
   DialogTrigger,
 } from "../components/ui/dialog";
 import { FeedbackForm } from "../components/ui/feedback-form";
-import { cn } from "../lib/utils";
+import { HeaderNav } from "@/components/header-nav";
 
 export default function WelcomePage() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
-      <div className="container max-w-5xl mx-auto">
-        {/* Centered Page Title */}
-        <div className="text-center mb-4 mt-2">
-          <h1 className="text-dynamic-lg font-bold text-foreground">Welcome Dashboard</h1>
-        </div>
-
+    <div className="min-h-screen bg-background">
+      <HeaderNav />
+      <main className="container max-w-4xl mx-auto pt-6 pb-20 px-4">
         {/* Welcome Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="h-16 w-16 rounded-full bg-primary text-white flex items-center justify-center shadow-md">
-              <BrainCircuit className="h-8 w-8" />
-            </div>
-          </div>
-          <h2 className="text-xl font-medium mb-2 text-[#3a474e]">
-            Welcome, <span className="text-primary font-semibold">{user?.username || 'Guest'}</span>
-          </h2>
-          <p className="text-muted-foreground max-w-md mx-auto text-sm">
-            Enhance your knowledge and collaborate with your team to excel together.
+          <h1 className="text-2xl font-bold mb-2">Welcome, {user?.username || 'Guest'} <PartyPopper className="h-5 w-5 inline-block ml-1" /></h1>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Ready to enhance your professional knowledge and compete with your team?
           </p>
         </div>
 
-        {/* Features Grid */}
-        <h2 className="text-lg font-semibold mb-4 text-[#3a474e] text-center">
-          Platform Features
-        </h2>
-        <div className="grid gap-4 mb-8">
-          <Card className="border overflow-hidden hover:shadow-md transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <BookOpen className="h-5 w-5" />
+        {/* Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Card className="overflow-hidden hover:shadow-md transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <BookOpen className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium mb-1 text-[#3a474e]">Weekly Knowledge Quiz</h3>
+                  <h3 className="font-semibold mb-1">Test Your Knowledge</h3>
                   <p className="text-sm text-muted-foreground">
-                    Challenge yourself with curated quizzes and expand your professional knowledge.
+                    Challenge yourself with our curated quizzes and learn something new every day.
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border overflow-hidden hover:shadow-md transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <Users className="h-5 w-5" />
+          <Card className="overflow-hidden hover:shadow-md transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium mb-1 text-[#3a474e]">Team Collaboration</h3>
+                  <h3 className="font-semibold mb-1">Team Competition</h3>
                   <p className="text-sm text-muted-foreground">
-                    Join forces with your team and climb the leaderboard together.
+                    Join forces with your team members and climb the leaderboard together.
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border overflow-hidden hover:shadow-md transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <Award className="h-5 w-5" />
+          <Card className="overflow-hidden hover:shadow-md transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <Award className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium mb-1 text-[#3a474e]">Earn Achievements</h3>
+                  <h3 className="font-semibold mb-1">Win Achievements</h3>
                   <p className="text-sm text-muted-foreground">
-                    Unlock badges and showcase your expertise on your profile.
+                    Earn badges and showcase your expertise!
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden hover:shadow-md transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <CheckCircle className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Track Progress</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Monitor your learning journey and see your improvement over time.
                   </p>
                 </div>
               </div>
@@ -105,101 +103,48 @@ export default function WelcomePage() {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <h2 className="text-lg font-semibold mb-4 text-[#3a474e] text-center">
-          Quick Access
-        </h2>
-        <div className="grid grid-cols-1 gap-3 mb-8">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3 justify-center mb-10">
           <Link href="/quiz">
-            <div className="group">
-              <Button variant="outline" className="w-full justify-between bg-white border rounded-lg hover:bg-primary/5 transition-all h-12 shadow-sm hover:shadow">
-                <div className="flex items-center">
-                  <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-3">
-                    <BookOpen className="h-4 w-4" />
-                  </div>
-                  <span className="font-medium text-[#3a474e]">Take Weekly Quiz</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted group-hover:text-primary transition-colors" />
-              </Button>
-            </div>
+            <Button className="px-6 py-2 bg-primary text-white hover:bg-primary/90">
+              Start Quiz
+            </Button>
           </Link>
           
           <Link href="/leaderboard">
-            <div className="group">
-              <Button variant="outline" className="w-full justify-between bg-white border rounded-lg hover:bg-primary/5 transition-all h-12 shadow-sm hover:shadow">
-                <div className="flex items-center">
-                  <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-3">
-                    <Trophy className="h-4 w-4" />
-                  </div>
-                  <span className="font-medium text-[#3a474e]">View Leaderboard</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted group-hover:text-primary transition-colors" />
-              </Button>
-            </div>
+            <Button variant="outline" className="px-6 py-2">
+              View Leaderboard
+            </Button>
           </Link>
           
-          <Link href="/profile">
-            <div className="group">
-              <Button variant="outline" className="w-full justify-between bg-white border rounded-lg hover:bg-primary/5 transition-all h-12 shadow-sm hover:shadow">
-                <div className="flex items-center">
-                  <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-3">
-                    <Award className="h-4 w-4" />
-                  </div>
-                  <span className="font-medium text-[#3a474e]">Your Achievements</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted group-hover:text-primary transition-colors" />
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="px-6 py-2">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Provide Feedback
               </Button>
-            </div>
-          </Link>
-        </div>
-
-        {/* Feedback Section */}
-        <div className="mb-6">
-          <div className="bg-muted p-6 rounded-lg border">
-            <div className="flex flex-col items-center gap-4">
-              <div className="shrink-0">
-                <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <MessageSquare className="h-5 w-5" />
-                </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Share Your Feedback</DialogTitle>
+                <DialogDescription>
+                  Your insights help us improve the platform for everyone.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4 px-1">
+                {user && <FeedbackForm userId={user.id} />}
               </div>
-              <div className="flex-1 text-center">
-                <h3 className="text-lg font-medium mb-2 text-[#3a474e]">We Value Your Insights</h3>
-                <p className="text-sm text-muted-foreground mb-4 max-w-md">
-                  Your feedback helps us refine our platform to better serve your team's knowledge needs.
-                </p>
-                
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button className="bg-[#18365a] text-white hover:bg-[#18365a]/90 transition-colors shadow-sm font-medium">
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Provide Feedback
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Share Your Feedback</DialogTitle>
-                      <DialogDescription>
-                        Your insights help us improve the platform for all team members.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="mt-4 px-1">
-                      {user && <FeedbackForm userId={user.id} />}
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Maintainer Note */}
-        <div className="border-t mt-8 pt-6 pb-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            Round Table is maintained by <span className="font-medium text-[#3a474e]">Belinda Mackie</span>.
-            Contact for collaboration opportunities and suggestions.
+        <div className="text-center text-sm text-muted-foreground mt-16">
+          <p>
+            Project Round Table is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please drop a note through the feedback form or reach out directly—I'd love to chat!
           </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
