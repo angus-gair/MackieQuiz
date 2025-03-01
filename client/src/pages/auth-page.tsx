@@ -40,7 +40,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
       {/* Hero Section */}
       <div className="w-full bg-[#1e293b] text-white py-6 px-4">
-        <div className="max-w-sm mx-auto text-center">
+        <div className="max-w-5xl mx-auto text-center">
           <h1 className="mb-3">
             <span className="text-2xl sm:text-3xl font-bold block">The Round Table:</span>
             <span className="text-lg sm:text-xl font-light italic mt-1 block">Kingsford Edition</span>
