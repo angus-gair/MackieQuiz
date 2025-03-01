@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { TeamLogo } from "@/components/ui/team-logo";
 
 // Types
 type TeamStats = {
@@ -210,8 +211,11 @@ export default function LeaderboardPage() {
                   {sortedTeams[1] && (
                     <Card className="text-center border-gray-200 hover:shadow-md transition-shadow h-full">
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
-                        <div className="h-10 w-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-2">
-                          <Medal className="h-6 w-6" />
+                        <div className="flex items-center gap-1 mb-2">
+                          <TeamLogo teamName={sortedTeams[1]?.teamName} size="md" />
+                          <div className="h-7 w-7 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
+                            <Medal className="h-4 w-4" />
+                          </div>
                         </div>
                         <p className="font-semibold text-sm truncate w-full">
                           {sortedTeams[1]?.teamName}
@@ -253,8 +257,11 @@ export default function LeaderboardPage() {
                         1st Place
                       </div>
                       <CardContent className="pt-6 pb-4 px-2 flex flex-col items-center">
-                        <div className="h-12 w-12 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center mb-2">
-                          <Trophy className="h-7 w-7" />
+                        <div className="flex items-center gap-2 mb-2">
+                          <TeamLogo teamName={sortedTeams[0]?.teamName} size="lg" />
+                          <div className="h-8 w-8 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center">
+                            <Trophy className="h-5 w-5" />
+                          </div>
                         </div>
                         <p className="font-bold text-primary truncate w-full mt-1">
                           {sortedTeams[0]?.teamName}
@@ -290,8 +297,11 @@ export default function LeaderboardPage() {
                   {sortedTeams[2] && (
                     <Card className="text-center border-amber-200 hover:shadow-md transition-shadow h-full">
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
-                        <div className="h-10 w-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
-                          <Award className="h-6 w-6" />
+                        <div className="flex items-center gap-1 mb-2">
+                          <TeamLogo teamName={sortedTeams[2]?.teamName} size="md" />
+                          <div className="h-7 w-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                            <Award className="h-4 w-4" />
+                          </div>
                         </div>
                         <p className="font-semibold text-sm truncate w-full">
                           {sortedTeams[2]?.teamName}
@@ -465,16 +475,19 @@ export default function LeaderboardPage() {
                         </span>
                       </div>
                       
-                      {/* Team Ranking Badge (replacing avatar) */}
-                      {Badge ? (
-                        <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", bgColor)}>
-                          <Badge className={cn("h-5 w-5", color)} />
-                        </div>
-                      ) : (
-                        <div className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-500">{index + 1}</span>
-                        </div>
-                      )}
+                      {/* Team Logo with Ranking Badge */}
+                      <div className="flex items-center gap-2">
+                        <TeamLogo teamName={team.teamName} />
+                        {Badge ? (
+                          <div className={cn("h-6 w-6 rounded-full flex items-center justify-center", bgColor)}>
+                            <Badge className={cn("h-4 w-4", color)} />
+                          </div>
+                        ) : (
+                          <div className="h-6 w-6 rounded-full bg-gray-50 flex items-center justify-center">
+                            <span className="text-xs font-medium text-gray-500">{index + 1}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Stats Grid */}
