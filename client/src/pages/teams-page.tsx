@@ -28,7 +28,8 @@ export default function TeamsPage() {
           <h1 className="text-dynamic-lg font-bold text-foreground">Teams</h1>
         </div>
 
-        <div className="space-y-4">
+        {/* Team Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {teamGroups && Object.entries(teamGroups).map(([team, members]) => (
             <Card key={team} className="shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -36,16 +37,17 @@ export default function TeamsPage() {
                   <Building className="h-5 w-5 mr-2 text-primary" />
                   {team}
                 </CardTitle>
-                <div className="bg-primary/10 rounded-full p-1.5">
+                <div className="bg-primary/10 rounded-full p-1.5 flex items-center gap-1">
                   <Users className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-medium text-primary">{members.length}</span>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {members.map((user) => (
                     <div
                       key={user.id}
-                      className="flex items-center justify-between p-2 bg-muted/50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
                     >
                       <div>
                         <p className="font-medium text-[#3a474e]">{user.username}</p>

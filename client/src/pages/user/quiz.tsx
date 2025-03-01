@@ -145,95 +145,109 @@ export default function QuizPage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="pt-16 pb-24 px-4">
-        <div className="container max-w-5xl mx-auto space-y-4">
-          {/* Progress indicator */}
-          <Card className="shadow-sm">
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-[#3a474e]">Question Progress</p>
-                <span className="text-sm text-muted-foreground">
-                  {currentQuestionIndex + 1}/{questions.length}
-                </span>
-              </div>
-              <div className="w-full bg-muted/50 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-[#18365a]" 
-                  style={{width: `${((currentQuestionIndex + 1) / questions.length) * 100}%`}}
-                ></div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="w-full">
-            {currentQuestion && (
-              <Card key={quizKey} className="quiz-card shadow-sm">
+        <div className="container max-w-5xl mx-auto space-y-6">
+          {/* Page structure with two columns on desktop */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Progress indicator - smaller on desktop */}
+            <div className="lg:col-span-1">
+              <Card className="shadow-sm h-full">
                 <CardHeader className="py-3">
-                  <CardTitle className="text-base font-medium leading-relaxed text-[#3a474e]">
-                    {currentQuestion.question}
-                  </CardTitle>
+                  <CardTitle className="text-base font-medium text-[#3a474e]">Quiz Progress</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <RadioGroup
-                    value={selectedAnswers[currentQuestion.id]}
-                    onValueChange={(value) =>
-                      setSelectedAnswers(prev => ({
-                        ...prev,
-                        [currentQuestion.id]: value,
-                      }))
-                    }
-                    className="space-y-2"
-                  >
-                    {currentQuestion.options.map((option: string) => (
-                      <div key={option} className="flex items-center space-x-2 rounded-md p-2 bg-muted/30">
-                        <RadioGroupItem
-                          value={option}
-                          id={`${currentQuestion.id}-${option}`}
-                        />
-                        <Label
-                          htmlFor={`${currentQuestion.id}-${option}`}
-                          className="text-sm cursor-pointer text-[#3a474e]"
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-
-                  <div className="flex justify-between mt-4">
-                    <Button
-                      variant="outline"
-                      onClick={handlePrevious}
-                      disabled={currentQuestionIndex === 0}
-                      size="sm"
-                      className="h-8"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-1" />
-                      <span className="text-sm">Previous</span>
-                    </Button>
-                    {isLastQuestion ? (
-                      <Button
-                        onClick={handleSubmit}
-                        disabled={!canGoNext}
-                        size="sm"
-                        className="h-8 bg-[#18365a] hover:bg-[#18365a]/90"
-                      >
-                        Submit Quiz
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleNext}
-                        disabled={!canGoNext}
-                        size="sm"
-                        className="h-8 bg-[#18365a] hover:bg-[#18365a]/90"
-                      >
-                        <span className="text-sm">Next</span>
-                        <ArrowRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    )}
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-primary">Question</span>
+                    <span className="text-sm text-primary font-medium">
+                      {currentQuestionIndex + 1} of {questions.length}
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted/50 h-3 rounded-full overflow-hidden mb-4">
+                    <div 
+                      className="h-full bg-[#18365a]" 
+                      style={{width: `${((currentQuestionIndex + 1) / questions.length) * 100}%`}}
+                    ></div>
+                  </div>
+                  
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    <p className="mb-2">Complete all questions to finish the quiz and view your results.</p>
+                    <p>Your progress is automatically saved.</p>
                   </div>
                 </CardContent>
               </Card>
-            )}
+            </div>
+
+            {/* Question Card - wider on desktop */}
+            <div className="lg:col-span-2">
+              {currentQuestion && (
+                <Card key={quizKey} className="quiz-card shadow-sm">
+                  <CardHeader className="py-4 border-b">
+                    <CardTitle className="text-lg font-medium leading-relaxed text-[#3a474e]">
+                      {currentQuestion.question}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="py-6">
+                    <RadioGroup
+                      value={selectedAnswers[currentQuestion.id]}
+                      onValueChange={(value) =>
+                        setSelectedAnswers(prev => ({
+                          ...prev,
+                          [currentQuestion.id]: value,
+                        }))
+                      }
+                      className="space-y-3"
+                    >
+                      {currentQuestion.options.map((option: string) => (
+                        <div key={option} className="flex items-center space-x-3 rounded-md p-3 bg-muted/30 hover:bg-muted/50 transition-colors">
+                          <RadioGroupItem
+                            value={option}
+                            id={`${currentQuestion.id}-${option}`}
+                          />
+                          <Label
+                            htmlFor={`${currentQuestion.id}-${option}`}
+                            className="text-sm cursor-pointer text-[#3a474e] font-medium"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+
+                    <div className="flex justify-between mt-6">
+                      <Button
+                        variant="outline"
+                        onClick={handlePrevious}
+                        disabled={currentQuestionIndex === 0}
+                        size="sm"
+                        className="h-9"
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-1" />
+                        <span className="text-sm">Previous</span>
+                      </Button>
+                      {isLastQuestion ? (
+                        <Button
+                          onClick={handleSubmit}
+                          disabled={!canGoNext}
+                          size="sm"
+                          className="h-9 bg-[#18365a] hover:bg-[#18365a]/90"
+                        >
+                          Submit Quiz
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={handleNext}
+                          disabled={!canGoNext}
+                          size="sm"
+                          className="h-9 bg-[#18365a] hover:bg-[#18365a]/90"
+                        >
+                          <span className="text-sm">Next</span>
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         </div>
       </main>
