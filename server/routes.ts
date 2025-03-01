@@ -417,11 +417,39 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/achievements/latest", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
-    // Get the latest achievement for the user
+    // Get achievements for the user that were earned in the last minute
+    // This ensures we only show achievements earned in the current session
     const achievements = await storage.getUserAchievements(req.user.id);
-    // Return the most recent achievement if it exists
-    const latestAchievement = achievements[0];
-    res.json(latestAchievement || null);
+    
+    // Filter for only recent achievements (earned in the last minute)
+    const now = new Date();
+    const oneMinuteAgo = new Date(now.getTime() - 60 * 1000); // 1 minute ago
+    
+    const recentAchievements = achievements.filter(achievement => 
+      new Date(achievement.earnedAt) > oneMinuteAgo
+    );
+    
+    // Return the most recent achievement if it exists and was earned recently
+    const latestAchievement = recentAchievements.length > 0 ? recentAchievements[0] : null;
+    res.json(latestAchievement);
+  });
+
+  // New endpoint to reset quiz data for new users
+  app.post("/api/user/reset-progress", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      // Reset the user's weekly score and quizzes
+      await storage.updateUser(req.user.id, {
+        weeklyScore: 0,
+        weeklyQuizzes: 0
+      });
+      
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("Error resetting user progress:", error);
+      res.status(500).json({ error: "Failed to reset user progress" });
+    }
   });
 
   app.get("/api/analytics/navigation", async (req, res) => {

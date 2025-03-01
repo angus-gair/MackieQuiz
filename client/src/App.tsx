@@ -27,6 +27,7 @@ const TeamsPage = lazy(() => import("@/pages/teams-page"));
 const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
 const QuizPage = lazy(() => import("@/pages/user/quiz"));
 const QuizCompletionPage = lazy(() => import("@/pages/user/quiz-completion"));
+const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
@@ -57,13 +58,14 @@ function Router() {
     <div className="flex flex-col min-h-screen bg-background">
       {showNav && <TopNav />}
       
-      <div className={`flex-1 ${contentClasses}`}>
+      <div className={`flex-1 ${contentClasses} max-w-5xl mx-auto`}>
         <Suspense fallback={<LoadingSpinner />}>
           <Switch>
             <Route path="/auth" component={AuthPage as AnyComponent} />
             <Route path="/" component={WelcomePage as AnyComponent} />
             
             {/* Protected Routes */}
+            <ProtectedRoute path="/team-allocation" component={TeamAllocationPage as AnyComponent} />
             <ProtectedRoute path="/leaderboard" component={LeaderboardPage as AnyComponent} />
             <ProtectedRoute path="/teams" component={TeamsPage as AnyComponent} />
             <ProtectedRoute path="/profile" component={ProfilePage as AnyComponent} />

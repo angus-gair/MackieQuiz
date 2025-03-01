@@ -19,30 +19,37 @@ export default function QuizCompletionPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center">
-      <Card className="w-full max-w-md p-6">
-        <div className="text-center space-y-4">
-          <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-            <Trophy className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold">Quiz Completed!</h1>
-          <p className="text-muted-foreground">
-            Great job! You've completed today's quiz.
-          </p>
-          <div className="pt-4">
-            <Button
-              onClick={() => setLocation("/")}
-              className="w-full"
-            >
-              <Home className="mr-2 h-4 w-4" />
-              Return Home
-            </Button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
+      <div className="container max-w-5xl mx-auto">
+        {/* Centered Page Title */}
+        <div className="text-center mb-4 mt-2">
+          <h1 className="text-dynamic-lg font-bold text-foreground">Quiz Completed</h1>
         </div>
-      </Card>
+        
+        <Card className="shadow-sm p-6 w-full" style={{ minHeight: '400px' }}>
+          <div className="text-center space-y-4">
+            <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+              <Trophy className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold text-[#3a474e]">Well Done!</h2>
+            <p className="text-muted-foreground">
+              Great job! You've completed today's quiz.
+            </p>
+            <div className="pt-4">
+              <Button
+                onClick={() => setLocation("/")}
+                className="w-full bg-[#18365a] hover:bg-[#18365a]/90"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Return Home
+              </Button>
+            </div>
+          </div>
+        </Card>
 
-      {/* Achievement notification will show automatically if there's a new achievement */}
-      <AchievementNotification achievement={latestAchievement} />
+        {/* Only show achievement notification when a new achievement exists */}
+        {latestAchievement && <AchievementNotification achievement={latestAchievement} />}
+      </div>
     </div>
   );
 }

@@ -6,11 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Redirect, Link } from "wouter";
+import { Redirect } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
 
 export default function SettingsPage() {
   const { user, logoutMutation } = useAuth();
@@ -49,21 +48,16 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background to-muted/20 px-4 py-4">
-      <div className="max-w-md mx-auto pt-16">
-        <div className="flex items-center mb-6">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="h-8 mr-3">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
-          <h1 className="text-lg font-bold">Settings</h1>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
+      <div className="container max-w-5xl mx-auto">
+        {/* Centered Page Title */}
+        <div className="text-center mb-4 mt-2">
+          <h1 className="text-dynamic-lg font-bold text-foreground">Settings</h1>
         </div>
 
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader className="py-4">
-            <CardTitle className="text-base">Update Profile</CardTitle>
+            <CardTitle className="text-base text-[#3a474e]">Update Profile</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -96,7 +90,7 @@ export default function SettingsPage() {
                 />
                 <Button 
                   type="submit" 
-                  className="w-full h-9 text-sm font-medium"
+                  className="w-full h-9 text-sm font-medium bg-[#18365a] hover:bg-[#18365a]/90"
                   disabled={updateProfileMutation.isPending}
                 >
                   Update Profile

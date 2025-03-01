@@ -1,12 +1,69 @@
 {
   "variant": "professional",
-  "primary": "#1a365d",
+  "primary": "#18365a",
   "appearance": "light",
-  "radius": 0.75,
+  "radius": 0.5,
   "colors": {
-    "background": "#f8f9fa",
-    "foreground": "#1c1c1e",
+    "background": "#ffffff",
+    "foreground": "#3a474e",
     "muted": "#64748b",
-    "border": "#e2e8f0"
+    "border": "#e2e8f0",
+    "primary": {
+      "DEFAULT": "#18365a",
+      "foreground": "#ffffff",
+      "50": "#f0f4f9",
+      "100": "#dce6f1",
+      "200": "#b8ccdd",
+      "300": "#86a7c8",
+      "400": "#5582ae",
+      "500": "#356597",
+      "600": "#18365a",
+      "700": "#142d4c",
+      "800": "#12263f",
+      "900": "#112136",
+      "950": "#0a1421"
+    },
+    "secondary": {
+      "DEFAULT": "#3a474e",
+      "foreground": "#ffffff",
+      "50": "#f5f7f8",
+      "100": "#e3e7ea",
+      "200": "#c7d0d5",
+      "300": "#a1afb8",
+      "400": "#778996",
+      "500": "#5d6e7c",
+      "600": "#4a5866",
+      "700": "#3a474e",
+      "800": "#343f45",
+      "900": "#2d363b",
+      "950": "#1a2024"
+    },
+    "accent": {
+      "DEFAULT": "#4c7c9b",
+      "foreground": "#ffffff",
+      "50": "#f2f7fa",
+      "100": "#e3eef5",
+      "200": "#c5deeb",
+      "300": "#97c5da",
+      "400": "#64a5c6",
+      "500": "#4c7c9b",
+      "600": "#3a667f",
+      "700": "#335469",
+      "800": "#2d4756",
+      "900": "#293d4a",
+      "950": "#172633"
+    },
+    "destructive": {
+      "DEFAULT": "#ef4444",
+      "foreground": "#ffffff"
+    },
+    "success": {
+      "DEFAULT": "#10b981",
+      "foreground": "#ffffff"
+    },
+    "warning": {
+      "DEFAULT": "#f59e0b",
+      "foreground": "#ffffff"
+    }
   }
 }

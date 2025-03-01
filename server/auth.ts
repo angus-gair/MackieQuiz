@@ -129,7 +129,11 @@ export function setupAuth(app: Express) {
           log(`Login after registration failed: ${err}`);
           return next(err);
         }
-        res.status(201).json(user);
+        // Include a redirect flag in the response to indicate the client should redirect to team allocation
+        res.status(201).json({
+          ...user,
+          shouldRedirectToTeamAllocation: true
+        });
       });
     } catch (err) {
       log(`Registration error: ${err}`);
@@ -187,5 +191,34 @@ export function setupAuth(app: Express) {
     }
     log(`User check: Authenticated as ${req.user.id}`);
     res.json(req.user);
+  });
+  
+  // Endpoint to sign out all users by clearing all sessions
+  app.post("/api/admin/logout-all-users", (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      log('Logout all users: Unauthorized access attempt');
+      return res.sendStatus(401);
+    }
+    
+    try {
+      // Check if sessionStore exists
+      if (!storage.sessionStore) {
+        log('Session store not available');
+        return res.status(500).json({ error: 'Session store not available' });
+      }
+      
+      // Clear all sessions in the session store
+      storage.sessionStore.clear((err) => {
+        if (err) {
+          log('Error clearing session store: ' + err);
+          return res.status(500).json({ error: 'Failed to logout all users' });
+        }
+        log('All user sessions have been cleared successfully');
+        res.json({ success: true, message: 'All users have been logged out' });
+      });
+    } catch (error) {
+      log('Error in logout-all-users endpoint: ' + error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 }

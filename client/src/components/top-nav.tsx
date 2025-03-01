@@ -5,7 +5,6 @@ import {
   Users, 
   BookOpen, 
   User, 
-  Settings, 
   LogOut, 
   ChevronLeft,
   Menu,
@@ -98,22 +97,21 @@ export function TopNav() {
             ) : (
               <Link href="/">
                 <div className="flex items-center">
-                  <div className="icon-circle-primary mr-2">
-                    <BookOpen className="h-4 w-4" />
+                  <div className="mr-2">
+                    <img 
+                      src="/images/roundtable.png" 
+                      alt="Round Table Logo" 
+                      className="h-7 w-auto"
+                    />
                   </div>
                   <h1 className="text-lg font-semibold text-primary hidden sm:block">
-                    Weekly Quiz
+                    Round Table
                   </h1>
                 </div>
               </Link>
             )}
             
-            {/* Page Title (only shown on non-home pages) */}
-            {getPageTitle() && (
-              <div className="ml-6 text-lg font-medium text-primary hidden sm:block">
-                {getPageTitle()}
-              </div>
-            )}
+            {/* Page Title removed from here - will be centered in page content */}
           </div>
           
           {/* Navigation Links - Desktop Only */}
@@ -124,7 +122,7 @@ export function TopNav() {
                 size="sm" 
                 className={cn(
                   "gap-2 px-3 py-5 h-16", 
-                  isActive("/") && "bg-primary/5 text-primary border-b-2 border-primary"
+                  isActive("/") && "bg-primary/5 text-primary"
                 )}
               >
                 <Home className="h-4 w-4" />
@@ -138,7 +136,7 @@ export function TopNav() {
                 size="sm" 
                 className={cn(
                   "gap-2 px-3 py-5 h-16", 
-                  isActive("/leaderboard") && "bg-primary/5 text-primary border-b-2 border-primary"
+                  isActive("/leaderboard") && "bg-primary/5 text-primary"
                 )}
               >
                 <Award className="h-4 w-4" />
@@ -152,7 +150,7 @@ export function TopNav() {
                 size="sm" 
                 className={cn(
                   "gap-2 px-3 py-5 h-16", 
-                  isActive("/teams") && "bg-primary/5 text-primary border-b-2 border-primary"
+                  isActive("/teams") && "bg-primary/5 text-primary"
                 )}
               >
                 <Users className="h-4 w-4" />
@@ -180,7 +178,7 @@ export function TopNav() {
                 size="sm" 
                 className={cn(
                   "gap-2 px-3 py-5 h-16", 
-                  isActive("/profile") && "bg-primary/5 text-primary border-b-2 border-primary"
+                  isActive("/profile") && "bg-primary/5 text-primary"
                 )}
               >
                 <User className="h-4 w-4" />
@@ -279,7 +277,6 @@ export function TopNav() {
                         "cursor-pointer flex items-center gap-2",
                         isAdminPage && "bg-primary/5 text-primary font-medium"
                       )}>
-                        <Settings className="h-4 w-4" />
                         <span>Admin Dashboard</span>
                       </DropdownMenuItem>
                     </Link>
@@ -292,7 +289,6 @@ export function TopNav() {
                         "cursor-pointer flex items-center gap-2",
                         location === '/settings' && "bg-primary/5 text-primary font-medium"
                       )}>
-                        <Settings className="h-4 w-4" />
                         <span>Settings</span>
                       </DropdownMenuItem>
                     </Link>
@@ -322,37 +318,6 @@ export function TopNav() {
                 <LogOut className="h-4 w-4" />
                 <span className="text-sm">Logout</span>
               </Button>
-            
-              {/* Admin or Settings button */}
-              {user?.isAdmin ? (
-                <Link href="/admin">
-                  <Button 
-                    variant={isAdminPage ? "default" : "ghost"}
-                    size="sm" 
-                    className={cn(
-                      "h-9 w-9 p-0 rounded-full",
-                      isAdminPage && "bg-primary text-white hover:bg-primary/90" 
-                    )}
-                  >
-                    <Settings className="h-4 w-4" />
-                    <span className="sr-only">Admin Settings</span>
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/settings">
-                  <Button 
-                    variant={location === '/settings' ? "default" : "ghost"} 
-                    size="sm" 
-                    className={cn(
-                      "h-9 w-9 p-0 rounded-full",
-                      location === '/settings' && "bg-primary text-white hover:bg-primary/90"
-                    )}
-                  >
-                    <Settings className="h-4 w-4" />
-                    <span className="sr-only">Settings</span>
-                  </Button>
-                </Link>
-              )}
             </div>
           </div>
         </div>

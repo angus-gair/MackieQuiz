@@ -55,6 +55,9 @@ export default function TeamAllocationPage() {
           const updatedUser = await userResponse.json();
           queryClient.setQueryData(["/api/user"], updatedUser);
 
+          // Reset the user's progress since they're a new user
+          await apiRequest("POST", "/api/user/reset-progress");
+          
           // After successful team assignment, automatically redirect to home
           setTimeout(() => {
             setLocation("/");
@@ -85,8 +88,12 @@ export default function TeamAllocationPage() {
   };
 
   useEffect(() => {
+    // Check if user is authenticated first
+    if (!user) return;
+    
     const hasSpun = sessionStorage.getItem('hasSpun');
     if (!user?.teamAssigned && !spinning && !selectedTeam && !showConfetti && !hasSpun) {
+      console.log("Team not assigned yet, starting team allocation spin");
       sessionStorage.setItem('hasSpun', 'true');
       startSpinning();
     }
@@ -134,55 +141,57 @@ export default function TeamAllocationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center mobile-p-2">
-      <Card className="w-full max-w-[280px] sm:max-w-sm">
-        <CardHeader className="mobile-space-y-1 pb-3">
-          <CardTitle className="text-lg sm:text-xl">Team Assignment</CardTitle>
-        </CardHeader>
-        <CardContent className="mobile-space-y-2">
-          <div className="text-center">
-            {spinning ? (
-              <motion.div
-                animate={{
-                  scale: [1, 1.05, 1],
-                  rotateX: [0, -180, -360],
-                  y: [-5, 5, -5]
-                }}
-                transition={{
-                  duration: 1.0,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="inline-block"
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                  <span className="text-base sm:text-lg font-bold text-primary">
-                    {selectedTeam || "Selecting team..."}
-                  </span>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center px-4">
+      <div className="container max-w-5xl mx-auto flex justify-center">
+        <Card className="w-full max-w-[280px] sm:max-w-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg sm:text-xl">Team Assignment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              {spinning ? (
+                <motion.div
+                  animate={{
+                    scale: [1, 1.05, 1],
+                    rotateX: [0, -180, -360],
+                    y: [-5, 5, -5]
+                  }}
+                  transition={{
+                    duration: 1.0,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="inline-block"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                    <span className="text-base sm:text-lg font-bold text-primary">
+                      {selectedTeam || "Selecting team..."}
+                    </span>
+                  </div>
+                </motion.div>
+              ) : selectedTeam ? (
+                <div className="space-y-2">
+                  <p className="text-sm sm:text-base">
+                    Congratulations! You've been assigned to:
+                  </p>
+                  <p className="text-lg sm:text-xl font-bold text-primary">
+                    {selectedTeam}
+                  </p>
                 </div>
-              </motion.div>
-            ) : selectedTeam ? (
-              <div className="mobile-space-y-2">
-                <p className="text-sm sm:text-base">
-                  Congratulations! You've been assigned to:
-                </p>
-                <p className="text-lg sm:text-xl font-bold text-primary">
-                  {selectedTeam}
-                </p>
-              </div>
-            ) : (
-              <Button 
-                className="w-full"
-                size="sm"
-                onClick={startSpinning}
-              >
-                Assign Team
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              ) : (
+                <Button 
+                  className="w-full"
+                  size="sm"
+                  onClick={startSpinning}
+                >
+                  Assign Team
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

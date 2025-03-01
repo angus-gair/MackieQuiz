@@ -44,26 +44,27 @@ export function HeaderNav() {
     location !== '/leaderboard' && 
     location !== '/teams' && 
     location !== '/profile' && 
-    location !== '/settings';
+    location !== '/settings' &&
+    location !== '/quiz';
 
   // Check if it's an admin page
   const isAdminPage = location.startsWith('/admin');
   
   // Determine page title based on current route
   const getPageTitle = () => {
-    if (location === '/') return 'Weekly Quiz';
+    if (location === '/') return 'Round Table';
     if (location === '/leaderboard') return 'Leaderboard';
     if (location === '/teams') return 'Teams';
     if (location === '/profile') return 'Your Profile';
     if (location === '/settings') return 'Settings';
-    if (location === '/quiz') return 'Quiz';
+    if (location === '/quiz') return 'Take Quiz';
     if (location.startsWith('/admin')) return 'Admin Dashboard';
-    return 'Weekly Quiz';
+    return 'Round Table';
   };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b shadow-sm bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container max-w-md mx-auto px-4">
+      <div className="container max-w-5xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Left side - Back button or Logo */}
           <div className="flex items-center">
@@ -80,8 +81,12 @@ export function HeaderNav() {
             ) : (
               <Link href="/">
                 <div className="flex items-center">
-                  <div className="icon-circle-primary mr-2">
-                    <BookOpen className="h-4 w-4" />
+                  <div className="mr-2 h-8 w-8 rounded-full overflow-hidden">
+                    <img 
+                      src="/images/roundtable.png" 
+                      alt="Round Table Logo" 
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                   <h1 className="text-lg font-semibold text-primary">
                     {getPageTitle()}
@@ -144,6 +149,17 @@ export function HeaderNav() {
                   )}>
                     <Trophy className="h-4 w-4" />
                     <span>Leaderboard</span>
+                  </DropdownMenuItem>
+                </Link>
+                
+                {/* Quiz link */}
+                <Link href="/quiz">
+                  <DropdownMenuItem className={cn(
+                    "cursor-pointer flex items-center gap-2",
+                    location === '/quiz' && "bg-primary/5 text-primary font-medium"
+                  )}>
+                    <BookOpen className="h-4 w-4" />
+                    <span>Take Quiz</span>
                   </DropdownMenuItem>
                 </Link>
                 

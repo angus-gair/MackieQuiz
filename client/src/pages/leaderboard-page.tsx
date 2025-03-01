@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, Trophy, Medal, Award, Users, User } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Trophy, Medal, Award, Users, User } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -41,17 +41,9 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
-      <div className="container max-w-md mx-auto">
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 mr-3"
-            onClick={() => setLocation("/")}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="text-dynamic-sm">Back</span>
-          </Button>
+      <div className="container max-w-5xl mx-auto">
+        {/* Centered Page Title */}
+        <div className="text-center mb-4 mt-2">
           <h1 className="text-dynamic-lg font-bold text-foreground">Weekly Leaderboard</h1>
         </div>
 
@@ -93,7 +85,7 @@ export default function LeaderboardPage() {
           }
         </p>
 
-        <div className="space-y-3">
+        <div className="space-y-3 max-w-3xl mx-auto">
           {showTeams ? (
             // Teams View
             teamStats.map((team, index) => {
@@ -102,19 +94,19 @@ export default function LeaderboardPage() {
 
               return (
                 <Card key={`team-${index}`} className={cn(
-                  "overflow-hidden transition-all duration-200 hover:shadow-md",
+                  "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
                   index === 0 && "border-yellow-500/50"
                 )}>
                   <CardHeader className="py-3">
                     <CardTitle className="flex items-center justify-between text-dynamic-base">
                       <div className="flex items-center gap-2 min-w-0">
-                        {Badge && <Badge className={cn("h-5 w-5", color)} />}
+                        {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
                         <span className="text-[#3a474e] font-semibold truncate">
                           {index + 1}. {team.teamName}
                         </span>
                       </div>
                       <span className={cn(
-                        "text-dynamic-base font-bold ml-2",
+                        "text-dynamic-base font-bold ml-2 flex-shrink-0",
                         team.weeklyCompletionPercentage >= 80 ? "text-emerald-600" :
                           team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
                             "text-destructive"
@@ -134,18 +126,18 @@ export default function LeaderboardPage() {
 
               return (
                 <Card key={`user-${index}`} className={cn(
-                  "overflow-hidden transition-all duration-200 hover:shadow-md",
+                  "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
                   index === 0 && "border-yellow-500/50"
                 )}>
                   <CardHeader className="py-3">
                     <CardTitle className="flex items-center justify-between text-dynamic-base">
                       <div className="flex items-center gap-2 min-w-0">
-                        {Badge && <Badge className={cn("h-5 w-5", color)} />}
+                        {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
                         <span className="text-[#3a474e] font-semibold truncate">
                           {index + 1}. {user.username}
                         </span>
                       </div>
-                      <span className="text-dynamic-base font-bold text-emerald-600">{user.weeklyScore ?? 0} pts</span>
+                      <span className="text-dynamic-base font-bold text-emerald-600 flex-shrink-0">{user.weeklyScore ?? 0} pts</span>
                     </CardTitle>
                   </CardHeader>
                 </Card>

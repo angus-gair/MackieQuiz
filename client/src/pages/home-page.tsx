@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, ArrowRight, ArrowLeft } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, Trophy } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, Answer } from "@shared/schema";
@@ -14,6 +14,17 @@ import { cn } from "@/lib/utils";
 import confetti from 'canvas-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeaderNav } from "@/components/header-nav";
+import { FaGlassCheers } from "react-icons/fa";
+
+// Team stats type
+type TeamStats = {
+  teamName: string;
+  totalScore: number;
+  averageScore: number;
+  completedQuizzes: number;
+  members: number;
+  weeklyCompletionPercentage: number;
+};
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -24,6 +35,14 @@ export default function HomePage() {
   const [quizKey, setQuizKey] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const isMobile = useIsMobile();
+
+  // Redirect to team allocation if user hasn't been assigned a team
+  useEffect(() => {
+    if (user && !user.teamAssigned) {
+      console.log("Team not assigned yet, starting team allocation spin");
+      setLocation('/team-allocation');
+    }
+  }, [user, setLocation]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -119,15 +138,36 @@ export default function HomePage() {
   };
 
   const today = new Date();
+
+  // Safety check - if no answers yet or user is new, return empty set
+  if (!answers || answers.length === 0) {
+    console.log("No answers available or new user detected");
+  }
+
   const answeredQuestions = new Set(answers?.filter(a => {
+    // First check if answer has a valid date
+    if (!a.answeredAt) {
+      console.log("Answer missing timestamp, skipping:", a);
+      return false;
+    }
+
     const answerDate = new Date(a.answeredAt);
     return answerDate.toDateString() === today.toDateString();
   }).filter(a => {
+    // Safety check for answer
+    if (!a || !a.answeredAt) return false;
+
     const answerTime = new Date(a.answeredAt).getTime();
     const todaysAnswers = answers?.filter(a => {
+      if (!a.answeredAt) return false;
       const date = new Date(a.answeredAt);
       return date.toDateString() === today.toDateString();
     }) ?? [];
+
+    // Safety check - if no answers today, return empty
+    if (todaysAnswers.length === 0) {
+      return false;
+    }
 
     const quizzes = [];
     let currentQuiz = [];
@@ -180,10 +220,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <HeaderNav />
       <main className="pt-16 pb-24 px-4">
-        <div className="max-w-md mx-auto space-y-4">
+        <div className="max-w-5xl mx-auto space-y-4">
           <Card className="quiz-card">
-            <CardContent className="pt-4">
-              <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>
+            <CardContent className="pt-4 relative">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-primary truncate scale">Welcome, {user?.username}!</h2>
+                <FaGlassCheers className="h-7 w-7 text-amber-500 animate-bounce" />
+              </div>
               <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
             </CardContent>
           </Card>
@@ -323,6 +366,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
           )}
+          <p className="text-sm italic text-muted-foreground">Project Round Table is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please drop a note through the feedback form or reach out directly—I'd love to chat!</p>
         </div>
       </main>
     </div>

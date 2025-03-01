@@ -55,8 +55,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/register", credentials);
       return await res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: (response) => {
+      // Update the user data in the cache
+      queryClient.setQueryData(["/api/user"], response);
+      
+      // Check if the server indicates we should redirect to team allocation
+      if (response.shouldRedirectToTeamAllocation) {
+        // Use a short timeout to ensure the UI updates before redirecting
+        setTimeout(() => {
+          window.location.href = '/team-allocation';
+        }, 300);
+      }
     },
     onError: (error: Error) => {
       toast({

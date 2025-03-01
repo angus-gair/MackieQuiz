@@ -460,22 +460,21 @@ export default function LeaderboardPage() {
                     {/* Team Name and Badge */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        {Badge ? (
-                          <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", bgColor)}>
-                            <Badge className={cn("h-5 w-5", color)} />
-                          </div>
-                        ) : (
-                          <div className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-500">{index + 1}</span>
-                          </div>
-                        )}
                         <span className="text-base font-semibold text-primary">
                           {team.teamName}
                         </span>
                       </div>
                       
-                      {/* Team Avatar */}
-                      {getTeamAvatar(team.teamName, team.members)}
+                      {/* Team Ranking Badge (replacing avatar) */}
+                      {Badge ? (
+                        <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", bgColor)}>
+                          <Badge className={cn("h-5 w-5", color)} />
+                        </div>
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-500">{index + 1}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Stats Grid */}
