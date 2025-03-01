@@ -65,6 +65,7 @@ function Router() {
             <Route path="/" component={WelcomePage as AnyComponent} />
             
             {/* Protected Routes */}
+            <ProtectedRoute path="/team-allocation" component={TeamAllocationPage as AnyComponent} />
             <ProtectedRoute path="/leaderboard" component={LeaderboardPage as AnyComponent} />
             <ProtectedRoute path="/teams" component={TeamsPage as AnyComponent} />
             <ProtectedRoute path="/profile" component={ProfilePage as AnyComponent} />
