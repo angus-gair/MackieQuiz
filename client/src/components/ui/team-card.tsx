@@ -44,31 +44,31 @@ export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
       )}
     >
       <CardContent className="p-0 flex">
-        {/* Left side - Team Logo */}
-        <div className="w-1/3 bg-slate-50 flex items-center justify-center p-4">
+        {/* Left side - Team Logo (reduced by 30%) */}
+        <div className="w-1/4 bg-slate-50 flex items-center justify-center p-3">
           {logoSrc ? (
             <img 
               src={logoSrc} 
               alt={`${team.teamName} logo`} 
-              className="w-full h-auto object-contain"
+              className="w-[70%] h-auto object-contain"
             />
           ) : (
-            <div className="w-24 h-24">
+            <div className="w-16 h-16">
               <TeamLogo teamName={team.teamName} size="lg" />
             </div>
           )}
         </div>
         
-        {/* Right side - Team Info */}
-        <div className="w-2/3 p-4">
+        {/* Right side - Team Info (expanded width) */}
+        <div className="w-3/4 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-primary">
+            <h3 className="text-lg font-semibold text-primary">
               {team.teamName}
             </h3>
             
             {/* Ranking Trophy Icon */}
             {index < 3 && (
-              <div className="h-6 w-6 text-muted-foreground">
+              <div className="h-7 w-7 text-muted-foreground">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-full">
                   <path d="M8 21V15M16 8V21M12 21V12M4 3H20V7C20 7 17 10 12 10C7 10 4 7 4 7V3Z" 
                     stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -83,31 +83,31 @@ export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
             )}
           </div>
           
-          {/* Stats Grid */}
+          {/* Stats Grid - Larger text and better spacing */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gray-50 p-2 rounded">
-              <div className="text-xs text-gray-500">Total Score</div>
-              <div className="text-sm font-semibold text-primary">
+            <div className="bg-gray-50 p-2.5 rounded">
+              <div className="text-sm text-gray-500 font-medium">Total Score</div>
+              <div className="text-base font-semibold text-primary">
                 {team.totalScore}
               </div>
             </div>
-            <div className="bg-gray-50 p-2 rounded">
-              <div className="text-xs text-gray-500">Avg Score</div>
-              <div className="text-sm font-semibold text-primary">
+            <div className="bg-gray-50 p-2.5 rounded">
+              <div className="text-sm text-gray-500 font-medium">Avg Score</div>
+              <div className="text-base font-semibold text-primary">
                 {Math.round(team.averageScore)}
               </div>
             </div>
-            <div className="bg-gray-50 p-2 rounded">
-              <div className="text-xs text-gray-500">Members</div>
-              <div className="text-sm font-semibold text-primary">
+            <div className="bg-gray-50 p-2.5 rounded">
+              <div className="text-sm text-gray-500 font-medium">Members</div>
+              <div className="text-base font-semibold text-primary">
                 {team.members}
               </div>
             </div>
             
             {/* Completion Rate - Highlighted */}
-            <div className={cn("p-2 rounded", completionRateColor.split(" ")[0])}>
-              <div className="text-xs text-gray-600 font-medium">Completion</div>
-              <div className={cn("text-sm font-bold", completionRateColor.split(" ")[1])}>
+            <div className={cn("p-2.5 rounded", completionRateColor.split(" ")[0])}>
+              <div className="text-sm text-gray-600 font-medium">Completion</div>
+              <div className={cn("text-base font-bold", completionRateColor.split(" ")[1])}>
                 {Math.round(team.weeklyCompletionPercentage)}%
               </div>
             </div>
