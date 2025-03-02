@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { TeamLogo } from "@/components/ui/team-logo";
 
 // Define team types used by this component
 type TeamStats = {
@@ -11,14 +12,12 @@ type TeamStats = {
   weeklyCompletionPercentage: number;
 };
 
-// Map of team names to their SVG logo files
+// Map of team names to their PNG logo files
 const TEAM_LOGOS: Record<string, string> = {
-  "Pour Decisions": "/images/team-logos/pour_decisions.svg",
-  "Sip Happens": "/images/team-logos/sip_happends.svg",
-  "Grape Minds": "/images/team-logos/grape_minds.svg",
-  "Kingsford Corkers": "/images/team-logos/kingsford_corkers.svg",
-  // Fallback for other teams
-  "default": "/images/team-logos/pour_decisions.svg",
+  "Pour Decisions": "/images/pour_decisions.PNG",
+  "Sip Happens": "/images/sip_happends.PNG",
+  "Grape Minds": "/images/grape_minds.PNG",
+  "Kingsford Corkers": "/images/kingsford_corkers.png",
 };
 
 interface TeamCardProps {
@@ -29,7 +28,7 @@ interface TeamCardProps {
 
 export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
   // Get the correct logo for this team
-  const logoSrc = TEAM_LOGOS[team.teamName] || TEAM_LOGOS.default;
+  const logoSrc = TEAM_LOGOS[team.teamName];
   
   // Determine completion rate styling
   const completionRateColor = 
@@ -46,12 +45,18 @@ export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
     >
       <CardContent className="p-0 flex">
         {/* Left side - Team Logo */}
-        <div className="w-1/3 bg-slate-100 flex items-center justify-center p-4">
-          <img 
-            src={logoSrc} 
-            alt={`${team.teamName} logo`} 
-            className="w-full h-auto"
-          />
+        <div className="w-1/3 bg-slate-50 flex items-center justify-center p-4">
+          {logoSrc ? (
+            <img 
+              src={logoSrc} 
+              alt={`${team.teamName} logo`} 
+              className="w-full h-auto object-contain"
+            />
+          ) : (
+            <div className="w-24 h-24">
+              <TeamLogo teamName={team.teamName} size="lg" />
+            </div>
+          )}
         </div>
         
         {/* Right side - Team Info */}
