@@ -40,8 +40,8 @@ export default function LeaderboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-4 py-4">
-      <div className="container max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-0 py-4">
+      <div className="container mx-auto" style={{ maxWidth: "760px" }}>
         {/* Centered Page Title */}
         <div className="text-center mb-4 mt-2">
           <h1 className="text-dynamic-lg font-bold text-foreground">Weekly Leaderboard</h1>
@@ -78,14 +78,14 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Description Text */}
-        <p className="text-dynamic-sm text-muted-foreground text-center mb-6" key={showTeams ? "team" : "individual"}>
+        <p className="text-dynamic-sm text-muted-foreground text-center mb-6 px-4" key={showTeams ? "team" : "individual"}>
           {showTeams
             ? "Teams are ranked by weekly quiz completion rate"
             : "Individuals are ranked by total points accumulated over multiple weeks through quiz completions"
           }
         </p>
 
-        <div className="space-y-3 max-w-3xl mx-auto">
+        <div className="space-y-3 w-full px-4">
           {showTeams ? (
             // Teams View
             teamStats.map((team, index) => {
@@ -97,7 +97,7 @@ export default function LeaderboardPage() {
                   "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
                   index === 0 && "border-yellow-500/50"
                 )}>
-                  <CardHeader className="py-3">
+                  <CardHeader className="py-3 px-6">
                     <CardTitle className="flex items-center justify-between text-dynamic-base">
                       <div className="flex items-center gap-2 min-w-0">
                         {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
@@ -129,7 +129,7 @@ export default function LeaderboardPage() {
                   "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
                   index === 0 && "border-yellow-500/50"
                 )}>
-                  <CardHeader className="py-3">
+                  <CardHeader className="py-3 px-6">
                     <CardTitle className="flex items-center justify-between text-dynamic-base">
                       <div className="flex items-center gap-2 min-w-0">
                         {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
