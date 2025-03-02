@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/ui/team-logo";
+import { Trophy, Medal, Award } from "lucide-react";
 
 // Define team types used by this component
 type TeamStats = {
@@ -67,18 +68,18 @@ export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
             </h3>
             
             {/* Ranking Trophy Icon */}
-            {index < 3 && (
-              <div className="h-7 w-7 text-muted-foreground">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-full">
-                  <path d="M8 21V15M16 8V21M12 21V12M4 3H20V7C20 7 17 10 12 10C7 10 4 7 4 7V3Z" 
-                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                    className={
-                      index === 0 ? "text-yellow-500" : 
-                      index === 1 ? "text-gray-400" : 
-                      "text-amber-600"
-                    }
-                  />
-                </svg>
+            {index < 4 && (
+              <div className={cn(
+                "h-8 w-8 rounded-full flex items-center justify-center",
+                index === 0 ? "bg-yellow-100" : 
+                index === 1 ? "bg-gray-100" : 
+                index === 2 ? "bg-amber-100" :
+                "bg-slate-100"
+              )}>
+                {index === 0 && <Trophy className="h-5 w-5 text-yellow-500" />}
+                {index === 1 && <Medal className="h-5 w-5 text-gray-400" />}
+                {index === 2 && <Award className="h-5 w-5 text-amber-600" />}
+                {index === 3 && <span className="text-xs font-semibold text-slate-500">4th</span>}
               </div>
             )}
           </div>
