@@ -85,65 +85,65 @@ export default function LeaderboardPage() {
           }
         </p>
 
-        <div className="space-y-3 w-full pb-8">
-          {showTeams ? (
-            // Teams View
-            teamStats.map((team, index) => {
-              const Badge = BADGES[index]?.icon ?? null;
-              const color = BADGES[index]?.color ?? "text-muted-foreground";
+        {/* Individual View Content */}
+        <div className="space-y-3 w-full pb-8" style={{ display: showTeams ? 'none' : 'block', width: '100%' }}>
+          {users.map((user, index) => {
+            const Badge = BADGES[index]?.icon ?? null;
+            const color = BADGES[index]?.color ?? "text-muted-foreground";
 
-              return (
-                <Card key={`team-${index}`} className={cn(
-                  "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
-                  index === 0 && "border-yellow-500/50"
-                )}>
-                  <CardHeader className="py-3 px-6">
-                    <CardTitle className="flex items-center justify-between text-dynamic-base">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
-                        <span className="text-[#3a474e] font-semibold truncate">
-                          {index + 1}. {team.teamName}
-                        </span>
-                      </div>
-                      <span className={cn(
-                        "text-dynamic-base font-bold ml-2 flex-shrink-0",
-                        team.weeklyCompletionPercentage >= 80 ? "text-emerald-600" :
-                          team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
-                            "text-destructive"
-                      )}>
-                        {Math.round(team.weeklyCompletionPercentage)}% completed
+            return (
+              <Card key={`user-${index}`} className={cn(
+                "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
+                index === 0 && "border-yellow-500/50"
+              )}>
+                <CardHeader className="py-3 px-6">
+                  <CardTitle className="flex items-center justify-between text-dynamic-base">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
+                      <span className="text-[#3a474e] font-semibold truncate">
+                        {index + 1}. {user.username}
                       </span>
-                    </CardTitle>
-                  </CardHeader>
-                </Card>
-              );
-            })
-          ) : (
-            // Individual View
-            users.map((user, index) => {
-              const Badge = BADGES[index]?.icon ?? null;
-              const color = BADGES[index]?.color ?? "text-muted-foreground";
+                    </div>
+                    <span className="text-dynamic-base font-bold text-emerald-600 flex-shrink-0">{user.weeklyScore ?? 0} pts</span>
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            );
+          })}
+        </div>
+          
+        {/* Teams View Content - Using same container width as Individual */}
+        <div className="space-y-3 w-full pb-8" style={{ display: showTeams ? 'block' : 'none', width: '100%' }}>
+          {teamStats.map((team, index) => {
+            const Badge = BADGES[index]?.icon ?? null;
+            const color = BADGES[index]?.color ?? "text-muted-foreground";
 
-              return (
-                <Card key={`user-${index}`} className={cn(
-                  "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
-                  index === 0 && "border-yellow-500/50"
-                )}>
-                  <CardHeader className="py-3 px-6">
-                    <CardTitle className="flex items-center justify-between text-dynamic-base">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
-                        <span className="text-[#3a474e] font-semibold truncate">
-                          {index + 1}. {user.username}
-                        </span>
-                      </div>
-                      <span className="text-dynamic-base font-bold text-emerald-600 flex-shrink-0">{user.weeklyScore ?? 0} pts</span>
-                    </CardTitle>
-                  </CardHeader>
-                </Card>
-              );
-            })
-          )}
+            return (
+              <Card key={`team-${index}`} className={cn(
+                "overflow-hidden transition-all duration-200 hover:shadow-md w-full",
+                index === 0 && "border-yellow-500/50"
+              )}>
+                <CardHeader className="py-3 px-6">
+                  <CardTitle className="flex items-center justify-between text-dynamic-base">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {Badge && <Badge className={cn("h-5 w-5 flex-shrink-0", color)} />}
+                      <span className="text-[#3a474e] font-semibold truncate">
+                        {index + 1}. {team.teamName}
+                      </span>
+                    </div>
+                    <span className={cn(
+                      "text-dynamic-base font-bold ml-2 flex-shrink-0",
+                      team.weeklyCompletionPercentage >= 80 ? "text-emerald-600" :
+                        team.weeklyCompletionPercentage >= 50 ? "text-amber-500" :
+                          "text-destructive"
+                    )}>
+                      {Math.round(team.weeklyCompletionPercentage)}% completed
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
