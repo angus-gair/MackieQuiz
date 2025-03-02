@@ -41,40 +41,7 @@ export default function WelcomePage() {
           </p>
         </div>
 
-        {/* User's Team Card */}
-        {user && teamStats && teamStats.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-center">Your Team's Performance</h2>
-            <div className="max-w-lg mx-auto">
-              {user.team ? (
-                // If team is assigned, show the team card
-                teamStats
-                  .filter(team => team.teamName === user.team)
-                  .map((team) => {
-                    // Find the position of the team in the overall leaderboard
-                    const teamIndex = teamStats.findIndex(t => t.teamName === team.teamName);
-                    return (
-                      <TeamCard 
-                        key={team.teamName} 
-                        team={team} 
-                        index={teamIndex} 
-                      />
-                    );
-                  })
-              ) : (
-                // If no team is assigned, show a message
-                <Card className="p-4 text-center bg-gray-50 border-dashed border-gray-300">
-                  <p className="text-muted-foreground mb-2">
-                    You haven't been assigned to a team yet.
-                  </p>
-                  <p className="text-sm">
-                    Please reach out to your administrator to join a team and participate in the competition.
-                  </p>
-                </Card>
-              )}
-            </div>
-          </div>
-        )}
+
 
         {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -142,6 +109,41 @@ export default function WelcomePage() {
             </CardContent>
           </Card>
         </div>
+        
+        {/* User's Team Card */}
+        {user && teamStats && teamStats.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 text-center">Your Team's Performance</h2>
+            <div className="max-w-lg mx-auto">
+              {user.team ? (
+                // If team is assigned, show the team card
+                teamStats
+                  .filter(team => team.teamName === user.team)
+                  .map((team) => {
+                    // Find the position of the team in the overall leaderboard
+                    const teamIndex = teamStats.findIndex(t => t.teamName === team.teamName);
+                    return (
+                      <TeamCard 
+                        key={team.teamName} 
+                        team={team} 
+                        index={teamIndex} 
+                      />
+                    );
+                  })
+              ) : (
+                // If no team is assigned, show a message
+                <Card className="p-4 text-center bg-gray-50 border-dashed border-gray-300">
+                  <p className="text-muted-foreground mb-2">
+                    You haven't been assigned to a team yet.
+                  </p>
+                  <p className="text-sm">
+                    Please reach out to your administrator to join a team and participate in the competition.
+                  </p>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3 justify-center mb-10">
