@@ -28,6 +28,7 @@ const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
 const QuizPage = lazy(() => import("@/pages/user/quiz"));
 const QuizCompletionPage = lazy(() => import("@/pages/user/quiz-completion"));
 const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
+const DebugLogosPage = lazy(() => import("@/pages/debug-logos"));
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
@@ -72,6 +73,7 @@ function Router() {
             <ProtectedRoute path="/settings" component={SettingsPage as AnyComponent} />
             <ProtectedRoute path="/quiz" component={QuizPage as AnyComponent} />
             <ProtectedRoute path="/quiz-completion" component={QuizCompletionPage as AnyComponent} />
+            <ProtectedRoute path="/debug-logos" component={DebugLogosPage as AnyComponent} />
 
             {/* Admin Routes */}
             <AdminRoute path="/admin" component={AdminDashboard as AnyComponent} />
