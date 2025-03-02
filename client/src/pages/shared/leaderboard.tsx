@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { User as UserType, Achievement, UserProfile } from "@shared/schema";
@@ -140,9 +141,35 @@ export default function LeaderboardPage() {
   // Determine if any data is still loading
   const isLoading = isUsersLoading || isTeamsLoading || isAchievementsLoading || isProfilesLoading;
 
+  // For debugging purposes
+  const iframeRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  
+  useEffect(() => {
+    const updateWidth = () => {
+      if (iframeRef.current) {
+        setContainerWidth(iframeRef.current.offsetWidth);
+      }
+    };
+    
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    
+    // For debugging - display width
+    console.log("Leaderboard container width:", containerWidth);
+    
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
   return (
     <div className="min-h-screen pt-16 pb-20 bg-gradient-to-b from-background to-muted/10">
-      <div className="content-container">
+      {/* Debug width display */}
+      <div className="fixed bottom-24 left-0 right-0 text-center text-xs text-gray-500 z-50 bg-black/10 py-1">
+        Container width: {containerWidth}px
+      </div>
+      
+      {/* Container with explicit fixed width */}
+      <div ref={iframeRef} className="mx-auto px-4" style={{ maxWidth: '760px', width: '100%' }}>
         {/* Page Header */}
         <div className="flex items-center mb-6">
           <div className="icon-circle-primary mr-3">
