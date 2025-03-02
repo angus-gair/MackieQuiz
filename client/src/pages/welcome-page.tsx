@@ -159,19 +159,19 @@ export default function WelcomePage() {
         </section>
 
         {/* Action Buttons - With Gray Background */}
-        <section className="py-8 px-4 bg-gray-50 rounded-lg mb-10 -mx-4">
+        <section className="py-5 px-4 bg-gray-50 rounded-lg mb-6 -mx-4">
           <div className="max-w-md mx-auto">
-            <Card className="p-6 text-center border-primary/10 bg-white">
-              <h2 className="text-xl font-semibold mb-4">Ready to Begin?</h2>
+            <Card className="p-4 text-center border-primary/10 bg-white">
+              <h2 className="text-lg font-semibold mb-3">Ready to Begin?</h2>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link href="/quiz">
-                  <Button className="px-5 py-2 bg-primary text-white hover:bg-primary/90">
+                  <Button className="px-4 py-1.5 bg-primary text-white hover:bg-primary/90">
                     Start Quiz
                   </Button>
                 </Link>
                 
                 <Link href="/leaderboard">
-                  <Button variant="outline" className="px-5 py-2 border-primary/20 hover:bg-primary/5">
+                  <Button variant="outline" className="px-4 py-1.5 border-primary/20 hover:bg-primary/5">
                     View Leaderboard
                   </Button>
                 </Link>
@@ -181,11 +181,10 @@ export default function WelcomePage() {
         </section>
 
         {/* Maintainer Note */}
-        <div className="text-center text-sm text-muted-foreground border-t border-gray-100 pt-6">
-          <p>
-            Project Round Table is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please reach out directly—I'd love to chat!
-          </p>
-        </div>
+        <p className="text-center text-xs italic text-muted-foreground mb-4">
+          Project Round Table is lovingly maintained by Belinda Mackie. If you have ideas to make it better or would like to get involved, please reach out directly—I'd love to chat!
+        </p>
+        <div className="border-t border-gray-100"></div>
       </main>
     </div>
   );
