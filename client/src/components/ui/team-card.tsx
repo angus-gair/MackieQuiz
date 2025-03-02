@@ -44,23 +44,23 @@ export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
       )}
     >
       <CardContent className="p-0 flex">
-        {/* Left side - Team Logo (further reduced) */}
-        <div className="w-1/5 bg-slate-50 flex items-center justify-center p-3">
+        {/* Left side - Team Logo (optimized size) */}
+        <div className="w-[22%] bg-slate-100 flex items-center justify-center py-4 px-2">
           {logoSrc ? (
             <img 
               src={logoSrc} 
               alt={`${team.teamName} logo`} 
-              className="w-[55%] h-auto object-contain max-h-20"
+              className="w-11/12 h-auto object-contain max-h-24"
             />
           ) : (
-            <div className="w-12 h-12">
-              <TeamLogo teamName={team.teamName} size="md" />
+            <div className="w-16 h-16">
+              <TeamLogo teamName={team.teamName} size="lg" />
             </div>
           )}
         </div>
         
-        {/* Right side - Team Info (expanded width) */}
-        <div className="w-4/5 p-4">
+        {/* Right side - Team Info (adjusted width) */}
+        <div className="w-[78%] p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-semibold text-primary">
               {team.teamName}
