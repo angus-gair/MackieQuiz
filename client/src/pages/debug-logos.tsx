@@ -11,26 +11,26 @@ export default function DebugLogosPage() {
 
   // Define the team logos we want to test
   const logos = [
-    { name: "Pour Decisions", path: "/images/team-logos/pour_decisions.svg" },
-    { name: "Sip Happens", path: "/images/team-logos/sip_happends.svg" },
-    { name: "Grape Minds", path: "/images/team-logos/grape_minds.svg" },
-    { name: "Kingsford Corkers", path: "/images/team-logos/kingsford_corkers.svg" }
+    { name: "Pour Decisions", path: "/images/pour_decisions.PNG" },
+    { name: "Sip Happens", path: "/images/sip_happends.PNG" },
+    { name: "Grape Minds", path: "/images/grape_minds.PNG" },
+    { name: "Kingsford Corkers", path: "/images/kingsford_corkers.png" }
   ];
 
-  // Additional test for root directory SVGs
-  const rootLogos = [
-    { name: "Pour Decisions (root)", path: "/pour_decisions.svg" },
-    { name: "Sip Happens (root)", path: "/sip_happends.svg" },
-    { name: "Grape Minds (root)", path: "/grape_minds.svg" },
-    { name: "Kingsford Corkers (root)", path: "/kingsford_corkers.svg" }
+  // Additional test for SVG logos
+  const svgLogos = [
+    { name: "Pour Decisions (SVG)", path: "/images/team-logos/pour_decisions.svg" },
+    { name: "Sip Happens (SVG)", path: "/images/team-logos/sip_happends.svg" },
+    { name: "Grape Minds (SVG)", path: "/images/team-logos/grape_minds.svg" },
+    { name: "Kingsford Corkers (SVG)", path: "/images/team-logos/kingsford_corkers.svg" }
   ];
 
   return (
     <div className="container py-8">
-      <h1 className="text-2xl font-bold mb-6">SVG Logo Debug Page</h1>
+      <h1 className="text-2xl font-bold mb-6">Team Logo Debug Page</h1>
       
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Team Logos from /images/team-logos/ directory</h2>
+        <h2 className="text-xl font-semibold mb-4">Team Logos from /images/ directory (PNG format)</h2>
         <div className="grid grid-cols-2 gap-4">
           {logos.map((logo) => (
             <Card key={logo.name} className="overflow-hidden">
@@ -51,9 +51,9 @@ export default function DebugLogosPage() {
       </div>
 
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Team Logos from root directory</h2>
+        <h2 className="text-xl font-semibold mb-4">Team Logos as SVG (for comparison)</h2>
         <div className="grid grid-cols-2 gap-4">
-          {rootLogos.map((logo) => (
+          {svgLogos.map((logo) => (
             <Card key={logo.name} className="overflow-hidden">
               <CardContent className="p-6">
                 <h3 className="text-lg font-medium mb-2">{logo.name}</h3>
