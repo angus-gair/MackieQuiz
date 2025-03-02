@@ -33,7 +33,7 @@ export default function WelcomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero section with gradient background */}
-      <section className="bg-gradient-to-b from-primary/5 to-background py-8 mb-6">
+      <section className="bg-gradient-to-b from-primary/5 to-background py-6 mb-2">
         <div className="container max-w-4xl mx-auto px-4">
           {/* Welcome Header */}
           <div className="text-center">
@@ -46,8 +46,6 @@ export default function WelcomePage() {
       </section>
 
       <main className="container max-w-4xl mx-auto pb-16 px-4">
-
-
 
         {/* Feature Cards Section - With Gray Background */}
         <section className="py-8 px-4 bg-gray-50 rounded-lg mb-10 -mx-4">
