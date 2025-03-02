@@ -223,8 +223,8 @@ export default function LeaderboardPage() {
         </div>
       </div>
       
-      {/* Main Container - explicitly set max width */}
-      <div ref={mainContainerRef} className="mx-auto px-4" style={{ maxWidth: '760px', width: '100%' }}>
+      {/* Main Container - explicitly set fixed width for consistency */}
+      <div ref={mainContainerRef} className="mx-auto px-4" style={{ width: '672px', maxWidth: '100%' }}>
         {/* Page Header */}
         <div className="flex items-center mb-6">
           <div className="icon-circle-primary mr-3">
