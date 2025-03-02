@@ -213,7 +213,9 @@ export default function LeaderboardPage() {
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
                         <div className="flex items-center gap-1 mb-2">
                           <img 
-                            src={`/images/team-logos/${sortedTeams[1]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
+                            src={sortedTeams[1]?.teamName === "Sip Happens" 
+                              ? "/images/team-logos/sip_happends.svg" 
+                              : `/images/team-logos/${sortedTeams[1]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
                             alt={`${sortedTeams[1]?.teamName} logo`}
                             className="h-10 w-10"
                           />
@@ -263,7 +265,9 @@ export default function LeaderboardPage() {
                       <CardContent className="pt-6 pb-4 px-2 flex flex-col items-center">
                         <div className="flex items-center gap-2 mb-2">
                           <img 
-                            src={`/images/team-logos/${sortedTeams[0]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
+                            src={sortedTeams[0]?.teamName === "Sip Happens" 
+                              ? "/images/team-logos/sip_happends.svg" 
+                              : `/images/team-logos/${sortedTeams[0]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
                             alt={`${sortedTeams[0]?.teamName} logo`}
                             className="h-12 w-12"
                           />
@@ -307,7 +311,9 @@ export default function LeaderboardPage() {
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
                         <div className="flex items-center gap-1 mb-2">
                           <img 
-                            src={`/images/team-logos/${sortedTeams[2]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
+                            src={sortedTeams[2]?.teamName === "Sip Happens" 
+                              ? "/images/team-logos/sip_happends.svg" 
+                              : `/images/team-logos/${sortedTeams[2]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
                             alt={`${sortedTeams[2]?.teamName} logo`}
                             className="h-10 w-10"
                           />

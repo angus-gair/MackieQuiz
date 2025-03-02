@@ -14,7 +14,7 @@ type TeamStats = {
 // Map of team names to their SVG logo files
 const TEAM_LOGOS: Record<string, string> = {
   "Pour Decisions": "/images/team-logos/pour_decisions.svg",
-  "Sip Happy": "/images/team-logos/sip_happy.svg",
+  "Sip Happens": "/images/team-logos/sip_happends.svg",
   "Grape Minds": "/images/team-logos/grape_minds.svg",
   "Kingsford Corkers": "/images/team-logos/kingsford_corkers.svg",
   // Fallback for other teams
