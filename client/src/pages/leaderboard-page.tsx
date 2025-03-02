@@ -41,9 +41,9 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 px-0 py-4">
-      <div className="container mx-auto" style={{ maxWidth: "760px" }}>
+      <div className="bg-gradient-to-b from-green-100/30 to-blue-100/60 mx-auto" style={{ width: "760px" }}>
         {/* Centered Page Title */}
-        <div className="text-center mb-4 mt-2">
+        <div className="text-center mb-4 mt-2 pt-4">
           <h1 className="text-dynamic-lg font-bold text-foreground">Weekly Leaderboard</h1>
         </div>
 
@@ -85,7 +85,7 @@ export default function LeaderboardPage() {
           }
         </p>
 
-        <div className="space-y-3 w-full px-4">
+        <div className="space-y-3 w-full px-4 pb-8">
           {showTeams ? (
             // Teams View
             teamStats.map((team, index) => {
