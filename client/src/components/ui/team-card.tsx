@@ -45,7 +45,7 @@ export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
     >
       <CardContent className="p-0 flex">
         {/* Left side - Team Logo (larger size) */}
-        <div className="w-[30%] bg-slate-100 flex items-center justify-center py-6 px-3">
+        <div className="w-[30%] bg-slate-100 flex items-center justify-center pt-10 pb-6 px-3">
           {logoSrc ? (
             <img 
               src={logoSrc} 
