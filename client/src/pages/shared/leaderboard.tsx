@@ -211,25 +211,8 @@ export default function LeaderboardPage() {
                   {sortedTeams[1] && (
                     <Card className="text-center border-gray-200 hover:shadow-md transition-shadow h-full">
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
-                        <div className="flex items-center gap-1 mb-2">
-                          <img 
-                            src={
-                              sortedTeams[1]?.teamName === "Sip Happens" 
-                                ? "/images/sip_happends.PNG" 
-                                : sortedTeams[1]?.teamName === "Pour Decisions" 
-                                  ? "/images/pour_decisions.PNG"
-                                  : sortedTeams[1]?.teamName === "Grape Minds"
-                                    ? "/images/grape_minds.PNG"
-                                    : sortedTeams[1]?.teamName === "Kingsford Corkers"
-                                      ? "/images/kingsford_corkers.png"
-                                      : ""
-                            }
-                            alt={`${sortedTeams[1]?.teamName} logo`}
-                            className="h-10 w-10 object-contain"
-                          />
-                          <div className="h-7 w-7 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
-                            <Medal className="h-4 w-4" />
-                          </div>
+                        <div className="h-10 w-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-2">
+                          <Medal className="h-6 w-6" />
                         </div>
                         <p className="font-semibold text-sm truncate w-full">
                           {sortedTeams[1]?.teamName}
@@ -271,25 +254,8 @@ export default function LeaderboardPage() {
                         1st Place
                       </div>
                       <CardContent className="pt-6 pb-4 px-2 flex flex-col items-center">
-                        <div className="flex items-center gap-2 mb-2">
-                          <img 
-                            src={
-                              sortedTeams[0]?.teamName === "Sip Happens" 
-                                ? "/images/sip_happends.PNG" 
-                                : sortedTeams[0]?.teamName === "Pour Decisions" 
-                                  ? "/images/pour_decisions.PNG"
-                                  : sortedTeams[0]?.teamName === "Grape Minds"
-                                    ? "/images/grape_minds.PNG"
-                                    : sortedTeams[0]?.teamName === "Kingsford Corkers"
-                                      ? "/images/kingsford_corkers.png"
-                                      : ""
-                            }
-                            alt={`${sortedTeams[0]?.teamName} logo`}
-                            className="h-12 w-12 object-contain"
-                          />
-                          <div className="h-8 w-8 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center">
-                            <Trophy className="h-5 w-5" />
-                          </div>
+                        <div className="h-14 w-14 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center mb-2">
+                          <Trophy className="h-8 w-8" />
                         </div>
                         <p className="font-bold text-primary truncate w-full mt-1">
                           {sortedTeams[0]?.teamName}
@@ -325,25 +291,8 @@ export default function LeaderboardPage() {
                   {sortedTeams[2] && (
                     <Card className="text-center border-amber-200 hover:shadow-md transition-shadow h-full">
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
-                        <div className="flex items-center gap-1 mb-2">
-                          <img 
-                            src={
-                              sortedTeams[2]?.teamName === "Sip Happens" 
-                                ? "/images/sip_happends.PNG" 
-                                : sortedTeams[2]?.teamName === "Pour Decisions" 
-                                  ? "/images/pour_decisions.PNG"
-                                  : sortedTeams[2]?.teamName === "Grape Minds"
-                                    ? "/images/grape_minds.PNG"
-                                    : sortedTeams[2]?.teamName === "Kingsford Corkers"
-                                      ? "/images/kingsford_corkers.png"
-                                      : ""
-                            }
-                            alt={`${sortedTeams[2]?.teamName} logo`}
-                            className="h-10 w-10 object-contain"
-                          />
-                          <div className="h-7 w-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
-                            <Award className="h-4 w-4" />
-                          </div>
+                        <div className="h-10 w-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
+                          <Award className="h-6 w-6" />
                         </div>
                         <p className="font-semibold text-sm truncate w-full">
                           {sortedTeams[2]?.teamName}
