@@ -460,11 +460,23 @@ export function registerRoutes(app: Express): Server {
     
     // Filter for only recent achievements (earned in the last minute)
     const now = new Date();
-    const oneMinuteAgo = new Date(now.getTime() - 60 * 1000); // 1 minute ago
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes ago
     
-    const recentAchievements = achievements.filter(achievement => 
-      new Date(achievement.earnedAt) > oneMinuteAgo
-    );
+    // Add extra debug info for troubleshooting
+    console.log(`[Achievement Latest] User ${req.user.id} has ${achievements.length} total achievements.`);
+    console.log(`[Achievement Latest] Checking for achievements newer than ${fiveMinutesAgo.toISOString()}`);
+    
+    const recentAchievements = achievements.filter(achievement => {
+      const earnedAt = new Date(achievement.earnedAt);
+      const isRecent = earnedAt > fiveMinutesAgo;
+      console.log(`[Achievement Filter] ${achievement.name} earned at ${earnedAt.toISOString()} - is recent: ${isRecent}`);
+      return isRecent;
+    });
+    
+    console.log(`[Achievement Latest] Found ${recentAchievements.length} recent achievements.`);
+    if (recentAchievements.length > 0) {
+      console.log(`[Achievement Latest] Types: ${recentAchievements.map(a => a.type).join(', ')}`);
+    }
     
     // Instead of returning just one achievement, return all recent ones
     // This allows us to handle multiple achievements earned at once

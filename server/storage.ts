@@ -316,21 +316,6 @@ export class DatabaseStorage implements IStorage {
         log(`User ${answer.userId} completed a quiz`);
 
         try {
-          // Calculate total completed quizzes for achievements
-          const totalQuizzes = Math.floor(userAnswers.length / 3);
-          log(`User ${answer.userId} has completed ${totalQuizzes} quizzes total`);
-
-          // Check for milestone achievements using our centralized method
-          const milestoneAchievement = await this.checkMilestoneAchievement(answer.userId, totalQuizzes);
-          if (milestoneAchievement) {
-            log(`Created milestone achievement for quiz #${totalQuizzes} for user ${answer.userId}`);
-          }
-
-        } catch (err) {
-          log(`Error creating achievements: ${err}`);
-        }
-
-        try {
           // Ensure user streak record exists and update it
           const streak = await this.getOrCreateUserStreak(answer.userId);
           await this.updateUserStreak(answer.userId, true);
@@ -352,6 +337,9 @@ export class DatabaseStorage implements IStorage {
             const perfectScore = latestQuizAnswers.every(a => a.correct);
             await this.updateTeamStats(user.team, perfectScore);
             log(`Updated team stats for team ${user.team}`);
+            
+            // Award team contribution achievement
+            await this.awardTeamContributionAchievement(answer.userId, 'Quiz');
           }
         } catch (err) {
           log(`Error updating team stats: ${err}`);
@@ -364,25 +352,10 @@ export class DatabaseStorage implements IStorage {
         } catch (err) {
           log(`Error refilling power-ups: ${err}`);
         }
-
-        try {
-          //Check for perfect quiz completion
-          if (todaysAnswers.length % 3 === 0) {
-            const latestQuizAnswers = todaysAnswers.slice(-3);
-            const isPerfectQuiz = latestQuizAnswers.every(a => a.correct);
-            if (isPerfectQuiz) {
-              await this.awardPerfectQuizAchievement(answer.userId);
-            }
-
-            //Check for team contribution
-            const user = await this.getUser(answer.userId);
-            if (user?.team) {
-              await this.awardTeamContributionAchievement(answer.userId, 'Quiz');
-            }
-          }
-        } catch (error) {
-          console.error('Error in achievement tracking:', error);
-        }
+        
+        // Note: We don't need to check for achievements here.
+        // All achievement checking is now centralized in checkAndAwardAchievements()
+        // which is called from the routes.ts after a quiz completion.
       }
 
       return newAnswer;
@@ -928,11 +901,17 @@ export class DatabaseStorage implements IStorage {
     const quizCount = Math.floor(userAnswers.length / 3);
     const newAchievements: Achievement[] = [];
 
-    // Check for milestone achievements
-    const milestoneAchievement = await this.checkMilestoneAchievement(userId, quizCount);
-    if (milestoneAchievement) {
-      newAchievements.push(milestoneAchievement);
-      console.log(`User ${userId} earned milestone achievement for quiz #${quizCount}`);
+    console.log(`[Achievement Check] User ${userId} has completed ${quizCount} quizzes (answers: ${userAnswers.length})`);
+
+    // Check for milestone achievements - make sure to check for first milestone (quizCount 1)
+    if (quizCount > 0) {
+      const milestoneAchievement = await this.checkMilestoneAchievement(userId, quizCount);
+      if (milestoneAchievement) {
+        newAchievements.push(milestoneAchievement);
+        console.log(`[Achievement] User ${userId} earned milestone achievement for quiz #${quizCount}`);
+      } else {
+        console.log(`[Achievement] No milestone achievement for user ${userId} at quiz #${quizCount}`);
+      }
     }
     
     // Check for perfect score achievement
@@ -940,18 +919,22 @@ export class DatabaseStorage implements IStorage {
     const latestQuizAnswers = userAnswers.slice(-3);
     if (latestQuizAnswers.length === 3) {
       const isPerfectScore = latestQuizAnswers.every(answer => answer.correct);
+      console.log(`[Achievement] User ${userId} perfect score check: ${isPerfectScore ? 'YES' : 'NO'}`);
+      
       if (isPerfectScore) {
         const perfectScoreAchievement = await this.awardPerfectQuizAchievement(userId);
         if (perfectScoreAchievement) {
           newAchievements.push(perfectScoreAchievement);
-          console.log(`User ${userId} earned perfect score achievement #${perfectScoreAchievement.milestone}`);
+          console.log(`[Achievement] User ${userId} earned perfect score achievement #${perfectScoreAchievement.milestone}`);
         }
       }
     }
 
     // Log combined achievements for debugging
     if (newAchievements.length > 0) {
-      console.log(`User ${userId} earned ${newAchievements.length} achievements: ${newAchievements.map(a => a.name).join(', ')}`);
+      console.log(`[Achievement Summary] User ${userId} earned ${newAchievements.length} achievements: ${newAchievements.map(a => a.name).join(', ')}`);
+    } else {
+      console.log(`[Achievement Summary] User ${userId} earned no new achievements`);
     }
 
     return newAchievements;
