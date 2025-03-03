@@ -500,7 +500,11 @@ export default function LeaderboardPage() {
                         
                         {/* Score and Quiz Count */}
                         <div className="text-right">
-                          <div className="badge-primary">{user.weeklyScore || 0} pts</div>
+                          {index < 10 ? (
+                            <div className="badge-primary">{user.weeklyScore || 0} pts</div>
+                          ) : (
+                            <div className="badge-primary blur-sm select-none opacity-70">{user.weeklyScore || 0} pts</div>
+                          )}
                           {index < 10 ? (
                             <div className="text-xs text-gray-500 mt-1">
                               {user.weeklyQuizzes || 0} quizzes completed
