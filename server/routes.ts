@@ -692,7 +692,7 @@ export function registerRoutes(app: Express): Server {
 
   // Get selected quiz questions (for admin panel)
   app.get("/api/quiz/selected-questions", async (req, res) => {
-    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    if (!req.isAuthenticated()) return res.sendStatus(401);
     
     try {
       const selectedIdsStr = await storage.getSetting('selected_questions');

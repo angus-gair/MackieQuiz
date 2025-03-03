@@ -17,7 +17,7 @@ export default function QuizPage() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [quizKey, setQuizKey] = useState(Date.now()); // Used to force re-render of quiz component
 
-  // Fetch weekly questions
+  // Fetch quiz questions (either selected by admin or weekly)
   const { data: questions = [], isLoading, error } = useQuery<Question[]>({
     queryKey: ["/api/questions/weekly"],
   });
@@ -80,8 +80,9 @@ export default function QuizPage() {
   });
 
   const currentQuestion = questions[currentQuestionIndex];
-  const isLastQuestion = (currentQuestion && questions) ? 
-    (currentQuestionIndex === questions.length - 1 || questions.length === 1) : false;
+  // Check if this is the last question (either the last in the array or the only question)
+  const isLastQuestion = currentQuestion && questions && 
+    (currentQuestionIndex === questions.length - 1);
   const canGoNext = currentQuestion ? !!selectedAnswers[currentQuestion.id] : false;
 
   const handleNext = () => {
