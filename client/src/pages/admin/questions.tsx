@@ -701,7 +701,28 @@ export default function AdminQuestionsPage() {
                           )}
                         </div>
 
-                        <div>
+                        <div className="flex items-center gap-1">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant={question.includedInQuiz ? "default" : "outline"} 
+                                size="sm" 
+                                className={`h-8 w-8 p-0 ${toggleInclusionMutation.isPending ? 'opacity-50' : ''}`}
+                                onClick={() => toggleInclusionMutation.mutate(question.id)}
+                                disabled={toggleInclusionMutation.isPending}
+                              >
+                                {question.includedInQuiz ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Plus className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {question.includedInQuiz ? "Remove from Quiz" : "Add to Quiz"}
+                            </TooltipContent>
+                          </Tooltip>
+                          
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -834,7 +855,28 @@ export default function AdminQuestionsPage() {
                             )}
                           </div>
 
-                          <div>
+                          <div className="flex items-center gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant={question.includedInQuiz ? "default" : "outline"} 
+                                  size="sm" 
+                                  className={`h-8 w-8 p-0 ${toggleInclusionMutation.isPending ? 'opacity-50' : ''}`}
+                                  onClick={() => toggleInclusionMutation.mutate(question.id)}
+                                  disabled={toggleInclusionMutation.isPending}
+                                >
+                                  {question.includedInQuiz ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Plus className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {question.includedInQuiz ? "Remove from Quiz" : "Add to Quiz"}
+                              </TooltipContent>
+                            </Tooltip>
+                            
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
