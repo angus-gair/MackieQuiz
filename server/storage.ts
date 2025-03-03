@@ -878,9 +878,23 @@ export class DatabaseStorage implements IStorage {
     const quizCount = Math.floor(userAnswers.length / 3);
     const newAchievements: Achievement[] = [];
 
+    // Check for milestone achievements
     const milestoneAchievement = await this.checkMilestoneAchievement(userId, quizCount);
     if (milestoneAchievement) {
       newAchievements.push(milestoneAchievement);
+    }
+    
+    // Check for perfect score achievement
+    // Get the latest 3 answers (current quiz)
+    const latestQuizAnswers = userAnswers.slice(-3);
+    if (latestQuizAnswers.length === 3) {
+      const isPerfectScore = latestQuizAnswers.every(answer => answer.correct);
+      if (isPerfectScore) {
+        const perfectScoreAchievement = await this.awardPerfectQuizAchievement(userId);
+        if (perfectScoreAchievement) {
+          newAchievements.push(perfectScoreAchievement);
+        }
+      }
     }
 
     return newAchievements;

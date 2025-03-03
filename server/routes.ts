@@ -429,9 +429,9 @@ export function registerRoutes(app: Express): Server {
       new Date(achievement.earnedAt) > oneMinuteAgo
     );
     
-    // Return the most recent achievement if it exists and was earned recently
-    const latestAchievement = recentAchievements.length > 0 ? recentAchievements[0] : null;
-    res.json(latestAchievement);
+    // Instead of returning just one achievement, return all recent ones
+    // This allows us to handle multiple achievements earned at once
+    res.json(recentAchievements);
   });
   
   // New endpoint to get all achievements for a user
