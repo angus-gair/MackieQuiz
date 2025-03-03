@@ -267,9 +267,9 @@ export class DatabaseStorage implements IStorage {
           weekStatus: weekStatus as 'past' | 'current' | 'future',
           isBonus: question.isBonus || false,
           bonusPoints: question.bonusPoints || 10,
-          // Store dates as YYYY-MM-DD strings to prevent timezone issues
-          availableFrom: formatDateForPg(availableFrom),
-          availableUntil: formatDateForPg(availableUntil)
+          // Store dates as proper Date objects for timestamp columns
+          availableFrom: availableFrom,
+          availableUntil: availableUntil
         })
         .returning();
       
@@ -648,6 +648,7 @@ export class DatabaseStorage implements IStorage {
   }
   async getWeeklyQuestions(): Promise<Question[]> {
     const today = new Date();
+    console.log(`Looking for questions available on ${today.toISOString()}`);
     
     // Get questions that are currently available based on date range
     const availableQuestions = await db
@@ -657,8 +658,9 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(questions.isArchived, false),
           eq(questions.isBonus, false),
-          lte(questions.availableFrom!, today),
-          gte(questions.availableUntil!, today)
+          // When comparing dates, use nullable safety check with SQL expressions
+          sql`${questions.availableFrom} IS NOT NULL AND ${questions.availableFrom} <= ${today}`,
+          sql`${questions.availableUntil} IS NOT NULL AND ${questions.availableUntil} >= ${today}`
         )
       );
     
@@ -1466,8 +1468,9 @@ export class DatabaseStorage implements IStorage {
         // Update the data with the normalized values
         updatedData.weekOf = formattedWeekOf;
         updatedData.weekStatus = weekStatus as 'past' | 'current' | 'future';
-        updatedData.availableFrom = formatDateForPg(availableFrom);
-        updatedData.availableUntil = formatDateForPg(availableUntil);
+        // Store as Date objects for timestamp columns
+        updatedData.availableFrom = availableFrom;
+        updatedData.availableUntil = availableUntil;
       }
       
       const [question] = await db

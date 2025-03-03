@@ -1,0 +1,39 @@
+3:29:24 AM [express] Deserialization successful for user: 132
+Getting week status for date: 2025-03-03
+Found week with identifier: Future
+Creating question for week of 2025-03-03 (Monday) with status: future
+Question will be available from 2025-03-03 to 2025-03-09
+Error creating question: TypeError: value.toISOString is not a function
+    at PgTimestamp.mapToDriverValue (/home/runner/workspace/node_modules/src/pg-core/columns/timestamp.ts:66:16)
+    at <anonymous> (/home/runner/workspace/node_modules/src/sql/sql.ts:223:69)
+    at Array.map (<anonymous>)
+    at SQL.buildQueryFromSourceParams (/home/runner/workspace/node_modules/src/sql/sql.ts:148:30)
+    at <anonymous> (/home/runner/workspace/node_modules/src/sql/sql.ts:170:17)
+    at Array.map (<anonymous>)
+    at SQL.buildQueryFromSourceParams (/home/runner/workspace/node_modules/src/sql/sql.ts:148:30)
+    at <anonymous> (/home/runner/workspace/node_modules/src/sql/sql.ts:174:17)
+    at Array.map (<anonymous>)
+    at SQL.buildQueryFromSourceParams (/home/runner/workspace/node_modules/src/sql/sql.ts:148:30)
+    at <anonymous> (/home/runner/workspace/node_modules/src/sql/sql.ts:124:23)
+    at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)
+    at SQL.toQuery (/home/runner/workspace/node_modules/src/sql/sql.ts:123:17)
+    at PgDialect.sqlToQuery (/home/runner/workspace/node_modules/src/pg-core/dialect.ts:591:14)
+    at <anonymous> (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:405:19)
+    at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)
+    at QueryPromise._prepare (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:400:17)
+    at <anonymous> (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:422:16)
+    at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)
+    at QueryPromise.execute (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:421:17)
+    at QueryPromise.then (/home/runner/workspace/node_modules/src/query-promise.ts:31:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+/home/runner/workspace/server/storage.ts:280
+      throw new Error(`Failed to create question: ${error instanceof Error ? error.message : String(error)}`);
+            ^
+
+
+Error: Failed to create question: value.toISOString is not a function
+    at DatabaseStorage.createQuestion (/home/runner/workspace/server/storage.ts:280:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:185:20)
+
+Node.js v20.18.1
