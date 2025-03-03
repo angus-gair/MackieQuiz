@@ -134,8 +134,8 @@ export const questions = pgTable("questions", {
   weekStatus: text("week_status", { enum: weekStatus }).notNull().default('future'),
   isBonus: boolean("is_bonus").notNull().default(false),
   bonusPoints: integer("bonus_points").notNull().default(10),
-  availableFrom: timestamp("available_from"),
-  availableUntil: timestamp("available_until"),
+  includedInQuiz: boolean("included_in_quiz").notNull().default(false),
+  // Removing availableFrom and availableUntil fields as they're no longer needed
 });
 
 // Define relations between questions and dim_date
@@ -214,9 +214,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertQuestionSchema = createInsertSchema(questions).extend({
   isBonus: z.boolean().optional().default(false),
   bonusPoints: z.number().optional().default(10),
-  availableFrom: z.date().optional(),
-  availableUntil: z.date().optional(),
   weekStatus: z.enum(weekStatus).optional().default('future'),
+  includedInQuiz: z.boolean().optional().default(false),
 });
 
 export const insertAnswerSchema = createInsertSchema(answers);

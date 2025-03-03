@@ -202,31 +202,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyQuestions(): Promise<Question[]> {
-    const today = new Date();
-    
-    // Get questions that are currently available based on date range
-    const availableQuestions = await db
+    // Get questions that are included in the quiz based on the new includedInQuiz field
+    const quizQuestions = await db
       .select()
       .from(questions)
       .where(
         and(
           eq(questions.isArchived, false),
           eq(questions.isBonus, false),
-          lte(questions.availableFrom!, today),
-          gte(questions.availableUntil!, today)
+          eq(questions.includedInQuiz, true)
         )
       );
     
-    console.log(`Found ${availableQuestions.length} available questions for today`);
+    console.log(`Found ${quizQuestions.length} questions included in quiz`);
     
-    if (availableQuestions.length === 0) {
-      // Fallback to regular questions if no available questions found
-      console.log("No available questions found for the current date range, falling back to all active questions");
+    if (quizQuestions.length === 0) {
+      // Fallback to regular questions if no included questions found
+      console.log("No questions are marked for inclusion in the quiz, falling back to all active questions");
       const allQuestions = await this.getQuestions();
       return this.shuffleArray(allQuestions).slice(0, 3);
     }
     
-    return this.shuffleArray(availableQuestions).slice(0, 3);
+    return this.shuffleArray(quizQuestions).slice(0, 3);
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
@@ -250,16 +247,9 @@ export class DatabaseStorage implements IStorage {
       // Get the week status for this date
       const weekStatus = await this.getWeekStatus(weekOfDate);
       
-      // Set availableFrom to the selected week's Monday (using UTC-safe approach)
-      const availableFrom = getWeekMonday(weekOfDate);
-      
-      // Set availableUntil to Sunday (using UTC-safe approach)
-      const availableUntil = getWeekSunday(weekOfDate);
-      
       console.log(`Creating question for week of ${formattedWeekOf} (Monday) with status: ${weekStatus}`);
-      console.log(`Question will be available from ${formatDateForPg(availableFrom)} to ${formatDateForPg(availableUntil)}`);
       
-      // Create the question with the normalized date and availability window
+      // Create the question with the normalized date
       const [newQuestion] = await db
         .insert(questions)
         .values({
@@ -273,9 +263,7 @@ export class DatabaseStorage implements IStorage {
           weekStatus: weekStatus as 'past' | 'current' | 'future',
           isBonus: question.isBonus || false,
           bonusPoints: question.bonusPoints || 10,
-          // Store dates as proper Date objects for timestamp columns
-          availableFrom: availableFrom,
-          availableUntil: availableUntil
+          includedInQuiz: question.includedInQuiz || false // Default to not included in quiz
         })
         .returning();
       
@@ -645,57 +633,28 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getWeeklyQuestions(): Promise<Question[]> {
-    const today = new Date();
-    const weekCommencing = this.getWeekCommencing(today);
-    
-    console.log(`Looking for questions for the week commencing ${weekCommencing.toISOString()}`);
-    
-    // Get questions that match the current week
-    const availableQuestions = await db
+    // Get questions that are included in the quiz (new approach)
+    const quizQuestions = await db
       .select()
       .from(questions)
       .where(
         and(
           eq(questions.isArchived, false),
           eq(questions.isBonus, false),
-          // Filter by questions where availableFrom is in the current week
-          sql`${questions.availableFrom} IS NOT NULL`,
-          // Compare the week start date of availableFrom with our current week start date
-          sql`DATE_TRUNC('week', ${questions.availableFrom}) = DATE_TRUNC('week', ${weekCommencing})`
+          eq(questions.includedInQuiz, true)
         )
       );
     
-    console.log(`Found ${availableQuestions.length} questions for the current week (${weekCommencing.toDateString()})`);
+    console.log(`Found ${quizQuestions.length} questions included in quiz for the week`);
     
-    if (availableQuestions.length === 0) {
-      // Fallback to available questions if no questions found for the current week
-      console.log("No questions found for the current week, falling back to available questions");
-      
-      const availableQuestionsAnyWeek = await db
-        .select()
-        .from(questions)
-        .where(
-          and(
-            eq(questions.isArchived, false),
-            eq(questions.isBonus, false),
-            // When comparing dates, use nullable safety check with SQL expressions
-            sql`${questions.availableFrom} IS NOT NULL AND ${questions.availableFrom} <= ${today}`,
-            sql`${questions.availableUntil} IS NOT NULL AND ${questions.availableUntil} >= ${today}`
-          )
-        );
-        
-      if (availableQuestionsAnyWeek.length > 0) {
-        console.log(`Found ${availableQuestionsAnyWeek.length} available questions (any week)`);
-        return this.shuffleArray(availableQuestionsAnyWeek).slice(0, 3);
-      }
-      
-      // If still no questions, fall back to all active questions
-      console.log("No available questions found, falling back to all active questions");
+    if (quizQuestions.length === 0) {
+      // Fallback to all active questions if no included questions found
+      console.log("No questions are marked for inclusion in the quiz, falling back to all active questions");
       const allQuestions = await this.getQuestions();
       return this.shuffleArray(allQuestions).slice(0, 3);
     }
     
-    return this.shuffleArray(availableQuestions).slice(0, 3);
+    return this.shuffleArray(quizQuestions).slice(0, 3);
   }
 
   async createUserSession(session: InsertUserSession): Promise<UserSession> {
