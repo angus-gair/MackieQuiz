@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const PREDEFINED_CATEGORIES = [
   "Operations",
@@ -50,6 +51,7 @@ export default function AdminQuestionsPage() {
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
     options: ["", "", "", ""],
   });
+  const [selectedWeekFilter, setSelectedWeekFilter] = useState<string | null>(null);
 
   // Get available weeks from the dim_date table
   const { data: availableWeeks, isLoading: isLoadingWeeks } = useQuery<DimDate[]>({
@@ -306,25 +308,60 @@ export default function AdminQuestionsPage() {
 
       <div className="container max-w-4xl mx-auto pt-[72px] pb-8 px-4">
         {/* Add Question Button at the top */}
-        <div className="mb-6">
-          <Sheet open={isAddQuestionSheetOpen} onOpenChange={setIsAddQuestionSheetOpen}>
-            <SheetTrigger asChild>
-              <Button
-                size="sm"
-                className="w-full md:w-auto"
-                onClick={() => {
-                  if (availableWeeks && availableWeeks.length > 0) {
-                    const weekDate = new Date(availableWeeks[0].week);
-                    if (!isNaN(weekDate.getTime())) {
-                      setSelectedWeek(weekDate);
+        <div className="mb-6 flex flex-col space-y-4">
+          <div className="flex justify-between items-center">
+            <Sheet open={isAddQuestionSheetOpen} onOpenChange={setIsAddQuestionSheetOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  size="sm"
+                  className="w-full md:w-auto"
+                  onClick={() => {
+                    if (availableWeeks && availableWeeks.length > 0) {
+                      const weekDate = new Date(availableWeeks[0].week);
+                      if (!isNaN(weekDate.getTime())) {
+                        setSelectedWeek(weekDate);
+                      }
                     }
-                  }
-                }}
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
+              </SheetTrigger>
+            </Sheet>
+          </div>
+          
+          {/* Week filter radio buttons */}
+          {availableWeeks && availableWeeks.length > 0 && (
+            <Card className="p-4">
+              <h3 className="text-sm font-medium mb-3">Filter Questions by Week:</h3>
+              <RadioGroup 
+                value={selectedWeekFilter || ''} 
+                onValueChange={(value) => setSelectedWeekFilter(value)}
+                className="flex flex-wrap gap-2 md:gap-3"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Question
-              </Button>
-            </SheetTrigger>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="" id="all-weeks" />
+                  <Label htmlFor="all-weeks">All Weeks</Label>
+                </div>
+                
+                {availableWeeks.map((weekData) => {
+                  const weekDate = new Date(weekData.week);
+                  const dateValue = !isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : '';
+                  const displayText = !isNaN(weekDate.getTime()) 
+                    ? `Week of ${format(weekDate, 'MMM dd')}${weekData.weekIdentifier === 'Current' ? ' (Current)' : ''}` 
+                    : 'Unknown Week';
+                    
+                  return (
+                    <div key={dateValue} className="flex items-center space-x-2">
+                      <RadioGroupItem value={dateValue} id={`week-${dateValue}`} />
+                      <Label htmlFor={`week-${dateValue}`}>{displayText}</Label>
+                    </div>
+                  );
+                })}
+              </RadioGroup>
+            </Card>
+          )}
             <SheetContent side="right" className="w-full p-4 sm:p-6 md:max-w-xl overflow-y-auto max-h-screen">
               <SheetHeader className="mb-5">
                 <SheetTitle className="text-xl">
