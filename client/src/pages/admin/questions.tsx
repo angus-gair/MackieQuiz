@@ -514,6 +514,28 @@ export default function AdminQuestionsPage() {
                         placeholder="Explain why this is the correct answer"
                       />
                     </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium">Availability Dates</Label>
+                      <div className="flex items-center space-x-2 bg-muted rounded-md p-3 text-sm">
+                        <div>
+                          <span className="font-medium">From:</span>{' '}
+                          {editingQuestion.availableFrom 
+                            ? format(new Date(editingQuestion.availableFrom), 'MMM dd, yyyy') 
+                            : 'Not set'}
+                        </div>
+                        <div className="text-muted-foreground">|</div>
+                        <div>
+                          <span className="font-medium">To:</span>{' '}
+                          {editingQuestion.availableUntil 
+                            ? format(new Date(editingQuestion.availableUntil), 'MMM dd, yyyy') 
+                            : 'Not set'}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Note: These dates are automatically set based on the selected week.
+                      </p>
+                    </div>
 
                     <Button
                       type="submit"
@@ -572,6 +594,9 @@ export default function AdminQuestionsPage() {
                             </h3>
                             <p className="text-sm text-muted-foreground mt-1">
                               Category: {question.category}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Available: {question.availableFrom ? format(new Date(question.availableFrom), 'MMM dd') : 'N/A'} - {question.availableUntil ? format(new Date(question.availableUntil), 'MMM dd') : 'N/A'}
                             </p>
                             <div className="mt-3 space-y-2">
                               {question.options.map((option) => (
