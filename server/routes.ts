@@ -433,6 +433,19 @@ export function registerRoutes(app: Express): Server {
     const latestAchievement = recentAchievements.length > 0 ? recentAchievements[0] : null;
     res.json(latestAchievement);
   });
+  
+  // New endpoint to get all achievements for a user
+  app.get("/api/achievements/user", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const achievements = await storage.getUserAchievements(req.user.id);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      res.status(500).json({ error: "Failed to fetch user achievements" });
+    }
+  });
 
   // New endpoint to reset quiz data for new users
   app.post("/api/user/reset-progress", async (req, res) => {

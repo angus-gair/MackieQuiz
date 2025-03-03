@@ -836,6 +836,10 @@ export class DatabaseStorage implements IStorage {
         description: achievements.description,
         icon: achievements.icon,
         badge: achievements.badge,
+        category: achievements.category,
+        tier: achievements.tier,
+        progress: achievements.progress,
+        isHighestTier: achievements.isHighestTier,
         user: {
           username: users.username
         }
