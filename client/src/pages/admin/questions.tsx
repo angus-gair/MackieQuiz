@@ -246,14 +246,24 @@ export default function AdminQuestionsPage() {
     <div className="min-h-screen">
       <div className="sticky top-0 z-30 bg-background border-b">
         <div className="container">
-          <div className="py-3 flex items-center gap-2">
-            <Link href="/admin/dashboard">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </Link>
-            <h1 className="text-lg font-semibold">Question Management</h1>
+          <div className="py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Link href="/admin/dashboard">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+              </Link>
+              <h1 className="text-lg font-semibold">Question Management</h1>
+            </div>
+            <div>
+              <Link href="/admin/archived-questions">
+                <Button variant="outline" size="sm">
+                  <Archive className="h-4 w-4 mr-2" />
+                  View Archived Questions
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
