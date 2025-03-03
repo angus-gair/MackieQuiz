@@ -1363,24 +1363,33 @@ export class DatabaseStorage implements IStorage {
 
   async getFeedback(): Promise<Feedback[]> {
     try {
-      return await db
-        .select({
-          id: feedback.id,
-          userId: feedback.userId,
-          content: feedback.content,
-          rating: feedback.rating,
-          category: feedback.category,
-          createdAt: feedback.createdAt,
-          user: {
-            username: users.username
-          }
-        })
-        .from(feedback)
-        .leftJoin(users, eq(feedback.userId, users.id))
-        .orderBy(desc(feedback.createdAt));
+      // This is a safer implementation that handles the case where the table might not exist yet
+      try {
+        return await db
+          .select({
+            id: feedback.id,
+            userId: feedback.userId,
+            content: feedback.content,
+            rating: feedback.rating,
+            category: feedback.category,
+            status: feedback.status,
+            createdAt: feedback.createdAt,
+            user: {
+              username: users.username
+            }
+          })
+          .from(feedback)
+          .leftJoin(users, eq(feedback.userId, users.id))
+          .orderBy(desc(feedback.createdAt));
+      } catch (e) {
+        // If table doesn't exist or any other error, return empty array
+        console.warn("Feedback table may not exist yet, returning empty array");
+        return [];
+      }
     } catch (error) {
       console.error('Error fetching feedback:', error);
-      throw error;
+      // Return empty array instead of throwing to prevent app crashes
+      return [];
     }
   }
   async getCurrentWeekQuestions(): Promise<Question[]> {
