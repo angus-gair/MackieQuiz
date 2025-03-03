@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Users, Award, LogOut } from "lucide-react";
+import { PlusCircle, Users, Award, LogOut, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -54,6 +54,12 @@ const AdminDashboard = () => {
       href: "/admin/questions"
     },
     {
+      icon: <Layers className="h-4 w-4" />,
+      title: "Question Sets",
+      description: "Create and manage organized question sets for quizzes",
+      href: "/admin/question-sets"
+    },
+    {
       icon: <Users className="h-4 w-4" />,
       title: "User Management",
       description: "Manage user team assignments and compositions",
@@ -74,7 +80,7 @@ const AdminDashboard = () => {
           <h1 className="text-2xl font-bold text-primary mb-6">Admin Dashboard</h1>
 
           {/* Module Cards */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {modules.map((module) => (
               <Card key={module.href} className="hover:shadow-md transition-shadow">
                 <CardHeader className="space-y-1">
