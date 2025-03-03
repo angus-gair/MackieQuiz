@@ -165,9 +165,7 @@ export default function AdminQuestionsPage() {
   // Archive Question Mutation
   const archiveQuestionMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest<Question>(`/api/questions/${id}/archive`, {
-        method: "PATCH",
-      });
+      return apiRequest("PATCH", `/api/questions/${id}/archive`, null);
     },
     onSuccess: (data) => {
       toast({
