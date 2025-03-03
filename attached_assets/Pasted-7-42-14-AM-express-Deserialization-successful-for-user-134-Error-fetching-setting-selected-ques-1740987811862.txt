@@ -1,0 +1,42 @@
+7:42:14 AM [express] Deserialization successful for user: 134
+Error fetching setting [selected_questions]: error: relation "app_settings" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getSetting (/home/runner/workspace/server/storage.ts:1752:25)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:698:30) {
+  length: 111,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '77',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+Questions API: Retrieved 3 questions
+7:42:15 AM [express] GET /api/weeks/available 304 in 229ms :: [{"dateId":62,"date":"2025-03-03","wee…
+7:42:15 AM [express] GET /api/questions 304 in 265ms :: [{"id":53,"question":"Mar 03","correctAnswer…
+7:42:15 AM [express] GET /api/quiz/selected-questions 304 in 256ms :: []
+7:42:15 AM [express] Deserializing user: 134
+7:42:15 AM [express] Deserialization successful for user: 134
+7:42:15 AM [express] User check: Authenticated as 134
+7:42:15 AM [express] GET /api/user 304 in 116ms :: {"id":134,"username":"admin1","password":"c260f38…
+7:42:18 AM [express] Deserializing user: 134
+7:42:19 AM [express] Deserialization successful for user: 134
+7:42:19 AM [express] User check: Authenticated as 134
+7:42:19 AM [express] GET /api/user 304 in 114ms :: {"id":134,"username":"admin1","password":"c260f38…
+7:42:19 AM [express] Deserializing user: 134
+7:42:19 AM [express] Deserialization successful for user: 134
+7:42:19 AM [express] User check: Authenticated as 134
+7:42:19 AM [express] GET /api/user 304 in 112ms :: {"id":134,"username":"admin1","password":"c260f38…
+7:42:20 AM [express] Deserializing user: 134
