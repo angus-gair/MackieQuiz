@@ -167,20 +167,23 @@ export default function AdminQuestionsPage() {
   // Toggle Question Inclusion Mutation
   const toggleInclusionMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest<Question>(`/api/questions/${id}/toggle-inclusion`, {
+      return apiRequest(`/api/questions/${id}/toggle-inclusion`, {
         method: "POST",
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: Question) => {
+      console.log("Toggle inclusion success:", data);
       toast({
         title: data.includedInQuiz ? "Added to Quiz" : "Removed from Quiz",
         description: data.includedInQuiz 
           ? "The question has been included in the quiz rotation." 
           : "The question has been removed from the quiz rotation.",
       });
+      // Force refresh to ensure UI updates with latest changes
       queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
     },
     onError: (error: Error) => {
+      console.error("Toggle inclusion error:", error);
       toast({
         title: "Failed to update question",
         description: error.message,

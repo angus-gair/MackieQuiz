@@ -283,7 +283,9 @@ export function registerRoutes(app: Express): Server {
     
     try {
       const questionId = parseInt(req.params.id);
+      console.log(`Toggle inclusion for question ${questionId} requested by user ${req.user.id}`);
       const updatedQuestion = await storage.toggleQuestionInclusion(questionId);
+      console.log(`Question ${questionId} toggled. New inclusion status: ${updatedQuestion.includedInQuiz}`);
       res.json(updatedQuestion);
     } catch (error) {
       console.error("Error toggling question inclusion:", error);
