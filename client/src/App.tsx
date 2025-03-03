@@ -32,7 +32,7 @@ const DebugLogosPage = lazy(() => import("@/pages/debug-logos"));
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
-const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
+const AdminQuestions = lazy(() => import("@/pages/admin/questions-new"));
 const AdminArchivedQuestions = lazy(() => import("@/pages/admin/archived-questions"));
 const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
 const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
