@@ -66,7 +66,7 @@ export default function QuestionSetsPage() {
       description: "",
       active: true,
       startDate: new Date().toISOString().split("T")[0],
-      endDate: null,
+      endDate: undefined,
       questionIds: [],
       targetTeams: [],
       rotationStrategy: "random",
@@ -81,7 +81,7 @@ export default function QuestionSetsPage() {
       description: "",
       active: true,
       startDate: new Date().toISOString().split("T")[0],
-      endDate: null,
+      endDate: undefined,
       questionIds: [],
       targetTeams: [],
       rotationStrategy: "random",
@@ -148,10 +148,7 @@ export default function QuestionSetsPage() {
           : updateData.targetTeams,
       };
 
-      const res = await apiRequest(`/api/question-sets/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(formattedData),
-      });
+      const res = await apiRequest("PUT", `/api/question-sets/${id}`, formattedData);
       return res.json();
     },
     onSuccess: () => {
@@ -176,9 +173,7 @@ export default function QuestionSetsPage() {
   // Delete question set mutation
   const deleteQuestionSetMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/api/question-sets/${id}`, {
-        method: "DELETE",
-      });
+      await apiRequest("DELETE", `/api/question-sets/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/question-sets"] });
