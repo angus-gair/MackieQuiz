@@ -90,6 +90,18 @@ export default function AdminQuestionsPage() {
   // Get currently selected questions
   const { data: selectedQuestions, isLoading: isLoadingSelectedQuestions } = useQuery<Question[]>({
     queryKey: ["/api/quiz/selected-questions"],
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch(queryKey[0] as string, {
+        credentials: "include",
+        cache: "default",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch selected questions: ${response.status}`);
+      }
+      
+      return response.json();
+    },
     onSuccess: (data) => {
       // Extract IDs to set the selectedQuestionIds state
       setSelectedQuestionIds(data.map(q => q.id));
@@ -105,10 +117,7 @@ export default function AdminQuestionsPage() {
       if (question.weekOf instanceof Date) {
         question.weekOf = format(question.weekOf, 'yyyy-MM-dd');
       }
-      return apiRequest<Question>("/api/questions", {
-        method: "POST",
-        body: question,
-      });
+      return apiRequest("POST", "/api/questions", question);
     },
     onSuccess: (data) => {
       toast({
@@ -133,10 +142,7 @@ export default function AdminQuestionsPage() {
   // Update Question Mutation
   const updateQuestionMutation = useMutation({
     mutationFn: async (question: Question) => {
-      return apiRequest<Question>(`/api/questions/${question.id}`, {
-        method: "PATCH",
-        body: question,
-      });
+      return apiRequest("PATCH", `/api/questions/${question.id}`, question);
     },
     onSuccess: (data) => {
       toast({
@@ -189,10 +195,7 @@ export default function AdminQuestionsPage() {
   // Save Selected Questions Mutation
   const saveSelectedQuestionsMutation = useMutation({
     mutationFn: async (questionIds: number[]) => {
-      return apiRequest("/api/quiz/selected-questions", {
-        method: "POST",
-        body: { questionIds },
-      });
+      return apiRequest("POST", "/api/quiz/selected-questions", { questionIds });
     },
     onSuccess: () => {
       toast({
