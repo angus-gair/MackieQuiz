@@ -44,7 +44,7 @@ export default function QuestionSetsPage() {
   const { data: questionSets, isLoading: isLoadingQuestionSets } = useQuery({
     queryKey: ["/api/question-sets"],
     queryFn: async () => {
-      const res = await apiRequest("/api/question-sets", { method: "GET" });
+      const res = await apiRequest("GET", "/api/question-sets");
       return res.json() as Promise<QuestionSet[]>;
     },
   });
@@ -53,7 +53,7 @@ export default function QuestionSetsPage() {
   const { data: questions, isLoading: isLoadingQuestions } = useQuery({
     queryKey: ["/api/questions"],
     queryFn: async () => {
-      const res = await apiRequest("/api/questions", { method: "GET" });
+      const res = await apiRequest("GET", "/api/questions");
       return res.json();
     },
   });
@@ -106,10 +106,7 @@ export default function QuestionSetsPage() {
           : data.targetTeams,
       };
 
-      const res = await apiRequest("/api/question-sets", {
-        method: "POST",
-        body: JSON.stringify(formattedData),
-      });
+      const res = await apiRequest("POST", "/api/question-sets", formattedData);
       
       return res.json();
     },
@@ -214,14 +211,31 @@ export default function QuestionSetsPage() {
     setSelectedQuestionSet(questionSet);
     
     // Pre-fill the form with question set data
+    // Convert date fields to appropriate format for form inputs
+    const formattedStartDate = questionSet.startDate 
+      ? typeof questionSet.startDate === 'string' 
+        ? new Date(questionSet.startDate).toISOString().split("T")[0] 
+        : questionSet.startDate instanceof Date 
+          ? questionSet.startDate.toISOString().split("T")[0]
+          : undefined
+      : undefined;
+      
+    const formattedEndDate = questionSet.endDate 
+      ? typeof questionSet.endDate === 'string' 
+        ? new Date(questionSet.endDate).toISOString().split("T")[0] 
+        : questionSet.endDate instanceof Date 
+          ? questionSet.endDate.toISOString().split("T")[0]
+          : undefined
+      : undefined;
+    
     editForm.reset({
       name: questionSet.name,
       description: questionSet.description,
       active: questionSet.active,
-      startDate: questionSet.startDate ? new Date(questionSet.startDate).toISOString().split("T")[0] : undefined,
-      endDate: questionSet.endDate ? new Date(questionSet.endDate).toISOString().split("T")[0] : undefined,
-      questionIds: questionSet.questionIds,
-      targetTeams: questionSet.targetTeams,
+      startDate: formattedStartDate,
+      endDate: formattedEndDate,
+      questionIds: questionSet.questionIds || [],
+      targetTeams: questionSet.targetTeams || [],
       rotationStrategy: questionSet.rotationStrategy,
     });
     
@@ -235,11 +249,13 @@ export default function QuestionSetsPage() {
   };
 
   // Helper function to format dates
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "No date set";
+  const formatDate = (dateValue: string | Date | null) => {
+    if (!dateValue) return "No date set";
     
     try {
-      return format(new Date(dateString), "dd MMM yyyy");
+      // Convert any type of date to a Date object
+      const dateObj = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+      return format(dateObj, "dd MMM yyyy");
     } catch (error) {
       return "Invalid date";
     }
@@ -304,7 +320,15 @@ export default function QuestionSetsPage() {
                         <FormItem>
                           <FormLabel>Start Date</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input 
+                              type="date" 
+                              value={typeof field.value === 'string' ? field.value : field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              disabled={field.disabled}
+                              ref={field.ref}
+                              name={field.name}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -320,8 +344,12 @@ export default function QuestionSetsPage() {
                           <FormControl>
                             <Input 
                               type="date" 
-                              {...field} 
-                              value={field.value || ""} 
+                              value={typeof field.value === 'string' ? field.value : field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              disabled={field.disabled}
+                              ref={field.ref}
+                              name={field.name}
                             />
                           </FormControl>
                           <FormMessage />
@@ -561,7 +589,15 @@ export default function QuestionSetsPage() {
                       <FormItem>
                         <FormLabel>Start Date</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input 
+                            type="date" 
+                            value={typeof field.value === 'string' ? field.value : field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            disabled={field.disabled}
+                            ref={field.ref}
+                            name={field.name}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -577,8 +613,12 @@ export default function QuestionSetsPage() {
                         <FormControl>
                           <Input 
                             type="date" 
-                            {...field} 
-                            value={field.value || ""} 
+                            value={typeof field.value === 'string' ? field.value : field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            disabled={field.disabled}
+                            ref={field.ref}
+                            name={field.name}
                           />
                         </FormControl>
                         <FormMessage />
@@ -720,7 +760,7 @@ function QuestionSetCard({
   questionSet: QuestionSet;
   onEdit: () => void;
   onDelete: () => void;
-  formatDate: (date: string | null) => string;
+  formatDate: (date: string | Date | null) => string;
 }) {
   return (
     <Card className={questionSet.active ? "" : "opacity-60"}>
