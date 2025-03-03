@@ -19,8 +19,18 @@ export default function TeamsPage() {
     queryKey: ["/api/users"],
   });
   
+  // Define team stats type
+  type TeamStat = {
+    teamName: string;
+    totalScore: number;
+    averageScore: number;
+    completedQuizzes: number;
+    members: number;
+    weeklyCompletionPercentage: number;
+  };
+
   // Fetch team stats for additional team information
-  const { data: teamStats, isLoading: isLoadingStats } = useQuery({
+  const { data: teamStats, isLoading: isLoadingStats } = useQuery<TeamStat[]>({
     queryKey: ["/api/analytics/teams"],
   });
 
@@ -47,8 +57,8 @@ export default function TeamsPage() {
   };
   
   // Function to get team stats for a specific team
-  const getTeamStats = (teamName: string) => {
-    return teamStats?.find(ts => ts.teamName === teamName);
+  const getTeamStats = (teamName: string): TeamStat | undefined => {
+    return teamStats?.find((ts: TeamStat) => ts.teamName === teamName);
   };
   
   // Function to sort members by score (descending)
@@ -119,49 +129,54 @@ export default function TeamsPage() {
                     </TabsList>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="flex justify-center">
                     {Object.entries(teamGroups).map(([team, members]) => {
                       const stats = getTeamStats(team);
                       const sortedMembers = sortMembersByScore(members);
                       
                       return (
-                        <TabsContent key={team} value={team} className="mt-0">
+                        <TabsContent key={team} value={team} className="mt-0 w-full max-w-3xl">
                           <Card className="shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
-                            <CardHeader className="pb-0">
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-4">
-                                  <TeamLogo teamName={team} size="lg" />
-                                  <div>
-                                    <CardTitle className="text-xl font-bold text-foreground">
-                                      {team}
-                                    </CardTitle>
-                                    <CardDescription>
-                                      {members.length} member{members.length !== 1 ? 's' : ''}
-                                    </CardDescription>
-                                    {stats && (
-                                      <div className="flex items-center gap-1 mt-1">
-                                        <Badge variant="outline" className="bg-primary/5 text-xs">
-                                          <Trophy className="h-3 w-3 mr-1 text-amber-500" />
-                                          Score: {stats.totalScore}
-                                        </Badge>
-                                        <Badge variant="outline" className="bg-primary/5 text-xs">
-                                          <Award className="h-3 w-3 mr-1 text-blue-500" />
-                                          {Math.round(stats.weeklyCompletionPercentage)}% Completion
-                                        </Badge>
-                                      </div>
-                                    )}
-                                  </div>
+                            <CardHeader className="pb-4">
+                              {/* Prominent centered team logo */}
+                              <div className="flex flex-col items-center mb-4">
+                                <div className="mb-2">
+                                  <TeamLogo teamName={team} size="lg" className="h-24 w-24" />
+                                </div>
+                                <div className="text-center">
+                                  <CardTitle className="text-2xl font-bold text-foreground">
+                                    {team}
+                                  </CardTitle>
+                                  <CardDescription>
+                                    {members.length} member{members.length !== 1 ? 's' : ''}
+                                  </CardDescription>
+                                  {stats && (
+                                    <div className="flex items-center justify-center gap-2 mt-2">
+                                      <Badge variant="outline" className="bg-primary/5 text-xs px-3 py-1">
+                                        <Trophy className="h-3 w-3 mr-1 text-amber-500" />
+                                        Score: {stats.totalScore}
+                                      </Badge>
+                                      <Badge variant="outline" className="bg-primary/5 text-xs px-3 py-1">
+                                        <Award className="h-3 w-3 mr-1 text-blue-500" />
+                                        {Math.round(stats.weeklyCompletionPercentage)}% Completion
+                                      </Badge>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
+                              
+                              <div className="w-full border-t border-border/30 pt-4 mt-2">
+                                <h3 className="text-sm font-medium text-muted-foreground text-center mb-2">TEAM MEMBERS</h3>
+                              </div>
                             </CardHeader>
-                            <CardContent className="pt-6">
+                            <CardContent>
                               <div className="space-y-3">
                                 {sortedMembers.map((user, index) => (
                                   <div 
                                     key={user.id} 
                                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/70 transition-colors"
                                   >
-                                    <Avatar className="h-9 w-9 border border-primary/20">
+                                    <Avatar className="h-10 w-10 border border-primary/20">
                                       <AvatarFallback className={index < 3 ? "bg-primary/10 text-primary" : ""}>
                                         {getInitials(user.username)}
                                       </AvatarFallback>
@@ -173,13 +188,13 @@ export default function TeamsPage() {
                                       </div>
                                     </div>
                                     {index === 0 && members.length > 1 && (
-                                      <Trophy className="h-4 w-4 text-amber-500" />
+                                      <Trophy className="h-5 w-5 text-amber-500" />
                                     )}
                                     {index === 1 && members.length > 2 && (
-                                      <Medal className="h-4 w-4 text-gray-400" />
+                                      <Medal className="h-5 w-5 text-gray-400" />
                                     )}
                                     {index === 2 && members.length > 3 && (
-                                      <Award className="h-4 w-4 text-amber-600" />
+                                      <Award className="h-5 w-5 text-amber-600" />
                                     )}
                                   </div>
                                 ))}

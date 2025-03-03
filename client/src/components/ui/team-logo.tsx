@@ -15,9 +15,10 @@ const DefaultLogo = Coffee;
 interface TeamLogoProps {
   teamName: string;
   size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
-export function TeamLogo({ teamName, size = "md" }: TeamLogoProps) {
+export function TeamLogo({ teamName, size = "md", className = "" }: TeamLogoProps) {
   const logoPath = TEAM_LOGOS[teamName];
   
   const sizeClasses = {
@@ -29,7 +30,7 @@ export function TeamLogo({ teamName, size = "md" }: TeamLogoProps) {
   // If we have a logo path for this team, render the image
   if (logoPath) {
     return (
-      <div className={`${sizeClasses[size]} rounded-full overflow-hidden flex items-center justify-center bg-white border border-gray-200`}>
+      <div className={`${sizeClasses[size]} rounded-full overflow-hidden flex items-center justify-center bg-white border border-gray-200 ${className}`}>
         <img 
           src={logoPath} 
           alt={`${teamName} logo`} 
@@ -41,7 +42,7 @@ export function TeamLogo({ teamName, size = "md" }: TeamLogoProps) {
   
   // Fallback to an icon for teams without a logo
   return (
-    <div className={`${sizeClasses[size]} rounded-full flex items-center justify-center bg-stone-100`}>
+    <div className={`${sizeClasses[size]} rounded-full flex items-center justify-center bg-stone-100 ${className}`}>
       <DefaultLogo className="w-1/2 h-1/2 text-stone-600" />
     </div>
   );
