@@ -216,6 +216,13 @@ export default function AdminQuestionsPage() {
 
   const getQuestionsForWeek = (weekData: DimDate, questions: Question[] = []) => {
     if (!questions || !weekData) return [];
+    
+    // During development, show all questions without filtering by week
+    // DEVELOPMENT MODE: Return all non-archived questions for easier viewing
+    // Comment this out for production
+    return questions.filter(q => !q.isArchived);
+    
+    /* PRODUCTION FILTERING - Uncomment for production
     const weekDate = new Date(weekData.week);
     const formattedWeekDate = !isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : '';
     
@@ -227,6 +234,7 @@ export default function AdminQuestionsPage() {
       }
       return false;
     });
+    */
   };
 
   const handleEditQuestion = (question: Question) => {
@@ -620,6 +628,123 @@ export default function AdminQuestionsPage() {
         </Sheet>
 
         <div className="space-y-4">
+          {/* DEVELOPMENT MODE: Show only one week container with all questions */}
+          {availableWeeks && availableWeeks.length > 0 && (
+            <Card key="all-questions">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-lg font-semibold">
+                      All Questions (Development View)
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {questions && questions.filter(q => !q.isArchived).map((question) => (
+                    <div 
+                      key={question.id} 
+                      className={`border rounded-lg p-4 ${question.includedInQuiz ? 'bg-primary/5 border-primary/30' : ''}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          {question.includedInQuiz && (
+                            <Badge variant="outline" className="mb-2 bg-primary/10 text-primary border-primary/30">
+                              Included in Quiz
+                            </Badge>
+                          )}
+                          <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="outline" className="px-2 py-0 h-6 font-normal">
+                                {question.category}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground ml-1">
+                                ID: {question.id}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                Week: {typeof question.weekOf === 'string' ? 
+                                  format(new Date(question.weekOf), 'MMM dd') : 
+                                  (question.weekOf instanceof Date ? format(question.weekOf, 'MMM dd') : 'Unknown')}
+                              </span>
+                            </div>
+                            <h3 className="font-medium">{question.question}</h3>
+                          </div>
+
+                          <div className="space-y-2 mb-4">
+                            {question.options.map((option, index) => (
+                              <div key={index} className="flex gap-2">
+                                <div className={cn(
+                                  "px-2 py-1 text-sm rounded-md w-full", 
+                                  option === question.correctAnswer ? 
+                                    "bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-900" : 
+                                    "bg-muted border"
+                                )}>
+                                  {option}
+                                  {option === question.correctAnswer && (
+                                    <span className="ml-2 text-green-600 dark:text-green-400 text-xs">
+                                      Correct Answer
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {question.explanation && (
+                            <div className="text-sm text-muted-foreground border-t pt-3 mt-3">
+                              <p className="text-xs font-medium mb-1">Explanation:</p>
+                              <p>{question.explanation}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditQuestion(question)}>
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => toggleInclusionMutation.mutate(question.id)}
+                              >
+                                {question.includedInQuiz ? "Remove from Quiz" : "Add to Quiz"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  if (confirm("Are you sure you want to archive this question?")) {
+                                    archiveQuestionMutation.mutate(question.id);
+                                  }
+                                }}
+                                className="text-destructive"
+                              >
+                                Archive
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {!questions || questions.filter(q => !q.isArchived).length === 0 && (
+                    <div className="border border-dashed rounded-lg p-8 flex flex-col items-center justify-center">
+                      <p className="text-muted-foreground text-center mb-4">
+                        No questions available.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* PRODUCTION MODE: Enable this for production
           {availableWeeks?.filter(weekData => {
             // If no week is selected in the filter, show all weeks
             if (!selectedWeekFilter) return true;
