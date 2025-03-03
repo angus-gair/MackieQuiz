@@ -7,6 +7,7 @@ import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 import { log } from "./vite";
 import { DimDate } from "@shared/schema";
+import { formatDateForPg, parseDateFromPg, createUTCDate, getWeekMonday, getWeekSunday } from "./utils/date-handlers";
 
 // Existing methods
 const PostgresSessionStore = connectPg(session);
@@ -235,30 +236,22 @@ export class DatabaseStorage implements IStorage {
       }
       
       // Use our helper function to normalize the date to Monday of the week
-      weekOfDate = normalizeToMonday(weekOfDate);
+      weekOfDate = getWeekMonday(weekOfDate);
       
-      // Format the date as YYYY-MM-DD to prevent timezone issues when stored in PostgreSQL
-      const formattedWeekOf = formatDateString(weekOfDate);
-      
-      // Verify we have a Monday date (extra validation)
-      if (!isMonday(weekOfDate)) {
-        console.warn(`Warning: Date ${formattedWeekOf} is not a Monday after normalization, forcing correction`);
-        // Force correction (should never happen but just in case)
-        weekOfDate = normalizeToMonday(weekOfDate);
-      }
+      // Format the date for PostgreSQL storage to prevent timezone issues
+      const formattedWeekOf = formatDateForPg(weekOfDate);
       
       // Get the week status for this date
       const weekStatus = await this.getWeekStatus(weekOfDate);
       
-      // Set availableFrom to the selected week's Monday
-      const availableFrom = new Date(weekOfDate);
+      // Set availableFrom to the selected week's Monday (using UTC-safe approach)
+      const availableFrom = getWeekMonday(weekOfDate);
       
-      // Set availableUntil to Monday + 6 days (Sunday)
-      const availableUntil = new Date(weekOfDate);
-      availableUntil.setDate(availableUntil.getDate() + 6);
+      // Set availableUntil to Sunday (using UTC-safe approach)
+      const availableUntil = getWeekSunday(weekOfDate);
       
       console.log(`Creating question for week of ${formattedWeekOf} (Monday) with status: ${weekStatus}`);
-      console.log(`Question will be available from ${availableFrom.toISOString()} to ${availableUntil.toISOString()}`);
+      console.log(`Question will be available from ${formatDateForPg(availableFrom)} to ${formatDateForPg(availableUntil)}`);
       
       // Create the question with the normalized date and availability window
       const [newQuestion] = await db
@@ -274,9 +267,9 @@ export class DatabaseStorage implements IStorage {
           weekStatus: weekStatus as 'past' | 'current' | 'future',
           isBonus: question.isBonus || false,
           bonusPoints: question.bonusPoints || 10,
-          // Override any supplied availableFrom/Until with our calculated values
-          availableFrom: availableFrom,
-          availableUntil: availableUntil
+          // Store dates as YYYY-MM-DD strings to prevent timezone issues
+          availableFrom: formatDateForPg(availableFrom),
+          availableUntil: formatDateForPg(availableUntil)
         })
         .returning();
       
