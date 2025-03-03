@@ -1,0 +1,63 @@
+We need to fix and enhance the existing achievements and awards system in our quiz application, focusing on two types of awards:
+
+Milestone Award
+Perfect Score Award
+1. Milestone Award
+Award Criteria
+A user should receive a milestone award upon completing quizzes numbered:
+1, 3, 5, 7, 10, 13, 15, 17, and 20.
+
+Award Presentation
+
+When a user finishes a quiz that triggers a new milestone (e.g., their 1st, 3rd, 5th, etc.), display a celebratory/confetti screen immediately after quiz completion.
+Ensure no milestone screen appears if the quiz number does not match one of the milestones. For example, if the user just finished their 2nd quiz, do not show the 1st quiz milestone screen again.
+Badge and Display
+
+Each milestone award grants the user a badge.
+This badge should be visible:
+On the user’s profile page, under the Achievements section (which already exists).
+Next to the user’s name in the /leaderboard and /team pages.
+In the user’s badge collection (wherever that is displayed currently).
+2. Perfect Score Award
+Award Criteria
+
+If a user answers all questions correctly in a quiz, they earn a “Perfect Score” badge.
+Badge and Display
+
+The perfect score badge also appears:
+On the user’s profile page under Achievements.
+In the same locations as other badges (leaderboard, team, etc.).
+3. Multiple Awards in a Single Quiz
+It’s possible for a single quiz completion to trigger two awards (e.g., if the user scores 100% on their first quiz, they get both the 1st milestone badge and the perfect score badge).
+Make sure the system can handle awarding both badges at once (e.g., showing both achievements, updating profile, etc.).
+4. Task Requirements
+Review Existing Code
+
+Inspect how achievements/awards are currently implemented.
+Identify and fix any bugs preventing correct award logic or display.
+Implement New/Updated Logic
+
+Ensure milestone awards trigger only on the correct quiz counts and do not repeat for non-milestone quizzes.
+Add perfect-score detection, awarding a “Perfect Score” badge if the user got all questions right.
+Update relevant data structures or databases so these awards are stored and retrievable.
+Front-End Presentation
+
+Display badges in the Achievements section of /profile.
+Show badges (or an indicator of them) in /leaderboard and /team pages.
+Include a special confetti/celebratory screen at the end of the quiz only when a milestone is reached.
+If both awards occur, ensure both are shown without conflicts.
+Testing and Validation
+
+Test quiz completions at different quiz counts (e.g., 1,2,3,5…) to confirm the correct milestones trigger and old milestones do not reappear.
+Test partial and perfect scores to confirm the perfect score badge is awarded only upon 100% correct answers.
+Validate that badges are correctly displayed across all specified pages.
+5. Deliverables
+Updated Code
+Provide the revised backend logic and any front-end changes needed for awarding and displaying badges.
+Summary of Changes
+Briefly describe how you repaired or improved the existing system.
+Implementation Notes
+If additional migrations or new tables/fields are needed in your database, outline them clearly.
+If front-end changes require new UI components, describe them as well.
+Goal:
+By following these instructions, the code should correctly award milestone badges at quizzes 1,3,5,7,10,13,15,17,20, only display the milestone confetti at those times, award a perfect score badge whenever a user has 100% correct answers, and properly track/display all badges in the user’s profile, leaderboard, and team pages.
