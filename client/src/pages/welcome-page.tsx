@@ -34,7 +34,7 @@ export default function WelcomePage() {
     <div className="min-h-screen bg-background">
       {/* Hero section with gradient background */}
       <section className="bg-gradient-to-b from-primary/5 to-background py-6 mb-2">
-        <div className="container max-w-4xl mx-auto px-4">
+        <div className="mx-auto px-4" style={{ width: '672px', maxWidth: '100%' }}>
           {/* Welcome Header */}
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-2">Welcome, {user?.username || 'Guest'} <PartyPopper className="h-6 w-6 inline-block ml-1" /></h1>
@@ -45,7 +45,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      <main className="container max-w-4xl mx-auto pb-16 px-4">
+      <main className="mx-auto pb-16 px-4" style={{ width: '672px', maxWidth: '100%' }}>
 
         {/* Feature Cards Section - With Gray Background */}
         <section className="py-8 px-4 bg-gray-50 rounded-lg mb-10 -mx-4">
