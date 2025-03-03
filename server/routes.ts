@@ -608,6 +608,102 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // App Settings routes
+  app.get("/api/settings", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+
+    try {
+      const settings = await storage.getAllSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      res.status(500).json({ error: 'Failed to fetch settings' });
+    }
+  });
+
+  app.get("/api/settings/:key", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const { key } = req.params;
+      const value = await storage.getSetting(key);
+      
+      if (value === null) {
+        return res.status(404).json({ error: 'Setting not found' });
+      }
+      
+      res.json({ key, value });
+    } catch (error) {
+      console.error(`Error fetching setting [${req.params.key}]:`, error);
+      res.status(500).json({ error: 'Failed to fetch setting' });
+    }
+  });
+
+  app.post("/api/settings", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    
+    try {
+      const { key, value } = req.body;
+      
+      if (!key || value === undefined) {
+        return res.status(400).json({ error: 'Key and value are required' });
+      }
+      
+      const updatedSetting = await storage.updateSetting(key, value, req.user.id);
+      res.json(updatedSetting);
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      res.status(500).json({ error: 'Failed to update setting' });
+    }
+  });
+
+  // Get selected quiz questions (for admin panel)
+  app.get("/api/quiz/selected-questions", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    
+    try {
+      const selectedIdsStr = await storage.getSetting('selected_questions');
+      
+      if (!selectedIdsStr) {
+        return res.json([]);
+      }
+      
+      // Parse the stored comma-separated IDs
+      const selectedIds = selectedIdsStr.split(',').map(id => parseInt(id, 10));
+      
+      // Fetch all questions and filter by selected IDs
+      const allQuestions = await storage.getQuestions();
+      const selectedQuestions = allQuestions.filter(q => selectedIds.includes(q.id));
+      
+      res.json(selectedQuestions);
+    } catch (error) {
+      console.error('Error fetching selected questions:', error);
+      res.status(500).json({ error: 'Failed to fetch selected questions' });
+    }
+  });
+
+  // Update selected quiz questions
+  app.post("/api/quiz/selected-questions", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    
+    try {
+      const { questionIds } = req.body;
+      
+      if (!Array.isArray(questionIds)) {
+        return res.status(400).json({ error: 'Question IDs must be an array' });
+      }
+      
+      // Store the selected question IDs as a comma-separated string
+      const selectedIdsStr = questionIds.join(',');
+      
+      await storage.updateSetting('selected_questions', selectedIdsStr, req.user.id);
+      
+      res.json({ success: true, message: 'Selected questions updated successfully' });
+    } catch (error) {
+      console.error('Error updating selected questions:', error);
+      res.status(500).json({ error: 'Failed to update selected questions' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
