@@ -1405,15 +1405,57 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateQuestion(id: number, questionData: Partial<InsertQuestion>): Promise<Question> {
-    const [question] = await db
-      .update(questions)
-      .set({
-        ...questionData,
-        updatedAt: new Date()
-      })
-      .where(eq(questions.id, id))
-      .returning();
-    return question;
+    try {
+      // Make a copy of the question data to modify
+      const updatedData: Record<string, any> = { ...questionData };
+
+      // If weekOf is being updated, recalculate the availability dates
+      if (updatedData.weekOf) {
+        let weekOfDate: Date;
+        
+        if (typeof updatedData.weekOf === 'string') {
+          // Parse date string
+          weekOfDate = new Date(updatedData.weekOf);
+        } else {
+          weekOfDate = new Date(updatedData.weekOf);
+        }
+        
+        // Use our helper function to normalize the date to Monday of the week
+        weekOfDate = getWeekMonday(weekOfDate);
+        
+        // Format the date for PostgreSQL storage to prevent timezone issues
+        const formattedWeekOf = formatDateForPg(weekOfDate);
+        
+        // Get the week status for this date
+        const weekStatus = await this.getWeekStatus(weekOfDate);
+        
+        // Set availableFrom to the selected week's Monday (using UTC-safe approach)
+        const availableFrom = getWeekMonday(weekOfDate);
+        
+        // Set availableUntil to Sunday (using UTC-safe approach)
+        const availableUntil = getWeekSunday(weekOfDate);
+        
+        console.log(`Updating question to week of ${formattedWeekOf} (Monday) with status: ${weekStatus}`);
+        console.log(`Question will be available from ${formatDateForPg(availableFrom)} to ${formatDateForPg(availableUntil)}`);
+        
+        // Update the data with the normalized values
+        updatedData.weekOf = formattedWeekOf;
+        updatedData.weekStatus = weekStatus as 'past' | 'current' | 'future';
+        updatedData.availableFrom = formatDateForPg(availableFrom);
+        updatedData.availableUntil = formatDateForPg(availableUntil);
+      }
+      
+      const [question] = await db
+        .update(questions)
+        .set(updatedData)
+        .where(eq(questions.id, id))
+        .returning();
+        
+      return question;
+    } catch (error) {
+      console.error("Error updating question:", error);
+      throw new Error(`Failed to update question: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   async getCurrentWeek(): Promise<DimDate> {
@@ -1440,7 +1482,8 @@ export class DatabaseStorage implements IStorage {
   async getWeekStatus(date: Date): Promise<string> {
     try {
       // Format date as YYYY-MM-DD string for proper PostgreSQL date comparison
-      const formattedDate = date.toISOString().split('T')[0];
+      // using our UTC-based formatting to prevent timezone issues
+      const formattedDate = formatDateForPg(date);
       console.log(`Getting week status for date: ${formattedDate}`);
       
       const [week] = await db

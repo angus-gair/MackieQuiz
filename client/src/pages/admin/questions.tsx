@@ -316,7 +316,17 @@ export default function AdminQuestionsPage() {
                     <Label className="text-sm font-medium">Select Week</Label>
                     <Select
                       value={selectedWeek && !isNaN(selectedWeek.getTime()) ? format(selectedWeek, 'yyyy-MM-dd') : undefined}
-                      onValueChange={(value) => setSelectedWeek(parseISO(value))}
+                      onValueChange={(value) => {
+                        // First parse it to a Date object for local display purposes
+                        const weekDate = parseISO(value);
+                        setSelectedWeek(weekDate);
+                        
+                        // Store the string value in the newQuestion state to send to the server
+                        setNewQuestion(prev => ({ 
+                          ...prev, 
+                          weekOf: value // Keep as string format to prevent timezone shifts
+                        }));
+                      }}
                     >
                       <SelectTrigger className="mt-1.5 w-full">
                         <SelectValue placeholder="Select week" />
@@ -537,7 +547,7 @@ export default function AdminQuestionsPage() {
                           const weekDate = parseISO(value);
                           setEditingQuestion({ 
                             ...editingQuestion, 
-                            weekOf: weekDate,
+                            weekOf: value,  // Store as string to prevent timezone issues
                             // We don't set availableFrom and availableUntil here as they're calculated on the server
                           });
                         }}
