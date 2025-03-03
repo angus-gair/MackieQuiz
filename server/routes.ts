@@ -277,6 +277,19 @@ export function registerRoutes(app: Express): Server {
     await storage.archiveQuestion(id);
     res.sendStatus(200);
   });
+  
+  app.post("/api/questions/:id/toggle-inclusion", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    
+    try {
+      const questionId = parseInt(req.params.id);
+      const updatedQuestion = await storage.toggleQuestionInclusion(questionId);
+      res.json(updatedQuestion);
+    } catch (error) {
+      console.error("Error toggling question inclusion:", error);
+      res.status(500).json({ error: "Failed to toggle question inclusion", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
 
   app.patch("/api/questions/:id", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);

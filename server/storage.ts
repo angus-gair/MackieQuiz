@@ -52,6 +52,7 @@ export interface IStorage {
   getArchivedQuestions(): Promise<Question[]>;
   archiveQuestion(id: number): Promise<void>;
   getWeeklyQuestions(): Promise<Question[]>;
+  toggleQuestionInclusion(id: number): Promise<Question>;
   
   // App settings methods
   getSetting(key: string): Promise<string | null>;
@@ -612,6 +613,31 @@ export class DatabaseStorage implements IStorage {
       .update(questions)
       .set({ isArchived: true })
       .where(eq(questions.id, id));
+  }
+  
+  async toggleQuestionInclusion(id: number): Promise<Question> {
+    // First get the current question to check its includedInQuiz status
+    const [question] = await db
+      .select()
+      .from(questions)
+      .where(eq(questions.id, id));
+      
+    if (!question) {
+      throw new Error(`Question with id ${id} not found`);
+    }
+    
+    // Toggle the includedInQuiz field
+    const [updatedQuestion] = await db
+      .update(questions)
+      .set({ 
+        includedInQuiz: !question.includedInQuiz 
+      })
+      .where(eq(questions.id, id))
+      .returning();
+      
+    console.log(`Question ${id} toggled inclusion status: ${updatedQuestion.includedInQuiz}`);
+    
+    return updatedQuestion;
   }
   /**
    * Get the start of the week (Monday) for a given date
