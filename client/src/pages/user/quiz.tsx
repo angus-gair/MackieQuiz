@@ -80,8 +80,8 @@ export default function QuizPage() {
   });
 
   const currentQuestion = questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestion && questions ? 
-    currentQuestionIndex === questions.length - 1 : false;
+  const isLastQuestion = (currentQuestion && questions) ? 
+    (currentQuestionIndex === questions.length - 1 || questions.length === 1) : false;
   const canGoNext = currentQuestion ? !!selectedAnswers[currentQuestion.id] : false;
 
   const handleNext = () => {

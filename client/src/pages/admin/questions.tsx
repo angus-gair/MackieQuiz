@@ -401,7 +401,7 @@ export default function AdminQuestionsPage() {
           {/* Week filter radio buttons */}
           {availableWeeks && availableWeeks.length > 0 && (
             <Card className="p-4">
-              <h3 className="text-sm font-medium mb-3">Filter Questions by Week:</h3>
+              <h3 className="text-sm font-medium mb-3">Select which questions for quiz:</h3>
               <RadioGroup 
                 value={selectedWeekFilter || ''} 
                 onValueChange={(value) => setSelectedWeekFilter(value)}
