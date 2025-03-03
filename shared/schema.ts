@@ -191,6 +191,16 @@ export const authEvents = pgTable("auth_events", {
   failureReason: text("failure_reason"),
 });
 
+// Add a settings table to store application-wide settings
+export const appSettings = pgTable("app_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedBy: integer("updated_by"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -217,6 +227,10 @@ export const insertFeedbackSchema = createInsertSchema(feedback).omit({
   id: true,
   createdAt: true,
   status: true
+});
+export const insertAppSettingsSchema = createInsertSchema(appSettings).omit({
+  id: true,
+  updatedAt: true
 });
 
 export const insertAchievementSchema = createInsertSchema(achievements).omit({
@@ -258,6 +272,8 @@ export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 export type InsertAuthEvent = z.infer<typeof insertAuthEventSchema>;
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type Feedback = typeof feedback.$inferSelect;
+export type InsertAppSettings = z.infer<typeof insertAppSettingsSchema>;
+export type AppSettings = typeof appSettings.$inferSelect;
 
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;

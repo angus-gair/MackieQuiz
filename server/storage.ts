@@ -52,6 +52,12 @@ export interface IStorage {
   getArchivedQuestions(): Promise<Question[]>;
   archiveQuestion(id: number): Promise<void>;
   getWeeklyQuestions(): Promise<Question[]>;
+  
+  // App settings methods
+  getSetting(key: string): Promise<string | null>;
+  getAllSettings(): Promise<AppSettings[]>;
+  updateSetting(key: string, value: string, userId?: number): Promise<AppSettings>;
+  getSelectedWeekFilter(): Promise<string | null>;
 
   // New analytics methods
   createUserSession(session: InsertUserSession): Promise<UserSession>;
