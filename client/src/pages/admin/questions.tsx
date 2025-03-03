@@ -111,7 +111,16 @@ export default function AdminQuestionsPage() {
   
   const updateQuestionMutation = useMutation({
     mutationFn: async (question: Partial<Question> & { id: number }) => {
-      const res = await apiRequest("PATCH", `/api/questions/${question.id}`, question);
+      // Format the weekOf field if it exists to ensure proper date handling
+      const questionData = { ...question };
+      if (questionData.weekOf && typeof questionData.weekOf === 'object') {
+        questionData.weekOf = format(questionData.weekOf, 'yyyy-MM-dd');
+      }
+      // Remove availableFrom and availableUntil fields as they're set on the server based on weekOf
+      delete questionData.availableFrom;
+      delete questionData.availableUntil;
+      
+      const res = await apiRequest("PATCH", `/api/questions/${question.id}`, questionData);
       return await res.json();
     },
     onSuccess: () => {
@@ -515,26 +524,47 @@ export default function AdminQuestionsPage() {
                       />
                     </div>
                     
-                    <div className="space-y-1.5">
-                      <Label className="text-sm font-medium">Availability Dates</Label>
-                      <div className="flex items-center space-x-2 bg-muted rounded-md p-3 text-sm">
-                        <div>
-                          <span className="font-medium">From:</span>{' '}
-                          {editingQuestion.availableFrom 
-                            ? format(new Date(editingQuestion.availableFrom), 'MMM dd, yyyy') 
-                            : 'Not set'}
-                        </div>
-                        <div className="text-muted-foreground">|</div>
-                        <div>
-                          <span className="font-medium">To:</span>{' '}
-                          {editingQuestion.availableUntil 
-                            ? format(new Date(editingQuestion.availableUntil), 'MMM dd, yyyy') 
-                            : 'Not set'}
-                        </div>
+                    {/* Week selection dropdown */}
+                    <div>
+                      <Label className="text-sm font-medium">Select Week</Label>
+                      <Select
+                        value={editingQuestion.weekOf ? 
+                          (typeof editingQuestion.weekOf === 'string' ? 
+                            editingQuestion.weekOf : format(editingQuestion.weekOf, 'yyyy-MM-dd')) 
+                          : undefined}
+                        onValueChange={(value) => {
+                          if (!editingQuestion) return;
+                          const weekDate = parseISO(value);
+                          setEditingQuestion({ 
+                            ...editingQuestion, 
+                            weekOf: weekDate,
+                            // We don't set availableFrom and availableUntil here as they're calculated on the server
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="mt-1.5 w-full">
+                          <SelectValue placeholder="Select week" />
+                        </SelectTrigger>
+                        <SelectContent position="popper" className="w-full min-w-[200px]">
+                          {availableWeeks?.map((weekData) => {
+                            const weekDate = new Date(weekData.week);
+                            return (
+                              <SelectItem 
+                                key={weekData.week.toString()} 
+                                value={!isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : ''}
+                              >
+                                Week of {!isNaN(weekDate.getTime()) ? format(weekDate, 'MMM dd') : 'Unknown'}
+                                {weekData.weekIdentifier === 'Current' && " (Current)"}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <div className="mt-2">
+                        <p className="text-xs text-muted-foreground">
+                          Note: Availability dates (Monday-Sunday) will be automatically updated based on the selected week.
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Note: These dates are automatically set based on the selected week.
-                      </p>
                     </div>
 
                     <Button
