@@ -267,13 +267,19 @@ export class DatabaseStorage implements IStorage {
           correctAnswer: question.correctAnswer,
           options: question.options,
           category: question.category,
+          subcategory: question.subcategory || null, // Handle the subcategory field
+          difficulty: question.difficulty || 'medium',
+          tags: question.tags || [],
           explanation: question.explanation,
           weekOf: formattedWeekOf,
           isArchived: false, // Never archive new questions by default
           weekStatus: weekStatus as 'past' | 'current' | 'future',
           isBonus: question.isBonus || false,
           bonusPoints: question.bonusPoints || 10,
-          includedInQuiz: question.includedInQuiz || false // Default to not included in quiz
+          includedInQuiz: question.includedInQuiz || false, // Default to not included in quiz
+          teamTargets: question.teamTargets || [], // New field for targeting teams
+          usageCount: 0, // Initialize usage tracking
+          successRate: null // No success rate yet for new questions
         })
         .returning();
       
