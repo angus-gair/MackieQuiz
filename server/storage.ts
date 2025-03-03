@@ -295,31 +295,10 @@ export class DatabaseStorage implements IStorage {
           const totalQuizzes = Math.floor(userAnswers.length / 3);
           log(`User ${answer.userId} has completed ${totalQuizzes} quizzes total`);
 
-          // Explicitly check for first quiz achievement
-          if (totalQuizzes === 1) {
-            const [firstQuizAchievement] = await db.insert(achievements).values({
-              userId: answer.userId,
-              type: 'quiz_milestone',
-              milestone: 1,
-              name: 'First Quiz Complete',
-              description: 'Completed your first quiz!',
-              icon: 'quiz-1'
-            }).returning();
-            log(`Created first quiz achievement for user ${answer.userId}`);
-          }
-
-          // Check for other milestone achievements (3, 5, 7, 10)
-          const milestones = [3, 5, 7, 10];
-          if (milestones.includes(totalQuizzes)) {
-            const [achievement] = await db.insert(achievements).values({
-              userId: answer.userId,
-              type: 'quiz_milestone',
-              milestone: totalQuizzes,
-              name: `${totalQuizzes} Quizzes Complete!`,
-              description: `You've completed ${totalQuizzes} quizzes!`,
-              icon: `quiz-${totalQuizzes}`
-            }).returning();
-            log(`Created ${totalQuizzes} quiz milestone achievement for user ${answer.userId}`);
+          // Check for milestone achievements using our centralized method
+          const milestoneAchievement = await this.checkMilestoneAchievement(answer.userId, totalQuizzes);
+          if (milestoneAchievement) {
+            log(`Created milestone achievement for quiz #${totalQuizzes} for user ${answer.userId}`);
           }
 
         } catch (err) {
@@ -808,7 +787,8 @@ export class DatabaseStorage implements IStorage {
 
 
   private async checkMilestoneAchievement(userId: number, quizCount: number): Promise<Achievement | null> {
-    const milestones = [1, 3, 5, 7, 10];
+    // Updated milestone list to match requirements: 1, 3, 5, 7, 10, 13, 15, 17, 20
+    const milestones = [1, 3, 5, 7, 10, 13, 15, 17, 20];
     if (milestones.includes(quizCount)) {
       // Check if achievement already exists
       const [existing] = await db
@@ -828,6 +808,10 @@ export class DatabaseStorage implements IStorage {
           name: `${quizCount} Quizzes Completed`,
           description: `Completed ${quizCount} quizzes!`,
           icon: `quiz-${quizCount}`, // Frontend will map this to actual icon
+          badge: `milestone-${quizCount}`,
+          category: 'quiz',
+          tier: quizCount >= 15 ? 'gold' : quizCount >= 7 ? 'silver' : 'bronze',
+          isHighestTier: quizCount === 20 // 20 is the highest milestone
         }).returning();
         return achievement;
       }
@@ -1095,6 +1079,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async awardPerfectQuizAchievement(userId: number): Promise<Achievement | null> {
+    // Count how many perfect scores the user has achieved
+    const userAnswers = await this.getUserAnswers(userId);
+    
+    // Group answers by quiz completion (every 3 answers is a complete quiz)
+    const completedQuizzes = Math.floor(userAnswers.length / 3);
+    let perfectScoreCount = 0;
+    
+    // Analyze each completed quiz to count perfect scores
+    for (let i = 0; i < completedQuizzes; i++) {
+      const quizAnswers = userAnswers.slice(i * 3, (i + 1) * 3);
+      const isPerfect = quizAnswers.every(a => a.correct);
+      if (isPerfect) {
+        perfectScoreCount++;
+      }
+    }
+    
+    // Check if this is a new perfect score achievement
     const [existing] = await db
       .select()
       .from(achievements)
@@ -1106,6 +1107,7 @@ export class DatabaseStorage implements IStorage {
       );
 
     if (!existing) {
+      // First perfect score achievement
       const [achievement] = await db.insert(achievements).values({
         userId,
         type: 'perfect_score',
@@ -1116,10 +1118,15 @@ export class DatabaseStorage implements IStorage {
         badge: 'perfect-1',
         category: 'quiz',
         tier: 'gold',
-        isHighestTier: true
+        isHighestTier: true,
+        progress: 100
       }).returning();
       return achievement;
     }
+    
+    // For future improvement: award higher tier perfect score achievements
+    // based on perfectScoreCount (e.g., 3, 5, 10 perfect scores)
+    
     return null;
   }
 
