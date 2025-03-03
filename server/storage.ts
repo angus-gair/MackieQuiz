@@ -932,6 +932,7 @@ export class DatabaseStorage implements IStorage {
     const milestoneAchievement = await this.checkMilestoneAchievement(userId, quizCount);
     if (milestoneAchievement) {
       newAchievements.push(milestoneAchievement);
+      console.log(`User ${userId} earned milestone achievement for quiz #${quizCount}`);
     }
     
     // Check for perfect score achievement
@@ -943,8 +944,14 @@ export class DatabaseStorage implements IStorage {
         const perfectScoreAchievement = await this.awardPerfectQuizAchievement(userId);
         if (perfectScoreAchievement) {
           newAchievements.push(perfectScoreAchievement);
+          console.log(`User ${userId} earned perfect score achievement #${perfectScoreAchievement.milestone}`);
         }
       }
+    }
+
+    // Log combined achievements for debugging
+    if (newAchievements.length > 0) {
+      console.log(`User ${userId} earned ${newAchievements.length} achievements: ${newAchievements.map(a => a.name).join(', ')}`);
     }
 
     return newAchievements;
@@ -1163,8 +1170,8 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    // Check if this is a new perfect score achievement
-    const [existing] = await db
+    // Count how many perfect score achievements the user already has
+    const existingAchievements = await db
       .select()
       .from(achievements)
       .where(
@@ -1172,28 +1179,34 @@ export class DatabaseStorage implements IStorage {
           eq(achievements.userId, userId),
           eq(achievements.type, 'perfect_score')
         )
-      );
-
-    if (!existing) {
-      // First perfect score achievement
+      )
+      .orderBy(desc(achievements.milestone));
+    
+    const currentMilestone = existingAchievements.length > 0 
+      ? existingAchievements[0].milestone 
+      : 0;
+    
+    // Should we award a new perfect score achievement?
+    // Award if either first achievement or if perfect score count is higher than current milestone
+    if (currentMilestone < perfectScoreCount) {
+      // Award next perfect score milestone
+      const newMilestone = currentMilestone + 1;
       const [achievement] = await db.insert(achievements).values({
         userId,
         type: 'perfect_score',
-        milestone: 1,
-        name: 'Perfect Quiz Master',
-        description: 'Completed a quiz with all correct answers!',
+        milestone: newMilestone,
+        name: `Perfect Quiz Master ${newMilestone > 1 ? newMilestone : ''}`,
+        description: `Completed ${newMilestone} ${newMilestone > 1 ? 'quizzes' : 'quiz'} with all correct answers!`,
         icon: 'perfect-score',
-        badge: 'perfect-1',
+        badge: `perfect-${newMilestone}`,
         category: 'quiz',
-        tier: 'gold',
-        isHighestTier: true,
+        tier: newMilestone >= 5 ? 'gold' : newMilestone >= 3 ? 'silver' : 'bronze',
+        isHighestTier: newMilestone >= 5, // Gold tier is highest tier
         progress: 100
       }).returning();
+      
       return achievement;
     }
-    
-    // For future improvement: award higher tier perfect score achievements
-    // based on perfectScoreCount (e.g., 3, 5, 10 perfect scores)
     
     return null;
   }
