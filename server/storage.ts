@@ -619,11 +619,32 @@ export class DatabaseStorage implements IStorage {
       .set({ isArchived: true })
       .where(eq(questions.id, id));
   }
+  /**
+   * Get the start of the week (Monday) for a given date
+   * @param date The date to get the start of the week for
+   * @returns A new Date object set to the Monday of the week
+   */
+  private getWeekCommencing(date: Date): Date {
+    const result = new Date(date);
+    const day = result.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    // Adjust to the previous Monday (or stay on Monday)
+    // JavaScript: 0 = Sunday, so we adjust differently
+    const diff = day === 0 ? 6 : day - 1;
+    
+    result.setDate(result.getDate() - diff);
+    result.setHours(0, 0, 0, 0); // Start of the day
+    
+    return result;
+  }
+  
   async getWeeklyQuestions(): Promise<Question[]> {
     const today = new Date();
-    console.log(`Looking for questions available on ${today.toISOString()}`);
+    const weekCommencing = this.getWeekCommencing(today);
     
-    // Get questions that are currently available based on date range
+    console.log(`Looking for questions for the week commencing ${weekCommencing.toISOString()}`);
+    
+    // Get questions that match the current week
     const availableQuestions = await db
       .select()
       .from(questions)
@@ -631,17 +652,39 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(questions.isArchived, false),
           eq(questions.isBonus, false),
-          // When comparing dates, use nullable safety check with SQL expressions
-          sql`${questions.availableFrom} IS NOT NULL AND ${questions.availableFrom} <= ${today}`,
-          sql`${questions.availableUntil} IS NOT NULL AND ${questions.availableUntil} >= ${today}`
+          // Filter by questions where availableFrom is in the current week
+          sql`${questions.availableFrom} IS NOT NULL`,
+          // Compare the week start date of availableFrom with our current week start date
+          sql`DATE_TRUNC('week', ${questions.availableFrom}) = DATE_TRUNC('week', ${weekCommencing})`
         )
       );
     
-    console.log(`Found ${availableQuestions.length} available questions for the week`);
+    console.log(`Found ${availableQuestions.length} questions for the current week (${weekCommencing.toDateString()})`);
     
     if (availableQuestions.length === 0) {
-      // Fallback to regular questions if no available questions found
-      console.log("No available questions found for the current week, falling back to all active questions");
+      // Fallback to available questions if no questions found for the current week
+      console.log("No questions found for the current week, falling back to available questions");
+      
+      const availableQuestionsAnyWeek = await db
+        .select()
+        .from(questions)
+        .where(
+          and(
+            eq(questions.isArchived, false),
+            eq(questions.isBonus, false),
+            // When comparing dates, use nullable safety check with SQL expressions
+            sql`${questions.availableFrom} IS NOT NULL AND ${questions.availableFrom} <= ${today}`,
+            sql`${questions.availableUntil} IS NOT NULL AND ${questions.availableUntil} >= ${today}`
+          )
+        );
+        
+      if (availableQuestionsAnyWeek.length > 0) {
+        console.log(`Found ${availableQuestionsAnyWeek.length} available questions (any week)`);
+        return this.shuffleArray(availableQuestionsAnyWeek).slice(0, 3);
+      }
+      
+      // If still no questions, fall back to all active questions
+      console.log("No available questions found, falling back to all active questions");
       const allQuestions = await this.getQuestions();
       return this.shuffleArray(allQuestions).slice(0, 3);
     }
