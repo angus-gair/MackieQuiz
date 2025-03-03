@@ -163,6 +163,31 @@ export default function AdminQuestionsPage() {
       });
     },
   });
+  
+  // Toggle Question Inclusion Mutation
+  const toggleInclusionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest<Question>(`/api/questions/${id}/toggle-inclusion`, {
+        method: "POST",
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: data.includedInQuiz ? "Added to Quiz" : "Removed from Quiz",
+        description: data.includedInQuiz 
+          ? "The question has been included in the quiz rotation." 
+          : "The question has been removed from the quiz rotation.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update question",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleSubmitQuestion = (e: React.FormEvent) => {
     e.preventDefault();
@@ -620,9 +645,17 @@ export default function AdminQuestionsPage() {
 
                   <div className="space-y-4">
                     {weekQuestions.map((question) => (
-                      <div key={question.id} className="border rounded-lg p-4">
+                      <div 
+                        key={question.id} 
+                        className={`border rounded-lg p-4 ${question.includedInQuiz ? 'bg-primary/5 border-primary/30' : ''}`}
+                      >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
+                            {question.includedInQuiz && (
+                              <Badge variant="outline" className="mb-2 bg-primary/10 text-primary border-primary/30">
+                                Included in Quiz
+                              </Badge>
+                            )}
                             <div className="mb-4">
                               <div className="flex items-center gap-2 mb-2">
                                 <Badge variant="outline" className="px-2 py-0 h-6 font-normal">
@@ -674,6 +707,11 @@ export default function AdminQuestionsPage() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handleEditQuestion(question)}>
                                   Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => toggleInclusionMutation.mutate(question.id)}
+                                >
+                                  {question.includedInQuiz ? "Remove from Quiz" : "Add to Quiz"}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => {
