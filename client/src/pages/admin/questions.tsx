@@ -214,7 +214,17 @@ export default function AdminQuestionsPage() {
       return;
     }
 
-    createQuestionMutation.mutate(newQuestion as InsertQuestion);
+    // Format the date as a string in YYYY-MM-DD format to avoid timezone issues
+    // If weekOf is already set as a string from the select dropdown, use that
+    // Otherwise, format the selectedWeek date
+    const formattedQuestion = {
+      ...newQuestion,
+      weekOf: newQuestion.weekOf || format(selectedWeek, 'yyyy-MM-dd')
+    };
+    
+    console.log("Submitting question with weekOf:", formattedQuestion.weekOf);
+    
+    createQuestionMutation.mutate(formattedQuestion as InsertQuestion);
   };
 
   const handleSubmitQuestionEdit = (e: React.FormEvent) => {
@@ -248,11 +258,25 @@ export default function AdminQuestionsPage() {
       return;
     }
 
+    // Ensure we're using string format for dates to prevent timezone issues
+    console.log("Updating question with weekOf:", editingQuestion.weekOf);
+    
+    // The weekOf is already set as a string in the select onChange handler
     updateQuestionMutation.mutate(editingQuestion);
   };
   
   const handleEditQuestion = (question: Question) => {
-    setEditingQuestion({...question});
+    // If weekOf is a Date object, convert it to a string in YYYY-MM-DD format
+    // to prevent timezone issues when editing
+    const formattedQuestion = {
+      ...question,
+      weekOf: question.weekOf ? 
+        (typeof question.weekOf === 'string' ?
+          question.weekOf : format(new Date(question.weekOf), 'yyyy-MM-dd'))
+        : undefined
+    };
+    
+    setEditingQuestion(formattedQuestion);
     setIsEditQuestionSheetOpen(true);
   };
 
