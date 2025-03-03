@@ -25,6 +25,9 @@ const questionSetFormSchema = insertQuestionSetSchema.extend({
   // Add client-side validation
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
+  // Handle date fields as strings or Date objects
+  startDate: z.union([z.string(), z.date(), z.null()]),
+  endDate: z.union([z.string(), z.date(), z.null()]).nullable(),
   // Convert string arrays to comma-separated strings for easier form handling
   questionIds: z.union([z.array(z.number()), z.string()]),
   targetTeams: z.union([z.array(z.string()), z.string()]).optional(),
@@ -41,7 +44,7 @@ export default function QuestionSetsPage() {
   const { data: questionSets, isLoading: isLoadingQuestionSets } = useQuery({
     queryKey: ["/api/question-sets"],
     queryFn: async () => {
-      const res = await apiRequest("/api/question-sets");
+      const res = await apiRequest("/api/question-sets", { method: "GET" });
       return res.json() as Promise<QuestionSet[]>;
     },
   });
@@ -50,7 +53,7 @@ export default function QuestionSetsPage() {
   const { data: questions, isLoading: isLoadingQuestions } = useQuery({
     queryKey: ["/api/questions"],
     queryFn: async () => {
-      const res = await apiRequest("/api/questions");
+      const res = await apiRequest("/api/questions", { method: "GET" });
       return res.json();
     },
   });
@@ -88,9 +91,13 @@ export default function QuestionSetsPage() {
   // Create question set mutation
   const createQuestionSetMutation = useMutation({
     mutationFn: async (data: z.infer<typeof questionSetFormSchema>) => {
-      // Handle string-to-array conversion if needed
+      // Handle string-to-array conversion and date conversions if needed
       const formattedData = {
         ...data,
+        // Convert string dates to proper Date objects for the database
+        startDate: data.startDate ? new Date(data.startDate) : null,
+        endDate: data.endDate ? new Date(data.endDate) : null,
+        // Handle arrays
         questionIds: typeof data.questionIds === "string" 
           ? data.questionIds.split(",").map(id => parseInt(id.trim()))
           : data.questionIds,
@@ -129,9 +136,13 @@ export default function QuestionSetsPage() {
     mutationFn: async (data: z.infer<typeof questionSetFormSchema> & { id: number }) => {
       const { id, ...updateData } = data;
       
-      // Handle string-to-array conversion if needed
+      // Handle string-to-array conversion and date conversions if needed
       const formattedData = {
         ...updateData,
+        // Convert string dates to proper Date objects for the database
+        startDate: updateData.startDate ? new Date(updateData.startDate) : null,
+        endDate: updateData.endDate ? new Date(updateData.endDate) : null,
+        // Handle arrays
         questionIds: typeof updateData.questionIds === "string" 
           ? updateData.questionIds.split(",").map(id => parseInt(id.trim()))
           : updateData.questionIds,
