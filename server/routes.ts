@@ -134,7 +134,24 @@ export function registerRoutes(app: Express): Server {
     try {
       // Archive past weeks' questions first
       await storage.archivePastWeeks();
-      // Then get current week's questions
+      
+      // Check if there are any selected questions
+      const selectedIdsStr = await storage.getSetting('selected_questions');
+      
+      if (selectedIdsStr) {
+        // Parse the stored comma-separated IDs
+        const selectedIds = selectedIdsStr.split(',').map(id => parseInt(id, 10));
+        
+        // Fetch all questions and filter by selected IDs
+        const allQuestions = await storage.getQuestions();
+        const selectedQuestions = allQuestions.filter(q => selectedIds.includes(q.id));
+        
+        if (selectedQuestions.length > 0) {
+          return res.json(selectedQuestions);
+        }
+      }
+      
+      // Fall back to current week questions if no selected questions
       const questions = await storage.getCurrentWeekQuestions();
       res.json(questions);
     } catch (error) {
@@ -199,7 +216,23 @@ export function registerRoutes(app: Express): Server {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     try {
-      // Get current week's questions for the user
+      // First check if there are any selected questions
+      const selectedIdsStr = await storage.getSetting('selected_questions');
+      
+      if (selectedIdsStr) {
+        // Parse the stored comma-separated IDs
+        const selectedIds = selectedIdsStr.split(',').map(id => parseInt(id, 10));
+        
+        // Fetch all questions and filter by selected IDs
+        const allQuestions = await storage.getQuestions();
+        const selectedQuestions = allQuestions.filter(q => selectedIds.includes(q.id));
+        
+        if (selectedQuestions.length > 0) {
+          return res.json(selectedQuestions);
+        }
+      }
+      
+      // Fall back to current week questions if no selected questions
       const questions = await storage.getCurrentWeekQuestions();
       res.json(questions);
     } catch (error) {
