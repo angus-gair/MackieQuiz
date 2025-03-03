@@ -44,7 +44,7 @@ export default function QuizPage() {
       const question = questions.find(q => q.id === answer.questionId);
       const isCorrect = question ? question.correctAnswer === answer.selectedOption : false;
       
-      return apiRequest<AnswerResponse>(
+      const response = await apiRequest(
         "POST",
         "/api/answers",
         {
@@ -53,12 +53,15 @@ export default function QuizPage() {
           correct: isCorrect, // Add the correct field
         }
       );
+      
+      // Cast the response to our expected type
+      return response as unknown as AnswerResponse;
     },
     onSuccess: (response) => {
       console.log("Response from server:", response);
       // Handle the last question case differently
       if (isLastQuestion) {
-        setLocation("/user/quiz-completion");
+        setLocation("/quiz-completion");
         return;
       }
       
