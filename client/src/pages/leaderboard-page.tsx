@@ -123,10 +123,10 @@ export default function LeaderboardPage() {
             }
           </p>
 
-          {/* Container width display */}
-          <div className="text-center mb-2 text-xs text-gray-400">
+          {/* Container width for debugging - hidden in production
+          <div className="text-center mb-2 text-xs text-gray-400 hidden">
             Container width: {containerWidth}px
-          </div>
+          </div> */}
 
           {/* Card Container */}
           <div className="w-full" style={{ width: '100%', maxWidth: '100%' }}>
@@ -150,7 +150,11 @@ export default function LeaderboardPage() {
                               {index + 1}. {user.username}
                             </span>
                           </div>
-                          <span className="text-dynamic-base font-bold text-emerald-600 flex-shrink-0">{user.weeklyScore ?? 0} pts</span>
+                          {index < 10 ? (
+                            <span className="text-dynamic-base font-bold text-emerald-600 flex-shrink-0">{user.weeklyScore ?? 0} pts</span>
+                          ) : (
+                            <span className="text-dynamic-base font-bold text-emerald-600 flex-shrink-0 blur-sm select-none opacity-70">{user.weeklyScore ?? 0} pts</span>
+                          )}
                         </CardTitle>
                       </CardHeader>
                     </Card>
