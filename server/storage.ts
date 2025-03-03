@@ -1,4 +1,4 @@
-import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile} from "@shared/schema";
+import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, appSettings, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile, type AppSettings} from "@shared/schema";
 import { feedback, type Feedback, type InsertFeedback, dimDate } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lte, lt } from "drizzle-orm";
@@ -1744,6 +1744,73 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(questions.availableUntil);
+  }
+
+  // App settings methods implementation
+  async getSetting(key: string): Promise<string | null> {
+    try {
+      const [setting] = await db
+        .select()
+        .from(appSettings)
+        .where(eq(appSettings.key, key));
+      
+      return setting ? setting.value : null;
+    } catch (error) {
+      console.error(`Error fetching setting [${key}]:`, error);
+      return null;
+    }
+  }
+  
+  async getAllSettings(): Promise<AppSettings[]> {
+    try {
+      return await db.select().from(appSettings);
+    } catch (error) {
+      console.error("Error fetching all settings:", error);
+      return [];
+    }
+  }
+  
+  async updateSetting(key: string, value: string, userId?: number): Promise<AppSettings> {
+    try {
+      // Check if setting exists
+      const existingSetting = await this.getSetting(key);
+      
+      if (existingSetting !== null) {
+        // Update existing setting
+        const [updatedSetting] = await db
+          .update(appSettings)
+          .set({ 
+            value, 
+            updatedAt: new Date(),
+            updatedBy: userId || null
+          })
+          .where(eq(appSettings.key, key))
+          .returning();
+          
+        return updatedSetting;
+      } else {
+        // Create new setting
+        const [newSetting] = await db
+          .insert(appSettings)
+          .values({
+            key,
+            value,
+            description: `Setting created on ${new Date().toISOString()}`,
+            updatedAt: new Date(),
+            updatedBy: userId || null
+          })
+          .returning();
+          
+        return newSetting;
+      }
+    } catch (error) {
+      console.error(`Error updating setting [${key}]:`, error);
+      throw new Error(`Failed to update setting: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  async getSelectedWeekFilter(): Promise<string | null> {
+    return this.getSetting('selected_week_filter');
   }
 }
 
