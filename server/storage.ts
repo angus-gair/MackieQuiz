@@ -1346,15 +1346,31 @@ export class DatabaseStorage implements IStorage {
   async createFeedback(feedbackData: InsertFeedback): Promise<Feedback> {
     try {
       console.log('Creating feedback in storage:', feedbackData); // Debug log
-      const [newFeedback] = await db
-        .insert(feedback)
-        .values({
-          ...feedbackData,
-          createdAt: new Date()
-        })
-        .returning();
-      console.log('Feedback created successfully:', newFeedback); // Debug log
-      return newFeedback;
+      
+      // Ensure status is set to 'pending' if not provided
+      const dataToInsert = {
+        ...feedbackData,
+        status: feedbackData.status || 'pending',
+        createdAt: new Date()
+      };
+      
+      // Try to create the feedback with proper error handling
+      try {
+        const [newFeedback] = await db
+          .insert(feedback)
+          .values(dataToInsert)
+          .returning();
+        
+        console.log('Feedback created successfully:', newFeedback); // Debug log
+        return newFeedback;
+      } catch (e) {
+        // If there's an error, check if it's because the table doesn't exist
+        if (e instanceof Error && e.message.includes('relation "feedback" does not exist')) {
+          console.error('Feedback table does not exist.');
+          throw new Error('Feedback table does not exist. Please run database migrations.');
+        }
+        throw e;
+      }
     } catch (error) {
       console.error('Error creating feedback:', error);
       throw error;
