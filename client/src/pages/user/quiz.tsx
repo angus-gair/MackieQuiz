@@ -22,14 +22,29 @@ export default function QuizPage() {
     queryKey: ["/api/questions/weekly"],
   });
 
+  // Define a type for the API response
+  type AnswerResponse = {
+    answer: Answer;
+    achievements?: {
+      id: number;
+      type: string;
+      name: string;
+      description: string;
+      icon: string;
+      badge: string;
+      tier: string;
+      milestone: number;
+    }[];
+  };
+
   // Submit answer mutation
-  const submitAnswerMutation = useMutation({
+  const submitAnswerMutation = useMutation<AnswerResponse, Error, { questionId: number; selectedOption: string }>({
     mutationFn: async (answer: { questionId: number; selectedOption: string }) => {
       // Find the current question to check if the answer is correct
       const question = questions.find(q => q.id === answer.questionId);
       const isCorrect = question ? question.correctAnswer === answer.selectedOption : false;
       
-      return apiRequest(
+      return apiRequest<AnswerResponse>(
         "POST",
         "/api/answers",
         {
@@ -40,21 +55,16 @@ export default function QuizPage() {
       );
     },
     onSuccess: (response) => {
-      // Check if the quiz is completed based on the response
-      const quizCompleted = response?.quizCompleted === true;
+      console.log("Response from server:", response);
+      // Handle the last question case differently
+      if (isLastQuestion) {
+        setLocation("/user/quiz-completion");
+        return;
+      }
       
-      // Move to next question or complete quiz
-      if (questions && currentQuestionIndex < questions.length - 1 && !quizCompleted) {
+      // For non-last questions, proceed to the next question
+      if (questions && currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
-      } else if (quizCompleted) {
-        // If the server says the quiz is completed, go to completion page
-        // This handles both the case of the last question and any server-side logic
-        setLocation("/quiz-completion");
-      } else {
-        // Move to next question as a fallback
-        setCurrentQuestionIndex(prev => 
-          prev < questions.length - 1 ? prev + 1 : prev
-        );
       }
     },
     onError: (error: Error) => {
@@ -88,7 +98,25 @@ export default function QuizPage() {
   };
 
   const handleSubmit = () => {
-    if (!currentQuestion || !canGoNext) return;
+    if (!currentQuestion) return;
+    
+    // Check if an answer has been selected for the current question
+    const hasSelectedAnswer = !!selectedAnswers[currentQuestion.id];
+    
+    // Don't proceed if no answer is selected
+    if (!hasSelectedAnswer) {
+      toast({
+        title: "Please select an answer",
+        description: "You need to select an answer before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Submitting answer:", {
+      questionId: currentQuestion.id,
+      selectedOption: selectedAnswers[currentQuestion.id],
+    });
 
     // Submit answer for the last question
     submitAnswerMutation.mutate({
