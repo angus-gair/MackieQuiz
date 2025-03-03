@@ -271,13 +271,50 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/answers", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
-    const answer = insertAnswerSchema.parse({
-      ...req.body,
-      userId: req.user.id
-    });
+    try {
+      // Parse and validate answer data
+      const answer = insertAnswerSchema.parse({
+        ...req.body,
+        userId: req.user.id
+      });
 
-    const result = await storage.submitAnswer(answer);
-    res.json(result);
+      // Submit the answer
+      const result = await storage.submitAnswer(answer);
+      
+      // Check for any earned achievements after submitting answer
+      // We need to check the number of answers to determine if a quiz was completed
+      const userAnswers = await storage.getUserAnswers(req.user.id);
+      
+      // If the user just completed a quiz (answers count is divisible by 3)
+      if (userAnswers.length % 3 === 0) {
+        // Check for achievements that should be awarded
+        const achievements = await storage.checkAndAwardAchievements(req.user.id);
+        
+        // Log how many achievements were earned
+        if (achievements.length > 0) {
+          console.log(`User ${req.user.id} earned ${achievements.length} achievements: ${achievements.map(a => a.name).join(', ')}`);
+        }
+        
+        // Add achievement information to the response
+        return res.json({
+          answer: result,
+          achievements: achievements,
+          quizCompleted: true
+        });
+      }
+      
+      // Return just the answer if quiz is not completed
+      res.json({
+        answer: result,
+        quizCompleted: false
+      });
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+      res.status(500).json({ 
+        error: "Failed to submit answer",
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   });
 
   app.get("/api/answers", async (req, res) => {

@@ -39,13 +39,22 @@ export default function QuizPage() {
         }
       );
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      // Check if the quiz is completed based on the response
+      const quizCompleted = response?.quizCompleted === true;
+      
       // Move to next question or complete quiz
-      if (questions && currentQuestionIndex < questions.length - 1) {
+      if (questions && currentQuestionIndex < questions.length - 1 && !quizCompleted) {
         setCurrentQuestionIndex(prev => prev + 1);
-      } else {
-        // Quiz completed
+      } else if (quizCompleted) {
+        // If the server says the quiz is completed, go to completion page
+        // This handles both the case of the last question and any server-side logic
         setLocation("/quiz-completion");
+      } else {
+        // Move to next question as a fallback
+        setCurrentQuestionIndex(prev => 
+          prev < questions.length - 1 ? prev + 1 : prev
+        );
       }
     },
     onError: (error: Error) => {
