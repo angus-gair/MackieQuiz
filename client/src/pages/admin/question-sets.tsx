@@ -91,9 +91,15 @@ export default function QuestionSetsPage() {
   // Create question set mutation
   const createQuestionSetMutation = useMutation({
     mutationFn: async (data: z.infer<typeof questionSetFormSchema>) => {
+      // Get the user data from the auth context
+      const { data: userData } = await apiRequest("GET", "/api/user");
+      const user = await userData.json();
+      
       // Handle string-to-array conversion and date conversions if needed
       const formattedData = {
         ...data,
+        // Add the createdBy field required by the server
+        createdBy: user.id,
         // Convert string dates to proper Date objects for the database
         startDate: data.startDate ? new Date(data.startDate) : null,
         endDate: data.endDate ? new Date(data.endDate) : null,
