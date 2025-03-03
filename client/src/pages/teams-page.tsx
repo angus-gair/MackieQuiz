@@ -140,8 +140,8 @@ export default function TeamsPage() {
                             <CardHeader className="pb-4">
                               {/* Prominent centered team logo */}
                               <div className="flex flex-col items-center mb-4">
-                                <div className="mb-2">
-                                  <TeamLogo teamName={team} size="lg" className="h-24 w-24" />
+                                <div className="mb-3">
+                                  <TeamLogo teamName={team} size="lg" className="h-32 w-32" />
                                 </div>
                                 <div className="text-center">
                                   <CardTitle className="text-2xl font-bold text-foreground">
@@ -183,9 +183,15 @@ export default function TeamsPage() {
                                     </Avatar>
                                     <div className="flex-1">
                                       <div className="font-medium">{user.username}</div>
-                                      <div className="text-xs text-muted-foreground">
-                                        Score: {user.weeklyScore || 0}
-                                      </div>
+                                      {index < 3 ? (
+                                        <div className="text-xs text-muted-foreground">
+                                          Score: {user.weeklyScore || 0}
+                                        </div>
+                                      ) : (
+                                        <div className="text-xs text-muted-foreground blur-sm select-none opacity-70">
+                                          Score: {user.weeklyScore || 0}
+                                        </div>
+                                      )}
                                     </div>
                                     {index === 0 && members.length > 1 && (
                                       <Trophy className="h-5 w-5 text-amber-500" />
