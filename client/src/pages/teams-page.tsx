@@ -141,7 +141,7 @@ export default function TeamsPage() {
                               {/* Prominent centered team logo */}
                               <div className="flex flex-col items-center mb-4">
                                 <div className="mb-3">
-                                  <TeamLogo teamName={team} size="lg" className="h-32 w-32" />
+                                  <TeamLogo teamName={team} size="lg" className="h-40 w-40" />
                                 </div>
                                 <div className="text-center">
                                   <CardTitle className="text-2xl font-bold text-foreground">
