@@ -328,6 +328,13 @@ export default function AdminQuestionsPage() {
                   Add Question
                 </Button>
               </SheetTrigger>
+              <SheetContent side="right" className="w-full p-4 sm:p-6 md:max-w-xl overflow-y-auto max-h-screen">
+                <SheetHeader className="mb-5">
+                  <SheetTitle className="text-xl">
+                    Add New Question
+                  </SheetTitle>
+                </SheetHeader>
+            </SheetContent>
             </Sheet>
           </div>
           
@@ -361,13 +368,7 @@ export default function AdminQuestionsPage() {
                 })}
               </RadioGroup>
             </Card>
-          )}
-            <SheetContent side="right" className="w-full p-4 sm:p-6 md:max-w-xl overflow-y-auto max-h-screen">
-              <SheetHeader className="mb-5">
-                <SheetTitle className="text-xl">
-                  Add New Question
-                </SheetTitle>
-              </SheetHeader>
+          )
               
               {/* Week selection dropdown in the form */}
               <div className="mt-4">
@@ -660,7 +661,15 @@ export default function AdminQuestionsPage() {
         </div>
 
         <div className="space-y-4">
-          {availableWeeks?.map((weekData) => {
+          {availableWeeks?.filter(weekData => {
+            // If no week is selected in the filter, show all weeks
+            if (!selectedWeekFilter) return true;
+            
+            // Otherwise, only show weeks that match the selected week date
+            const weekDate = new Date(weekData.week);
+            const formattedWeekDate = !isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : '';
+            return formattedWeekDate === selectedWeekFilter;
+          }).map((weekData) => {
             const weekQuestions = getQuestionsForWeek(weekData, questions);
             const isCurrentWeek = weekData.weekIdentifier === 'Current';
 
