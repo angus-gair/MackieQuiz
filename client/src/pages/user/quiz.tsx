@@ -91,8 +91,10 @@ export default function QuizPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <main className="pt-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        <main className="pt-16">
+          <div className="mx-auto flex items-center justify-center min-h-[calc(100vh-8rem)]" style={{ width: '672px', maxWidth: '100%' }}>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+          </div>
         </main>
       </div>
     );
@@ -101,8 +103,8 @@ export default function QuizPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <main className="pt-16 px-4">
-          <div className="flex flex-col items-center justify-center p-4 max-w-5xl mx-auto">
+        <main className="pt-16">
+          <div className="flex flex-col items-center justify-center p-4 mx-auto" style={{ width: '672px', maxWidth: '100%' }}>
             <div className="text-red-500 mb-4">
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -124,8 +126,8 @@ export default function QuizPage() {
   if (!questions || questions.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <main className="pt-16 px-4">
-          <div className="flex flex-col items-center justify-center p-4 max-w-5xl mx-auto">
+        <main className="pt-16">
+          <div className="flex flex-col items-center justify-center p-4 mx-auto" style={{ width: '672px', maxWidth: '100%' }}>
             <div className="text-amber-500 mb-4">
               <ClipboardCheck className="w-12 h-12" />
             </div>
@@ -144,8 +146,8 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="pt-16 pb-24 px-4">
-        <div className="container max-w-5xl mx-auto space-y-4 w-full">
+      <main className="pt-16 pb-24">
+        <div className="mx-auto px-4 space-y-4 w-full" style={{ width: '672px', maxWidth: '100%' }}>
           {/* Progress indicator */}
           <Card className="shadow-sm">
             <CardContent className="py-4">
