@@ -195,8 +195,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyQuestions(): Promise<Question[]> {
-    const allQuestions = await this.getQuestions();
-    return this.shuffleArray(allQuestions).slice(0, 3);
+    const today = new Date();
+    
+    // Get questions that are currently available based on date range
+    const availableQuestions = await db
+      .select()
+      .from(questions)
+      .where(
+        and(
+          eq(questions.isArchived, false),
+          eq(questions.isBonus, false),
+          lte(questions.availableFrom!, today),
+          gte(questions.availableUntil!, today)
+        )
+      );
+    
+    console.log(`Found ${availableQuestions.length} available questions for today`);
+    
+    if (availableQuestions.length === 0) {
+      // Fallback to regular questions if no available questions found
+      console.log("No available questions found for the current date range, falling back to all active questions");
+      const allQuestions = await this.getQuestions();
+      return this.shuffleArray(allQuestions).slice(0, 3);
+    }
+    
+    return this.shuffleArray(availableQuestions).slice(0, 3);
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
@@ -227,9 +250,17 @@ export class DatabaseStorage implements IStorage {
       // Get the week status for this date
       const weekStatus = await this.getWeekStatus(weekOfDate);
       
-      console.log(`Creating question for week of ${formattedWeekOf} (Monday) with status: ${weekStatus}`);
+      // Set availableFrom to the selected week's Monday
+      const availableFrom = new Date(weekOfDate);
       
-      // Create the question with the normalized date
+      // Set availableUntil to Monday + 6 days (Sunday)
+      const availableUntil = new Date(weekOfDate);
+      availableUntil.setDate(availableUntil.getDate() + 6);
+      
+      console.log(`Creating question for week of ${formattedWeekOf} (Monday) with status: ${weekStatus}`);
+      console.log(`Question will be available from ${availableFrom.toISOString()} to ${availableUntil.toISOString()}`);
+      
+      // Create the question with the normalized date and availability window
       const [newQuestion] = await db
         .insert(questions)
         .values({
@@ -243,8 +274,9 @@ export class DatabaseStorage implements IStorage {
           weekStatus: weekStatus as 'past' | 'current' | 'future',
           isBonus: question.isBonus || false,
           bonusPoints: question.bonusPoints || 10,
-          availableFrom: question.availableFrom,
-          availableUntil: question.availableUntil
+          // Override any supplied availableFrom/Until with our calculated values
+          availableFrom: availableFrom,
+          availableUntil: availableUntil
         })
         .returning();
       
@@ -622,8 +654,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(questions.id, id));
   }
   async getWeeklyQuestions(): Promise<Question[]> {
-    const allQuestions = await this.getQuestions();
-    return this.shuffleArray(allQuestions).slice(0, 3);
+    const today = new Date();
+    
+    // Get questions that are currently available based on date range
+    const availableQuestions = await db
+      .select()
+      .from(questions)
+      .where(
+        and(
+          eq(questions.isArchived, false),
+          eq(questions.isBonus, false),
+          lte(questions.availableFrom!, today),
+          gte(questions.availableUntil!, today)
+        )
+      );
+    
+    console.log(`Found ${availableQuestions.length} available questions for the week`);
+    
+    if (availableQuestions.length === 0) {
+      // Fallback to regular questions if no available questions found
+      console.log("No available questions found for the current week, falling back to all active questions");
+      const allQuestions = await this.getQuestions();
+      return this.shuffleArray(allQuestions).slice(0, 3);
+    }
+    
+    return this.shuffleArray(availableQuestions).slice(0, 3);
   }
 
   async createUserSession(session: InsertUserSession): Promise<UserSession> {
