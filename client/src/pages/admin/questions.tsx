@@ -368,11 +368,11 @@ export default function AdminQuestionsPage() {
                 })}
               </RadioGroup>
             </Card>
-          )
+          )}
               
-              {/* Week selection dropdown in the form */}
-              <div className="mt-4">
-                <form onSubmit={handleSubmitQuestion} className="space-y-5">
+          {/* Week selection dropdown in the form */}
+          <div className="mt-4">
+            <form onSubmit={handleSubmitQuestion} className="space-y-5">
                   {/* Week selection */}
                   <div>
                     <Label className="text-sm font-medium">Select Week</Label>
