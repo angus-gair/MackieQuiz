@@ -62,8 +62,8 @@ function Router() {
       <div className={`flex-1 ${contentClasses} max-w-5xl mx-auto`}>
         <Suspense fallback={<LoadingSpinner />}>
           <Switch>
-            <Route path="/auth" component={AuthPage as AnyComponent} />
-            <Route path="/" component={WelcomePage as AnyComponent} />
+            <Route path="/" component={AuthPage as AnyComponent} />
+            <Route path="/welcome" component={WelcomePage as AnyComponent} />
             
             {/* Protected Routes */}
             <ProtectedRoute path="/team-allocation" component={TeamAllocationPage as AnyComponent} />
