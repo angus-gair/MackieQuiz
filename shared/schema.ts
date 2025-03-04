@@ -128,9 +128,6 @@ export const questions = pgTable("questions", {
   correctAnswer: text("correct_answer").notNull(),
   options: text("options").array().notNull(),
   category: text("category").notNull(),
-  subcategory: text("subcategory"), // NEW: More granular categorization
-  difficulty: text("difficulty", { enum: ['easy', 'medium', 'hard'] }).notNull().default('medium'), // NEW
-  tags: text("tags").array(), // NEW: For flexible grouping
   explanation: text("explanation").notNull(),
   weekOf: date("week_of").notNull(),
   isArchived: boolean("is_archived").notNull().default(false),
@@ -138,12 +135,7 @@ export const questions = pgTable("questions", {
   isBonus: boolean("is_bonus").notNull().default(false),
   bonusPoints: integer("bonus_points").notNull().default(10),
   includedInQuiz: boolean("included_in_quiz").notNull().default(false),
-  teamTargets: text("team_targets").array(), // NEW: Target specific teams
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  lastUsed: timestamp("last_used"), // NEW: Track when question was last presented
-  usageCount: integer("usage_count").notNull().default(0), // NEW: Track how many times used
-  successRate: integer("success_rate"), // NEW: % of correct answers
-  authorId: integer("author_id"), // NEW: Track who created the question
+  // Removing availableFrom and availableUntil fields as they're no longer needed
 });
 
 // Define relations between questions and dim_date
@@ -209,23 +201,6 @@ export const appSettings = pgTable("app_settings", {
   updatedBy: integer("updated_by"),
 });
 
-// Question Set Model for organizing and scheduling sets of questions
-export const questionSets = pgTable("question_sets", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
-  active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  startDate: timestamp("start_date"),
-  endDate: timestamp("end_date"),
-  targetTeams: text("target_teams").array(),
-  questionIds: integer("question_ids").array().notNull(),
-  rotationStrategy: text("rotation_strategy", { 
-    enum: ['random', 'sequential', 'adaptive'] 
-  }).notNull().default('random'),
-  createdBy: integer("created_by").notNull(),
-});
-
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -255,11 +230,6 @@ export const insertFeedbackSchema = createInsertSchema(feedback).omit({
 export const insertAppSettingsSchema = createInsertSchema(appSettings).omit({
   id: true,
   updatedAt: true
-});
-
-export const insertQuestionSetSchema = createInsertSchema(questionSets).omit({
-  id: true,
-  createdAt: true
 });
 
 export const insertAchievementSchema = createInsertSchema(achievements).omit({
@@ -303,9 +273,6 @@ export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type Feedback = typeof feedback.$inferSelect;
 export type InsertAppSettings = z.infer<typeof insertAppSettingsSchema>;
 export type AppSettings = typeof appSettings.$inferSelect;
-
-export type InsertQuestionSet = z.infer<typeof insertQuestionSetSchema>;
-export type QuestionSet = typeof questionSets.$inferSelect;
 
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;

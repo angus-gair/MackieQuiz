@@ -33,7 +33,6 @@ const DebugLogosPage = lazy(() => import("@/pages/debug-logos"));
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
 const AdminQuestions = lazy(() => import("@/pages/admin/questions-new"));
-const AdminQuestionSets = lazy(() => import("@/pages/admin/question-sets"));
 const AdminArchivedQuestions = lazy(() => import("@/pages/admin/archived-questions"));
 const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
 const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
@@ -79,7 +78,6 @@ function Router() {
             {/* Admin Routes */}
             <AdminRoute path="/admin" component={AdminDashboard as AnyComponent} />
             <AdminRoute path="/admin/questions" component={AdminQuestions as AnyComponent} />
-            <AdminRoute path="/admin/question-sets" component={AdminQuestionSets as AnyComponent} />
             <AdminRoute path="/admin/questions/archived" component={AdminArchivedQuestions as AnyComponent} />
             <AdminRoute path="/admin/users" component={AdminUsersTeams as AnyComponent} />
             <AdminRoute path="/admin/achievements" component={AdminAchievements as AnyComponent} />

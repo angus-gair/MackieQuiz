@@ -1,4 +1,4 @@
-import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, appSettings, questionSets, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile, type AppSettings, type QuestionSet, type InsertQuestionSet} from "@shared/schema";
+import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, appSettings, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile, type AppSettings} from "@shared/schema";
 import { feedback, type Feedback, type InsertFeedback, dimDate } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lte, lt } from "drizzle-orm";
@@ -136,15 +136,6 @@ export interface IStorage {
   createBonusQuestion(question: InsertQuestion & { bonusPoints: number; availableFrom: Date; availableUntil: Date }): Promise<Question>;
   getActiveBonusQuestions(): Promise<Question[]>;
   getAvailableWeeks(): Promise<DimDate[]>;
-  
-  // Question Sets methods
-  createQuestionSet(questionSet: InsertQuestionSet): Promise<QuestionSet>;
-  getQuestionSet(id: number): Promise<QuestionSet | undefined>;
-  getActiveQuestionSets(): Promise<QuestionSet[]>;
-  updateQuestionSet(id: number, data: Partial<InsertQuestionSet>): Promise<QuestionSet>;
-  deleteQuestionSet(id: number): Promise<void>;
-  getQuestionSetsForTeam(teamName: string): Promise<QuestionSet[]>;
-  getQuestionsForUser(userId: number, setId: number, count?: number): Promise<Question[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -267,19 +258,13 @@ export class DatabaseStorage implements IStorage {
           correctAnswer: question.correctAnswer,
           options: question.options,
           category: question.category,
-          subcategory: question.subcategory || null, // Handle the subcategory field
-          difficulty: question.difficulty || 'medium',
-          tags: question.tags || [],
           explanation: question.explanation,
           weekOf: formattedWeekOf,
           isArchived: false, // Never archive new questions by default
           weekStatus: weekStatus as 'past' | 'current' | 'future',
           isBonus: question.isBonus || false,
           bonusPoints: question.bonusPoints || 10,
-          includedInQuiz: question.includedInQuiz || false, // Default to not included in quiz
-          teamTargets: question.teamTargets || [], // New field for targeting teams
-          usageCount: 0, // Initialize usage tracking
-          successRate: null // No success rate yet for new questions
+          includedInQuiz: question.includedInQuiz || false // Default to not included in quiz
         })
         .returning();
       
@@ -1811,223 +1796,6 @@ export class DatabaseStorage implements IStorage {
   
   async getSelectedWeekFilter(): Promise<string | null> {
     return this.getSetting('selected_week_filter');
-  }
-
-  // Question Sets methods
-  
-  /**
-   * Creates a new question set
-   * @param questionSet The question set data to create
-   * @returns The created question set
-   */
-  async createQuestionSet(questionSet: InsertQuestionSet): Promise<QuestionSet> {
-    try {
-      const [newQuestionSet] = await db
-        .insert(questionSets)
-        .values({
-          name: questionSet.name,
-          description: questionSet.description,
-          active: questionSet.active ?? true,
-          startDate: questionSet.startDate,
-          endDate: questionSet.endDate,
-          targetTeams: questionSet.targetTeams,
-          questionIds: questionSet.questionIds,
-          rotationStrategy: questionSet.rotationStrategy ?? 'random',
-          createdBy: questionSet.createdBy
-        })
-        .returning();
-      
-      console.log(`Created new question set: ${newQuestionSet.name} with ${newQuestionSet.questionIds.length} questions`);
-      return newQuestionSet;
-    } catch (error) {
-      console.error("Error creating question set:", error);
-      throw new Error(`Failed to create question set: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-  
-  /**
-   * Gets a question set by ID
-   * @param id The ID of the question set to get
-   * @returns The question set or undefined if not found
-   */
-  async getQuestionSet(id: number): Promise<QuestionSet | undefined> {
-    const [questionSet] = await db
-      .select()
-      .from(questionSets)
-      .where(eq(questionSets.id, id));
-    
-    return questionSet;
-  }
-  
-  /**
-   * Gets all active question sets
-   * @returns An array of active question sets
-   */
-  async getActiveQuestionSets(): Promise<QuestionSet[]> {
-    return await db
-      .select()
-      .from(questionSets)
-      .where(eq(questionSets.active, true))
-      .orderBy(questionSets.createdAt);
-  }
-  
-  /**
-   * Updates a question set
-   * @param id The ID of the question set to update
-   * @param data The data to update
-   * @returns The updated question set
-   */
-  async updateQuestionSet(id: number, data: Partial<InsertQuestionSet>): Promise<QuestionSet> {
-    const [updatedQuestionSet] = await db
-      .update(questionSets)
-      .set(data)
-      .where(eq(questionSets.id, id))
-      .returning();
-    
-    return updatedQuestionSet;
-  }
-  
-  /**
-   * Deletes a question set
-   * @param id The ID of the question set to delete
-   */
-  async deleteQuestionSet(id: number): Promise<void> {
-    await db
-      .delete(questionSets)
-      .where(eq(questionSets.id, id));
-  }
-  
-  /**
-   * Gets all question sets for a specific team
-   * @param teamName The name of the team
-   * @returns An array of question sets for the team
-   */
-  async getQuestionSetsForTeam(teamName: string): Promise<QuestionSet[]> {
-    // Find sets that either have no team targeting or include this team
-    return await db
-      .select()
-      .from(questionSets)
-      .where(
-        and(
-          eq(questionSets.active, true),
-          // Using SQL directly for this complex condition
-          sql`(${questionSets.targetTeams} IS NULL OR ${teamName} = ANY(${questionSets.targetTeams}))`
-        )
-      );
-  }
-  
-  /**
-   * Gets questions for a user based on their team and performance
-   * @param userId The ID of the user
-   * @param setId The ID of the question set
-   * @param count The number of questions to get (default: 3)
-   * @returns An array of questions
-   */
-  async getQuestionsForUser(userId: number, setId: number, count: number = 3): Promise<Question[]> {
-    // Get the question set
-    const [questionSet] = await db
-      .select()
-      .from(questionSets)
-      .where(eq(questionSets.id, setId));
-      
-    if (!questionSet || !questionSet.active) {
-      throw new Error("Question set not found or inactive");
-    }
-    
-    // Get user's team for targeting
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId));
-      
-    // Get all user's past answers
-    const userAnswers = await db
-      .select()
-      .from(answers)
-      .where(eq(answers.userId, userId));
-      
-    // Get all available questions in the set
-    const availableQuestions = await db
-      .select()
-      .from(questions)
-      .where(
-        and(
-          sql`${questions.id} = ANY(${questionSet.questionIds})`,
-          eq(questions.isArchived, false)
-        )
-      );
-      
-    // Apply selection strategy based on the question set configuration
-    let selectedQuestions: Question[] = [];
-    
-    switch(questionSet.rotationStrategy) {
-      case 'random':
-        selectedQuestions = this.shuffleArray(availableQuestions).slice(0, count);
-        break;
-        
-      case 'sequential':
-        // Get questions that the user hasn't seen yet
-        const answeredQuestionIds = userAnswers.map(a => a.questionId);
-        const unansweredQuestions = availableQuestions.filter(
-          q => !answeredQuestionIds.includes(q.id)
-        );
-        
-        selectedQuestions = unansweredQuestions.slice(0, count);
-        
-        // If we don't have enough, add some already answered ones
-        if (selectedQuestions.length < count) {
-          const additionalQuestions = this.shuffleArray(
-            availableQuestions.filter(q => answeredQuestionIds.includes(q.id))
-          ).slice(0, count - selectedQuestions.length);
-          
-          selectedQuestions = [...selectedQuestions, ...additionalQuestions];
-        }
-        break;
-        
-      case 'adaptive':
-        // Calculate user's performance level based on past answers
-        const correctAnswers = userAnswers.filter(a => a.correct).length;
-        const totalAnswers = userAnswers.length;
-        const performanceLevel = totalAnswers > 0 
-          ? (correctAnswers / totalAnswers) 
-          : 0.5; // Default mid-level
-        
-        // Determine target difficulty
-        let targetDifficulty: string;
-        if (performanceLevel < 0.4) targetDifficulty = 'easy';
-        else if (performanceLevel > 0.8) targetDifficulty = 'hard';
-        else targetDifficulty = 'medium';
-        
-        // Get questions matching the target difficulty
-        const matchingQuestions = availableQuestions.filter(
-          q => q.difficulty === targetDifficulty
-        );
-        
-        selectedQuestions = this.shuffleArray(matchingQuestions).slice(0, count);
-        
-        // Fall back to random if not enough questions at the right difficulty
-        if (selectedQuestions.length < count) {
-          const additionalQuestions = this.shuffleArray(
-            availableQuestions.filter(q => q.difficulty !== targetDifficulty)
-          ).slice(0, count - selectedQuestions.length);
-          
-          selectedQuestions = [...selectedQuestions, ...additionalQuestions];
-        }
-        break;
-    }
-    
-    // Update the lastUsed timestamp and increment usageCount for selected questions
-    for (const question of selectedQuestions) {
-      await db
-        .update(questions)
-        .set({
-          lastUsed: new Date(),
-          usageCount: question.usageCount + 1
-        })
-        .where(eq(questions.id, question.id));
-    }
-    
-    return selectedQuestions;
   }
 }
 
