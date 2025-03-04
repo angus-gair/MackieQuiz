@@ -657,10 +657,10 @@ export default function AdminQuestionsPage() {
                       className={`border rounded-lg p-4 ${question.includedInQuiz ? 'bg-primary/5 border-primary/30' : ''}`}
                     >
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
+                        <div className={`flex-1 ${question.includedInQuiz ? 'border-l-4 border-l-primary pl-3' : ''}`}>
                           {question.includedInQuiz && (
-                            <Badge variant="outline" className="mb-2 bg-primary/10 text-primary border-primary/30">
-                              Included in Quiz
+                            <Badge variant="default" className="mb-2 bg-primary text-primary-foreground">
+                              <Check className="h-3 w-3 mr-1" /> Included in Quiz
                             </Badge>
                           )}
                           <div className="mb-4">
@@ -777,179 +777,10 @@ export default function AdminQuestionsPage() {
             </Card>
           )}
 
-          {/* PRODUCTION MODE: Enable this for production
-          {availableWeeks?.filter(weekData => {
-            // If no week is selected in the filter, show all weeks
-            if (!selectedWeekFilter) return true;
-            
-            // Otherwise, only show weeks that match the selected week date
-            const weekDate = new Date(weekData.week);
-            const formattedWeekDate = !isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : '';
-            return formattedWeekDate === selectedWeekFilter;
-          }).map((weekData) => {
-            const weekQuestions = getQuestionsForWeek(weekData, questions);
-            const isCurrentWeek = weekData.weekIdentifier === 'Current';
-
-            return (
-              <Card key={weekData.week.toString()}>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h2 className="text-lg font-semibold">
-                        {(() => {
-                          const weekDate = new Date(weekData.week);
-                          return !isNaN(weekDate.getTime()) 
-                            ? `Week of ${format(weekDate, 'MMM dd')}` 
-                            : 'Week of Unknown Date';
-                        })()}
-                        {isCurrentWeek && (
-                          <span className="ml-2 text-sm font-normal text-muted-foreground">
-                            (Current)
-                          </span>
-                        )}
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    {weekQuestions.map((question) => (
-                      <div 
-                        key={question.id} 
-                        className={`border rounded-lg p-4 ${question.includedInQuiz ? 'bg-primary/5 border-primary/30' : ''}`}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            {question.includedInQuiz && (
-                              <Badge variant="outline" className="mb-2 bg-primary/10 text-primary border-primary/30">
-                                Included in Quiz
-                              </Badge>
-                            )}
-                            <div className="mb-4">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="outline" className="px-2 py-0 h-6 font-normal">
-                                  {question.category}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground ml-1">
-                                  ID: {question.id}
-                                </span>
-                              </div>
-                              <h3 className="font-medium">{question.question}</h3>
-                            </div>
-
-                            <div className="space-y-2 mb-4">
-                              {question.options.map((option, index) => (
-                                <div key={index} className="flex gap-2">
-                                  <div className={cn(
-                                    "px-2 py-1 text-sm rounded-md w-full", 
-                                    option === question.correctAnswer ? 
-                                      "bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-900" : 
-                                      "bg-muted border"
-                                  )}>
-                                    {option}
-                                    {option === question.correctAnswer && (
-                                      <span className="ml-2 text-green-600 dark:text-green-400 text-xs">
-                                        Correct Answer
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-
-                            {question.explanation && (
-                              <div className="text-sm text-muted-foreground border-t pt-3 mt-3">
-                                <p className="text-xs font-medium mb-1">Explanation:</p>
-                                <p>{question.explanation}</p>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-1">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant={question.includedInQuiz ? "default" : "outline"} 
-                                    size="sm" 
-                                    className={`h-8 w-8 p-0 ${toggleInclusionMutation.isPending ? 'opacity-50' : ''}`}
-                                    onClick={() => toggleInclusionMutation.mutate(question.id)}
-                                    disabled={toggleInclusionMutation.isPending}
-                                  >
-                                    {question.includedInQuiz ? (
-                                      <Check className="h-4 w-4" />
-                                    ) : (
-                                      <Plus className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {question.includedInQuiz ? "Remove from Quiz" : "Add to Quiz"}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <span className="sr-only">Open menu</span>
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleEditQuestion(question)}>
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => toggleInclusionMutation.mutate(question.id)}
-                                >
-                                  {question.includedInQuiz ? "Remove from Quiz" : "Add to Quiz"}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => {
-                                    if (confirm("Are you sure you want to archive this question?")) {
-                                      archiveQuestionMutation.mutate(question.id);
-                                    }
-                                  }}
-                                  className="text-destructive"
-                                >
-                                  Archive
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    {weekQuestions.length === 0 && (
-                      <div className="border border-dashed rounded-lg p-8 flex flex-col items-center justify-center">
-                        <p className="text-muted-foreground text-center mb-4">
-                          No questions available for this week.
-                        </p>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            const weekDate = new Date(weekData.week);
-                            if (!isNaN(weekDate.getTime())) {
-                              setSelectedWeek(weekDate);
-                              setNewQuestion(prev => ({ 
-                                ...prev, 
-                                weekOf: format(weekDate, 'yyyy-MM-dd')
-                              }));
-                              setIsAddQuestionSheetOpen(true);
-                            }
-                          }}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Question
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
+          {/* 
+            PRODUCTION MODE: Code for filtering questions by week - enable this for production 
+            and comment out the development mode filtering in getQuestionsForWeek function.
+          */}
         </div>
       </div>
     </div>
