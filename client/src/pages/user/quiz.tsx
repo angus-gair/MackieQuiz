@@ -17,19 +17,34 @@ export default function QuizPage() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [quizKey, setQuizKey] = useState(Date.now()); // Used to force re-render of quiz component
 
-  // Fetch weekly questions
+  // Fetch quiz questions (either selected by admin or weekly)
   const { data: questions = [], isLoading, error } = useQuery<Question[]>({
     queryKey: ["/api/questions/weekly"],
   });
 
+  // Define a type for the API response
+  type AnswerResponse = {
+    answer: Answer;
+    achievements?: {
+      id: number;
+      type: string;
+      name: string;
+      description: string;
+      icon: string;
+      badge: string;
+      tier: string;
+      milestone: number;
+    }[];
+  };
+
   // Submit answer mutation
-  const submitAnswerMutation = useMutation({
+  const submitAnswerMutation = useMutation<AnswerResponse, Error, { questionId: number; selectedOption: string }>({
     mutationFn: async (answer: { questionId: number; selectedOption: string }) => {
       // Find the current question to check if the answer is correct
       const question = questions.find(q => q.id === answer.questionId);
       const isCorrect = question ? question.correctAnswer === answer.selectedOption : false;
       
-      return apiRequest(
+      const response = await apiRequest(
         "POST",
         "/api/answers",
         {
@@ -38,14 +53,21 @@ export default function QuizPage() {
           correct: isCorrect, // Add the correct field
         }
       );
+      
+      // Cast the response to our expected type
+      return response as unknown as AnswerResponse;
     },
-    onSuccess: () => {
-      // Move to next question or complete quiz
+    onSuccess: (response) => {
+      console.log("Response from server:", response);
+      // Handle the last question case differently
+      if (isLastQuestion) {
+        setLocation("/quiz-completion");
+        return;
+      }
+      
+      // For non-last questions, proceed to the next question
       if (questions && currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
-      } else {
-        // Quiz completed
-        setLocation("/quiz-completion");
       }
     },
     onError: (error: Error) => {
@@ -58,8 +80,9 @@ export default function QuizPage() {
   });
 
   const currentQuestion = questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestion && questions ? 
-    currentQuestionIndex === questions.length - 1 : false;
+  // Check if this is the last question (either the last in the array or the only question)
+  const isLastQuestion = currentQuestion && questions && 
+    (currentQuestionIndex === questions.length - 1);
   const canGoNext = currentQuestion ? !!selectedAnswers[currentQuestion.id] : false;
 
   const handleNext = () => {
@@ -79,7 +102,25 @@ export default function QuizPage() {
   };
 
   const handleSubmit = () => {
-    if (!currentQuestion || !canGoNext) return;
+    if (!currentQuestion) return;
+    
+    // Check if an answer has been selected for the current question
+    const hasSelectedAnswer = !!selectedAnswers[currentQuestion.id];
+    
+    // Don't proceed if no answer is selected
+    if (!hasSelectedAnswer) {
+      toast({
+        title: "Please select an answer",
+        description: "You need to select an answer before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Submitting answer:", {
+      questionId: currentQuestion.id,
+      selectedOption: selectedAnswers[currentQuestion.id],
+    });
 
     // Submit answer for the last question
     submitAnswerMutation.mutate({
@@ -91,8 +132,10 @@ export default function QuizPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <main className="pt-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        <main className="pt-16">
+          <div className="mx-auto flex items-center justify-center min-h-[calc(100vh-8rem)]" style={{ width: '672px', maxWidth: '100%' }}>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+          </div>
         </main>
       </div>
     );
@@ -101,8 +144,8 @@ export default function QuizPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <main className="pt-16 px-4">
-          <div className="flex flex-col items-center justify-center p-4 max-w-5xl mx-auto">
+        <main className="pt-16">
+          <div className="flex flex-col items-center justify-center p-4 mx-auto" style={{ width: '672px', maxWidth: '100%' }}>
             <div className="text-red-500 mb-4">
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -124,8 +167,8 @@ export default function QuizPage() {
   if (!questions || questions.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <main className="pt-16 px-4">
-          <div className="flex flex-col items-center justify-center p-4 max-w-5xl mx-auto">
+        <main className="pt-16">
+          <div className="flex flex-col items-center justify-center p-4 mx-auto" style={{ width: '672px', maxWidth: '100%' }}>
             <div className="text-amber-500 mb-4">
               <ClipboardCheck className="w-12 h-12" />
             </div>
@@ -144,8 +187,8 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="pt-16 pb-24 px-4">
-        <div className="container max-w-5xl mx-auto space-y-4 w-full">
+      <main className="pt-16 pb-24">
+        <div className="mx-auto px-4 space-y-4 w-full" style={{ width: '672px', maxWidth: '100%' }}>
           {/* Progress indicator */}
           <Card className="shadow-sm">
             <CardContent className="py-4">

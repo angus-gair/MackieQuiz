@@ -17,25 +17,20 @@ import {
   Archive,
   ArrowLeft,
   Loader2,
-  CalendarIcon,
-  Pencil,
   Check,
+  Pencil,
+  CheckSquare,
+  Square,
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Question, InsertQuestion, DimDate } from "@shared/schema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,7 +71,11 @@ export default function AdminQuestionsPage() {
   const [newQuestion, setNewQuestion] = useState<Partial<InsertQuestion>>({
     options: ["", "", "", ""],
   });
-  const [selectedWeekFilter, setSelectedWeekFilter] = useState<string | null>(null);
+  
+  // States for question selection
+  const [selectedQuestionIds, setSelectedQuestionIds] = useState<number[]>([]);
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [isConfirmSaveOpen, setIsConfirmSaveOpen] = useState(false);
 
   // Get available weeks from the dim_date table
   const { data: availableWeeks, isLoading: isLoadingWeeks } = useQuery<DimDate[]>({
@@ -88,7 +87,28 @@ export default function AdminQuestionsPage() {
     queryKey: ["/api/questions"],
   });
 
-  const isLoading = isLoadingWeeks || isLoadingQuestions;
+  // Get currently selected questions
+  const { data: selectedQuestions, isLoading: isLoadingSelectedQuestions } = useQuery<Question[]>({
+    queryKey: ["/api/quiz/selected-questions"],
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch(queryKey[0] as string, {
+        credentials: "include",
+        cache: "default",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch selected questions: ${response.status}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Extract IDs to set the selectedQuestionIds state
+      setSelectedQuestionIds(data.map(q => q.id));
+    }
+  });
+
+  const isLoading = isLoadingWeeks || isLoadingQuestions || isLoadingSelectedQuestions;
 
   // Create Question Mutation
   const createQuestionMutation = useMutation({
@@ -97,10 +117,7 @@ export default function AdminQuestionsPage() {
       if (question.weekOf instanceof Date) {
         question.weekOf = format(question.weekOf, 'yyyy-MM-dd');
       }
-      return apiRequest<Question>("/api/questions", {
-        method: "POST",
-        body: question,
-      });
+      return apiRequest("POST", "/api/questions", question);
     },
     onSuccess: (data) => {
       toast({
@@ -125,10 +142,7 @@ export default function AdminQuestionsPage() {
   // Update Question Mutation
   const updateQuestionMutation = useMutation({
     mutationFn: async (question: Question) => {
-      return apiRequest<Question>(`/api/questions/${question.id}`, {
-        method: "PATCH",
-        body: question,
-      });
+      return apiRequest("PATCH", `/api/questions/${question.id}`, question);
     },
     onSuccess: (data) => {
       toast({
@@ -151,9 +165,7 @@ export default function AdminQuestionsPage() {
   // Archive Question Mutation
   const archiveQuestionMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest<Question>(`/api/questions/${id}/archive`, {
-        method: "PATCH",
-      });
+      return apiRequest("PATCH", `/api/questions/${id}/archive`, null);
     },
     onSuccess: (data) => {
       toast({
@@ -161,6 +173,13 @@ export default function AdminQuestionsPage() {
         description: "The question has been successfully archived.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
+      
+      // Remove from selected questions if it was selected
+      if (selectedQuestionIds.includes(data.id)) {
+        const newSelectedIds = selectedQuestionIds.filter(id => id !== data.id);
+        setSelectedQuestionIds(newSelectedIds);
+        saveSelectedQuestionsMutation.mutate(newSelectedIds);
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -170,29 +189,23 @@ export default function AdminQuestionsPage() {
       });
     },
   });
-  
-  // Toggle Question Inclusion Mutation
-  const toggleInclusionMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest(`/api/questions/${id}/toggle-inclusion`, {
-        method: "POST",
-      });
+
+  // Save Selected Questions Mutation
+  const saveSelectedQuestionsMutation = useMutation({
+    mutationFn: async (questionIds: number[]) => {
+      return apiRequest("POST", "/api/quiz/selected-questions", { questionIds });
     },
-    onSuccess: (data: Question) => {
-      console.log("Toggle inclusion success:", data);
+    onSuccess: () => {
       toast({
-        title: data.includedInQuiz ? "Added to Quiz" : "Removed from Quiz",
-        description: data.includedInQuiz 
-          ? "The question has been included in the quiz rotation." 
-          : "The question has been removed from the quiz rotation.",
+        title: "Quiz questions updated",
+        description: "The selected questions for the quiz have been updated.",
       });
-      // Force refresh to ensure UI updates with latest changes
-      queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quiz/selected-questions"] });
+      setIsConfirmSaveOpen(false);
     },
     onError: (error: Error) => {
-      console.error("Toggle inclusion error:", error);
       toast({
-        title: "Failed to update question",
+        title: "Failed to update quiz questions",
         description: error.message,
         variant: "destructive",
       });
@@ -224,32 +237,36 @@ export default function AdminQuestionsPage() {
     updateQuestionMutation.mutate(editingQuestion);
   };
 
-  const getQuestionsForWeek = (weekData: DimDate, questions: Question[] = []) => {
-    if (!questions || !weekData) return [];
-    
-    // During development, show all questions without filtering by week
-    // DEVELOPMENT MODE: Return all non-archived questions for easier viewing
-    // Comment this out for production
-    return questions.filter(q => !q.isArchived);
-    
-    /* PRODUCTION FILTERING - Uncomment for production
-    const weekDate = new Date(weekData.week);
-    const formattedWeekDate = !isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : '';
-    
-    return questions.filter(question => {
-      if (typeof question.weekOf === 'string') {
-        return question.weekOf === formattedWeekDate;
-      } else if (question.weekOf instanceof Date) {
-        return format(question.weekOf, 'yyyy-MM-dd') === formattedWeekDate;
-      }
-      return false;
-    });
-    */
-  };
-
   const handleEditQuestion = (question: Question) => {
     setEditingQuestion(question);
     setIsEditQuestionSheetOpen(true);
+  };
+
+  const handleToggleQuestionSelection = (questionId: number) => {
+    const isCurrentlySelected = selectedQuestionIds.includes(questionId);
+    
+    if (isCurrentlySelected) {
+      // Remove from selection
+      setSelectedQuestionIds(prev => prev.filter(id => id !== questionId));
+    } else {
+      // Add to selection
+      setSelectedQuestionIds(prev => [...prev, questionId]);
+    }
+  };
+
+  const handleSaveSelectedQuestions = () => {
+    setIsConfirmSaveOpen(false);
+    saveSelectedQuestionsMutation.mutate(selectedQuestionIds);
+  };
+
+  const getFilteredQuestions = () => {
+    if (!questions) return [];
+    
+    if (showOnlySelected) {
+      return questions.filter(q => selectedQuestionIds.includes(q.id));
+    }
+    
+    return questions;
   };
 
   if (isLoading) {
@@ -264,30 +281,20 @@ export default function AdminQuestionsPage() {
     <div className="min-h-screen">
       <div className="sticky top-0 z-30 bg-background border-b">
         <div className="container">
-          <div className="py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Link href="/admin/dashboard">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
-              </Link>
-              <h1 className="text-lg font-semibold">Question Management</h1>
-            </div>
-            <div>
-              <Link href="/admin/archived-questions">
-                <Button variant="outline" size="sm">
-                  <Archive className="h-4 w-4 mr-2" />
-                  View Archived Questions
-                </Button>
-              </Link>
-            </div>
+          <div className="py-3 flex items-center gap-2">
+            <Link href="/admin/dashboard">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <h1 className="text-lg font-semibold">Question Management</h1>
           </div>
         </div>
       </div>
 
       <div className="container max-w-4xl mx-auto pt-[72px] pb-8 px-4">
-        {/* Add Question Button at the top */}
+        {/* Action buttons at the top */}
         <div className="mb-6 flex flex-col space-y-4">
           <div className="flex justify-between items-center">
             <Sheet open={isAddQuestionSheetOpen} onOpenChange={setIsAddQuestionSheetOpen}>
@@ -352,6 +359,11 @@ export default function AdminQuestionsPage() {
                           })}
                         </SelectContent>
                       </Select>
+                      <div className="mt-2">
+                        <p className="text-xs text-muted-foreground">
+                          Note: Availability dates (Monday-Sunday) will be automatically updated based on the selected week.
+                        </p>
+                      </div>
                     </div>
                     
                     <div>
@@ -451,37 +463,36 @@ export default function AdminQuestionsPage() {
             </Sheet>
           </div>
           
-          {/* Week filter radio buttons */}
-          {availableWeeks && availableWeeks.length > 0 && (
-            <Card className="p-4">
-              <h3 className="text-sm font-medium mb-3">Select which questions for quiz:</h3>
-              <RadioGroup 
-                value={selectedWeekFilter || ''} 
-                onValueChange={(value) => setSelectedWeekFilter(value)}
-                className="flex flex-wrap gap-2 md:gap-3"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="" id="all-weeks" />
-                  <Label htmlFor="all-weeks">All Weeks</Label>
+          {/* Quiz Question Selection Card */}
+          <Card className="p-4">
+            <div className="flex flex-col space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-medium">Select questions for the quiz:</h3>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="show-selected" 
+                      checked={showOnlySelected}
+                      onCheckedChange={(checked) => setShowOnlySelected(checked as boolean)}
+                    />
+                    <Label htmlFor="show-selected" className="text-sm">Show selected only</Label>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={() => setIsConfirmSaveOpen(true)}
+                    className="ml-2"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Save Selection
+                  </Button>
                 </div>
-                
-                {availableWeeks.map((weekData) => {
-                  const weekDate = new Date(weekData.week);
-                  const dateValue = !isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : '';
-                  const displayText = !isNaN(weekDate.getTime()) 
-                    ? `Week of ${format(weekDate, 'MMM dd')}${weekData.weekIdentifier === 'Current' ? ' (Current)' : ''}` 
-                    : 'Unknown Week';
-                    
-                  return (
-                    <div key={dateValue} className="flex items-center space-x-2">
-                      <RadioGroupItem value={dateValue} id={`week-${dateValue}`} />
-                      <Label htmlFor={`week-${dateValue}`}>{displayText}</Label>
-                    </div>
-                  );
-                })}
-              </RadioGroup>
-            </Card>
-          )}
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                {selectedQuestionIds.length} questions selected. Click on questions below to select/deselect them for the quiz.
+              </div>
+            </div>
+          </Card>
         </div>
 
         {/* Edit Question Sheet */}
@@ -573,49 +584,6 @@ export default function AdminQuestionsPage() {
                       placeholder="Explain why this is the correct answer"
                     />
                   </div>
-                  
-                  {/* Week selection dropdown */}
-                  <div>
-                    <Label className="text-sm font-medium">Select Week</Label>
-                    <Select
-                      value={editingQuestion.weekOf ? 
-                        (typeof editingQuestion.weekOf === 'string' ? 
-                          editingQuestion.weekOf : format(editingQuestion.weekOf, 'yyyy-MM-dd')) 
-                        : undefined}
-                      onValueChange={(value) => {
-                        if (!editingQuestion) return;
-                        const weekDate = parseISO(value);
-                        setEditingQuestion({ 
-                          ...editingQuestion, 
-                          weekOf: value,  // Store as string to prevent timezone issues
-                          // We don't set availableFrom and availableUntil here as they're calculated on the server
-                        });
-                      }}
-                    >
-                      <SelectTrigger className="mt-1.5 w-full">
-                        <SelectValue placeholder="Select week" />
-                      </SelectTrigger>
-                      <SelectContent position="popper" className="w-full min-w-[200px]">
-                        {availableWeeks?.map((weekData) => {
-                          const weekDate = new Date(weekData.week);
-                          return (
-                            <SelectItem 
-                              key={weekData.week.toString()} 
-                              value={!isNaN(weekDate.getTime()) ? format(weekDate, 'yyyy-MM-dd') : ''}
-                            >
-                              Week of {!isNaN(weekDate.getTime()) ? format(weekDate, 'MMM dd') : 'Unknown'}
-                              {weekData.weekIdentifier === 'Current' && " (Current)"}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                    <div className="mt-2">
-                      <p className="text-xs text-muted-foreground">
-                        Note: Availability dates (Monday-Sunday) will be automatically updated based on the selected week.
-                      </p>
-                    </div>
-                  </div>
 
                   <Button
                     type="submit"
@@ -637,150 +605,164 @@ export default function AdminQuestionsPage() {
           </SheetContent>
         </Sheet>
 
+        {/* Confirmation Dialog for Saving Selected Questions */}
+        <AlertDialog open={isConfirmSaveOpen} onOpenChange={setIsConfirmSaveOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Save Quiz Questions</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to save these {selectedQuestionIds.length} questions for the quiz? 
+                This will update the questions shown to users in the quiz.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleSaveSelectedQuestions}>
+                {saveSelectedQuestionsMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Quiz Questions"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Question List */}
         <div className="space-y-4">
-          {/* DEVELOPMENT MODE: Show only one week container with all questions */}
-          {availableWeeks && availableWeeks.length > 0 && (
-            <Card key="all-questions">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-lg font-semibold">
-                      All Questions (Development View)
-                    </h2>
+          {getFilteredQuestions().map((question) => (
+            <div 
+              key={question.id} 
+              className={cn(
+                "border rounded-lg p-4 cursor-pointer transition-colors", 
+                selectedQuestionIds.includes(question.id)
+                  ? "border-primary bg-primary/5"
+                  : "hover:bg-accent/50"
+              )}
+              onClick={() => handleToggleQuestionSelection(question.id)}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className="px-2 py-0 h-6 font-normal">
+                        {question.category}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground ml-1">
+                        ID: {question.id}
+                      </span>
+                      {selectedQuestionIds.includes(question.id) && (
+                        <Badge variant="secondary" className="ml-2">Selected</Badge>
+                      )}
+                    </div>
+                    <h3 className="font-medium">{question.question}</h3>
                   </div>
-                </div>
 
-                <div className="space-y-4">
-                  {questions && questions.filter(q => !q.isArchived).map((question) => (
-                    <div 
-                      key={question.id} 
-                      className={`border rounded-lg p-4 ${question.includedInQuiz ? 'bg-primary/5 border-primary/30' : ''}`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className={`flex-1 ${question.includedInQuiz ? 'border-l-4 border-l-primary pl-3' : ''}`}>
-                          {question.includedInQuiz && (
-                            <Badge variant="default" className="mb-2 bg-primary text-primary-foreground">
-                              <Check className="h-3 w-3 mr-1" /> Included in Quiz
-                            </Badge>
+                  <div className="space-y-2 mb-4">
+                    {question.options.map((option, index) => (
+                      <div key={index} className="flex gap-2">
+                        <div className={cn(
+                          "px-2 py-1 text-sm rounded-md w-full", 
+                          option === question.correctAnswer ? 
+                            "bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-900" : 
+                            "bg-muted border"
+                        )}>
+                          {option}
+                          {option === question.correctAnswer && (
+                            <span className="ml-2 text-green-600 dark:text-green-400 text-xs">
+                              Correct Answer
+                            </span>
                           )}
-                          <div className="mb-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="outline" className="px-2 py-0 h-6 font-normal">
-                                {question.category}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground ml-1">
-                                ID: {question.id}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                Week: {typeof question.weekOf === 'string' ? 
-                                  format(new Date(question.weekOf), 'MMM dd') : 
-                                  (question.weekOf instanceof Date ? format(question.weekOf, 'MMM dd') : 'Unknown')}
-                              </span>
-                            </div>
-                            <h3 className="font-medium">{question.question}</h3>
-                          </div>
-
-                          <div className="space-y-2 mb-4">
-                            {question.options.map((option, index) => (
-                              <div key={index} className="flex gap-2">
-                                <div className={cn(
-                                  "px-2 py-1 text-sm rounded-md w-full", 
-                                  option === question.correctAnswer ? 
-                                    "bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-900" : 
-                                    "bg-muted border"
-                                )}>
-                                  {option}
-                                  {option === question.correctAnswer && (
-                                    <span className="ml-2 text-green-600 dark:text-green-400 text-xs">
-                                      Correct Answer
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          {question.explanation && (
-                            <div className="text-sm text-muted-foreground border-t pt-3 mt-3">
-                              <p className="text-xs font-medium mb-1">Explanation:</p>
-                              <p>{question.explanation}</p>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant={question.includedInQuiz ? "default" : "outline"} 
-                                  size="sm" 
-                                  className={`h-8 w-8 p-0 ${toggleInclusionMutation.isPending ? 'opacity-50' : ''}`}
-                                  onClick={() => toggleInclusionMutation.mutate(question.id)}
-                                  disabled={toggleInclusionMutation.isPending}
-                                >
-                                  {question.includedInQuiz ? (
-                                    <Check className="h-4 w-4" />
-                                  ) : (
-                                    <Plus className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {question.includedInQuiz ? "Remove from Quiz" : "Add to Quiz"}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditQuestion(question)}>
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => toggleInclusionMutation.mutate(question.id)}
-                              >
-                                {question.includedInQuiz ? "Remove from Quiz" : "Add to Quiz"}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => {
-                                  if (confirm("Are you sure you want to archive this question?")) {
-                                    archiveQuestionMutation.mutate(question.id);
-                                  }
-                                }}
-                                className="text-destructive"
-                              >
-                                Archive
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
 
-                  {!questions || questions.filter(q => !q.isArchived).length === 0 && (
-                    <div className="border border-dashed rounded-lg p-8 flex flex-col items-center justify-center">
-                      <p className="text-muted-foreground text-center mb-4">
-                        No questions available.
-                      </p>
+                  {question.explanation && (
+                    <div className="text-sm text-muted-foreground border-t pt-3 mt-3">
+                      <p className="text-xs font-medium mb-1">Explanation:</p>
+                      <p>{question.explanation}</p>
                     </div>
                   )}
                 </div>
-              </div>
-            </Card>
-          )}
 
-          {/* 
-            PRODUCTION MODE: Code for filtering questions by week - enable this for production 
-            and comment out the development mode filtering in getQuestionsForWeek function.
-          */}
+                <div className="flex flex-col gap-2">
+                  {/* Selection checkbox */}
+                  <div 
+                    className="p-2 rounded-md hover:bg-accent"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleQuestionSelection(question.id);
+                    }}
+                  >
+                    {selectedQuestionIds.includes(question.id) ? (
+                      <CheckSquare className="h-5 w-5 text-primary" />
+                    ) : (
+                      <Square className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  
+                  {/* Edit dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span className="sr-only">Open menu</span>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditQuestion(question);
+                        }}
+                      >
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm("Are you sure you want to archive this question?")) {
+                            archiveQuestionMutation.mutate(question.id);
+                          }
+                        }}
+                        className="text-destructive"
+                      >
+                        Archive
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {getFilteredQuestions().length === 0 && (
+            <div className="border border-dashed rounded-lg p-8 flex flex-col items-center justify-center">
+              <p className="text-muted-foreground text-center mb-4">
+                {showOnlySelected 
+                  ? "No questions are selected. Click 'Show selected only' to view all questions and make a selection."
+                  : "No questions available. Add some questions first."}
+              </p>
+              {!showOnlySelected && (
+                <Button
+                  size="sm"
+                  onClick={() => setIsAddQuestionSheetOpen(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile} from "@shared/schema";
+import { users, questions, answers, userSessions, pageViews, authEvents, achievements, userStreaks, teamStats, powerUps, userProfiles, appSettings, type User, type InsertUser, type Question, type InsertQuestion, type Answer, type InsertAnswer, type UserSession, type InsertUserSession, type PageView, type InsertPageView, type AuthEvent, type InsertAuthEvent, type Achievement, type InsertAchievement, type UserStreak, type TeamStat, type PowerUp, type UserProfile, type InsertUserProfile, type AppSettings} from "@shared/schema";
 import { feedback, type Feedback, type InsertFeedback, dimDate } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lte, lt } from "drizzle-orm";
@@ -7,6 +7,7 @@ import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 import { log } from "./vite";
 import { DimDate } from "@shared/schema";
+import { formatDateForPg, parseDateFromPg, createUTCDate, getWeekMonday, getWeekSunday } from "./utils/date-handlers";
 
 // Existing methods
 const PostgresSessionStore = connectPg(session);
@@ -51,6 +52,13 @@ export interface IStorage {
   getArchivedQuestions(): Promise<Question[]>;
   archiveQuestion(id: number): Promise<void>;
   getWeeklyQuestions(): Promise<Question[]>;
+  toggleQuestionInclusion(id: number): Promise<Question>;
+  
+  // App settings methods
+  getSetting(key: string): Promise<string | null>;
+  getAllSettings(): Promise<AppSettings[]>;
+  updateSetting(key: string, value: string, userId?: number): Promise<AppSettings>;
+  getSelectedWeekFilter(): Promise<string | null>;
 
   // New analytics methods
   createUserSession(session: InsertUserSession): Promise<UserSession>;
@@ -195,8 +203,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyQuestions(): Promise<Question[]> {
-    const allQuestions = await this.getQuestions();
-    return this.shuffleArray(allQuestions).slice(0, 3);
+    // Get questions that are included in the quiz based on the new includedInQuiz field
+    const quizQuestions = await db
+      .select()
+      .from(questions)
+      .where(
+        and(
+          eq(questions.isArchived, false),
+          eq(questions.isBonus, false),
+          eq(questions.includedInQuiz, true)
+        )
+      );
+    
+    console.log(`Found ${quizQuestions.length} questions included in quiz`);
+    
+    if (quizQuestions.length === 0) {
+      // Fallback to regular questions if no included questions found
+      console.log("No questions are marked for inclusion in the quiz, falling back to all active questions");
+      const allQuestions = await this.getQuestions();
+      return this.shuffleArray(allQuestions).slice(0, 3);
+    }
+    
+    return this.shuffleArray(quizQuestions).slice(0, 3);
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
@@ -212,17 +240,10 @@ export class DatabaseStorage implements IStorage {
       }
       
       // Use our helper function to normalize the date to Monday of the week
-      weekOfDate = normalizeToMonday(weekOfDate);
+      weekOfDate = getWeekMonday(weekOfDate);
       
-      // Format the date as YYYY-MM-DD to prevent timezone issues when stored in PostgreSQL
-      const formattedWeekOf = formatDateString(weekOfDate);
-      
-      // Verify we have a Monday date (extra validation)
-      if (!isMonday(weekOfDate)) {
-        console.warn(`Warning: Date ${formattedWeekOf} is not a Monday after normalization, forcing correction`);
-        // Force correction (should never happen but just in case)
-        weekOfDate = normalizeToMonday(weekOfDate);
-      }
+      // Format the date for PostgreSQL storage to prevent timezone issues
+      const formattedWeekOf = formatDateForPg(weekOfDate);
       
       // Get the week status for this date
       const weekStatus = await this.getWeekStatus(weekOfDate);
@@ -243,8 +264,7 @@ export class DatabaseStorage implements IStorage {
           weekStatus: weekStatus as 'past' | 'current' | 'future',
           isBonus: question.isBonus || false,
           bonusPoints: question.bonusPoints || 10,
-          availableFrom: question.availableFrom,
-          availableUntil: question.availableUntil
+          includedInQuiz: question.includedInQuiz || false // Default to not included in quiz
         })
         .returning();
       
@@ -291,42 +311,6 @@ export class DatabaseStorage implements IStorage {
         log(`User ${answer.userId} completed a quiz`);
 
         try {
-          // Calculate total completed quizzes for achievements
-          const totalQuizzes = Math.floor(userAnswers.length / 3);
-          log(`User ${answer.userId} has completed ${totalQuizzes} quizzes total`);
-
-          // Explicitly check for first quiz achievement
-          if (totalQuizzes === 1) {
-            const [firstQuizAchievement] = await db.insert(achievements).values({
-              userId: answer.userId,
-              type: 'quiz_milestone',
-              milestone: 1,
-              name: 'First Quiz Complete',
-              description: 'Completed your first quiz!',
-              icon: 'quiz-1'
-            }).returning();
-            log(`Created first quiz achievement for user ${answer.userId}`);
-          }
-
-          // Check for other milestone achievements (3, 5, 7, 10)
-          const milestones = [3, 5, 7, 10];
-          if (milestones.includes(totalQuizzes)) {
-            const [achievement] = await db.insert(achievements).values({
-              userId: answer.userId,
-              type: 'quiz_milestone',
-              milestone: totalQuizzes,
-              name: `${totalQuizzes} Quizzes Complete!`,
-              description: `You've completed ${totalQuizzes} quizzes!`,
-              icon: `quiz-${totalQuizzes}`
-            }).returning();
-            log(`Created ${totalQuizzes} quiz milestone achievement for user ${answer.userId}`);
-          }
-
-        } catch (err) {
-          log(`Error creating achievements: ${err}`);
-        }
-
-        try {
           // Ensure user streak record exists and update it
           const streak = await this.getOrCreateUserStreak(answer.userId);
           await this.updateUserStreak(answer.userId, true);
@@ -348,6 +332,9 @@ export class DatabaseStorage implements IStorage {
             const perfectScore = latestQuizAnswers.every(a => a.correct);
             await this.updateTeamStats(user.team, perfectScore);
             log(`Updated team stats for team ${user.team}`);
+            
+            // Award team contribution achievement
+            await this.awardTeamContributionAchievement(answer.userId, 'Quiz');
           }
         } catch (err) {
           log(`Error updating team stats: ${err}`);
@@ -360,25 +347,10 @@ export class DatabaseStorage implements IStorage {
         } catch (err) {
           log(`Error refilling power-ups: ${err}`);
         }
-
-        try {
-          //Check for perfect quiz completion
-          if (todaysAnswers.length % 3 === 0) {
-            const latestQuizAnswers = todaysAnswers.slice(-3);
-            const isPerfectQuiz = latestQuizAnswers.every(a => a.correct);
-            if (isPerfectQuiz) {
-              await this.awardPerfectQuizAchievement(answer.userId);
-            }
-
-            //Check for team contribution
-            const user = await this.getUser(answer.userId);
-            if (user?.team) {
-              await this.awardTeamContributionAchievement(answer.userId, 'Quiz');
-            }
-          }
-        } catch (error) {
-          console.error('Error in achievement tracking:', error);
-        }
+        
+        // Note: We don't need to check for achievements here.
+        // All achievement checking is now centralized in checkAndAwardAchievements()
+        // which is called from the routes.ts after a quiz completion.
       }
 
       return newAnswer;
@@ -642,9 +614,73 @@ export class DatabaseStorage implements IStorage {
       .set({ isArchived: true })
       .where(eq(questions.id, id));
   }
+  
+  async toggleQuestionInclusion(id: number): Promise<Question> {
+    // First get the current question to check its includedInQuiz status
+    const [question] = await db
+      .select()
+      .from(questions)
+      .where(eq(questions.id, id));
+      
+    if (!question) {
+      throw new Error(`Question with id ${id} not found`);
+    }
+    
+    // Toggle the includedInQuiz field
+    const [updatedQuestion] = await db
+      .update(questions)
+      .set({ 
+        includedInQuiz: !question.includedInQuiz 
+      })
+      .where(eq(questions.id, id))
+      .returning();
+      
+    console.log(`Question ${id} toggled inclusion status: ${updatedQuestion.includedInQuiz}`);
+    
+    return updatedQuestion;
+  }
+  /**
+   * Get the start of the week (Monday) for a given date
+   * @param date The date to get the start of the week for
+   * @returns A new Date object set to the Monday of the week
+   */
+  private getWeekCommencing(date: Date): Date {
+    const result = new Date(date);
+    const day = result.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    // Adjust to the previous Monday (or stay on Monday)
+    // JavaScript: 0 = Sunday, so we adjust differently
+    const diff = day === 0 ? 6 : day - 1;
+    
+    result.setDate(result.getDate() - diff);
+    result.setHours(0, 0, 0, 0); // Start of the day
+    
+    return result;
+  }
+  
   async getWeeklyQuestions(): Promise<Question[]> {
-    const allQuestions = await this.getQuestions();
-    return this.shuffleArray(allQuestions).slice(0, 3);
+    // Get questions that are included in the quiz (new approach)
+    const quizQuestions = await db
+      .select()
+      .from(questions)
+      .where(
+        and(
+          eq(questions.isArchived, false),
+          eq(questions.isBonus, false),
+          eq(questions.includedInQuiz, true)
+        )
+      );
+    
+    console.log(`Found ${quizQuestions.length} questions included in quiz for the week`);
+    
+    if (quizQuestions.length === 0) {
+      // Fallback to all active questions if no included questions found
+      console.log("No questions are marked for inclusion in the quiz, falling back to all active questions");
+      const allQuestions = await this.getQuestions();
+      return this.shuffleArray(allQuestions).slice(0, 3);
+    }
+    
+    return this.shuffleArray(quizQuestions).slice(0, 3);
   }
 
   async createUserSession(session: InsertUserSession): Promise<UserSession> {
@@ -808,7 +844,8 @@ export class DatabaseStorage implements IStorage {
 
 
   private async checkMilestoneAchievement(userId: number, quizCount: number): Promise<Achievement | null> {
-    const milestones = [1, 3, 5, 7, 10];
+    // Updated milestone list to match requirements: 1, 3, 5, 7, 10, 13, 15, 17, 20
+    const milestones = [1, 3, 5, 7, 10, 13, 15, 17, 20];
     if (milestones.includes(quizCount)) {
       // Check if achievement already exists
       const [existing] = await db
@@ -828,6 +865,10 @@ export class DatabaseStorage implements IStorage {
           name: `${quizCount} Quizzes Completed`,
           description: `Completed ${quizCount} quizzes!`,
           icon: `quiz-${quizCount}`, // Frontend will map this to actual icon
+          badge: `milestone-${quizCount}`,
+          category: 'quiz',
+          tier: quizCount >= 15 ? 'gold' : quizCount >= 7 ? 'silver' : 'bronze',
+          isHighestTier: quizCount === 20 // 20 is the highest milestone
         }).returning();
         return achievement;
       }
@@ -852,6 +893,10 @@ export class DatabaseStorage implements IStorage {
         description: achievements.description,
         icon: achievements.icon,
         badge: achievements.badge,
+        category: achievements.category,
+        tier: achievements.tier,
+        progress: achievements.progress,
+        isHighestTier: achievements.isHighestTier,
         user: {
           username: users.username
         }
@@ -890,9 +935,40 @@ export class DatabaseStorage implements IStorage {
     const quizCount = Math.floor(userAnswers.length / 3);
     const newAchievements: Achievement[] = [];
 
-    const milestoneAchievement = await this.checkMilestoneAchievement(userId, quizCount);
-    if (milestoneAchievement) {
-      newAchievements.push(milestoneAchievement);
+    console.log(`[Achievement Check] User ${userId} has completed ${quizCount} quizzes (answers: ${userAnswers.length})`);
+
+    // Check for milestone achievements - make sure to check for first milestone (quizCount 1)
+    if (quizCount > 0) {
+      const milestoneAchievement = await this.checkMilestoneAchievement(userId, quizCount);
+      if (milestoneAchievement) {
+        newAchievements.push(milestoneAchievement);
+        console.log(`[Achievement] User ${userId} earned milestone achievement for quiz #${quizCount}`);
+      } else {
+        console.log(`[Achievement] No milestone achievement for user ${userId} at quiz #${quizCount}`);
+      }
+    }
+    
+    // Check for perfect score achievement
+    // Get the latest 3 answers (current quiz)
+    const latestQuizAnswers = userAnswers.slice(-3);
+    if (latestQuizAnswers.length === 3) {
+      const isPerfectScore = latestQuizAnswers.every(answer => answer.correct);
+      console.log(`[Achievement] User ${userId} perfect score check: ${isPerfectScore ? 'YES' : 'NO'}`);
+      
+      if (isPerfectScore) {
+        const perfectScoreAchievement = await this.awardPerfectQuizAchievement(userId);
+        if (perfectScoreAchievement) {
+          newAchievements.push(perfectScoreAchievement);
+          console.log(`[Achievement] User ${userId} earned perfect score achievement #${perfectScoreAchievement.milestone}`);
+        }
+      }
+    }
+
+    // Log combined achievements for debugging
+    if (newAchievements.length > 0) {
+      console.log(`[Achievement Summary] User ${userId} earned ${newAchievements.length} achievements: ${newAchievements.map(a => a.name).join(', ')}`);
+    } else {
+      console.log(`[Achievement Summary] User ${userId} earned no new achievements`);
     }
 
     return newAchievements;
@@ -1095,7 +1171,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async awardPerfectQuizAchievement(userId: number): Promise<Achievement | null> {
-    const [existing] = await db
+    // Count how many perfect scores the user has achieved
+    const userAnswers = await this.getUserAnswers(userId);
+    
+    // Group answers by quiz completion (every 3 answers is a complete quiz)
+    const completedQuizzes = Math.floor(userAnswers.length / 3);
+    let perfectScoreCount = 0;
+    
+    // Analyze each completed quiz to count perfect scores
+    for (let i = 0; i < completedQuizzes; i++) {
+      const quizAnswers = userAnswers.slice(i * 3, (i + 1) * 3);
+      const isPerfect = quizAnswers.every(a => a.correct);
+      if (isPerfect) {
+        perfectScoreCount++;
+      }
+    }
+    
+    // Count how many perfect score achievements the user already has
+    const existingAchievements = await db
       .select()
       .from(achievements)
       .where(
@@ -1103,23 +1196,35 @@ export class DatabaseStorage implements IStorage {
           eq(achievements.userId, userId),
           eq(achievements.type, 'perfect_score')
         )
-      );
-
-    if (!existing) {
+      )
+      .orderBy(desc(achievements.milestone));
+    
+    const currentMilestone = existingAchievements.length > 0 
+      ? existingAchievements[0].milestone 
+      : 0;
+    
+    // Should we award a new perfect score achievement?
+    // Award if either first achievement or if perfect score count is higher than current milestone
+    if (currentMilestone < perfectScoreCount) {
+      // Award next perfect score milestone
+      const newMilestone = currentMilestone + 1;
       const [achievement] = await db.insert(achievements).values({
         userId,
         type: 'perfect_score',
-        milestone: 1,
-        name: 'Perfect Quiz Master',
-        description: 'Completed a quiz with all correct answers!',
+        milestone: newMilestone,
+        name: `Perfect Quiz Master ${newMilestone > 1 ? newMilestone : ''}`,
+        description: `Completed ${newMilestone} ${newMilestone > 1 ? 'quizzes' : 'quiz'} with all correct answers!`,
         icon: 'perfect-score',
-        badge: 'perfect-1',
+        badge: `perfect-${newMilestone}`,
         category: 'quiz',
-        tier: 'gold',
-        isHighestTier: true
+        tier: newMilestone >= 5 ? 'gold' : newMilestone >= 3 ? 'silver' : 'bronze',
+        isHighestTier: newMilestone >= 5, // Gold tier is highest tier
+        progress: 100
       }).returning();
+      
       return achievement;
     }
+    
     return null;
   }
 
@@ -1273,15 +1378,31 @@ export class DatabaseStorage implements IStorage {
   async createFeedback(feedbackData: InsertFeedback): Promise<Feedback> {
     try {
       console.log('Creating feedback in storage:', feedbackData); // Debug log
-      const [newFeedback] = await db
-        .insert(feedback)
-        .values({
-          ...feedbackData,
-          createdAt: new Date()
-        })
-        .returning();
-      console.log('Feedback created successfully:', newFeedback); // Debug log
-      return newFeedback;
+      
+      // Ensure status is set to 'pending' if not provided
+      const dataToInsert = {
+        ...feedbackData,
+        status: feedbackData.status || 'pending',
+        createdAt: new Date()
+      };
+      
+      // Try to create the feedback with proper error handling
+      try {
+        const [newFeedback] = await db
+          .insert(feedback)
+          .values(dataToInsert)
+          .returning();
+        
+        console.log('Feedback created successfully:', newFeedback); // Debug log
+        return newFeedback;
+      } catch (e) {
+        // If there's an error, check if it's because the table doesn't exist
+        if (e instanceof Error && e.message.includes('relation "feedback" does not exist')) {
+          console.error('Feedback table does not exist.');
+          throw new Error('Feedback table does not exist. Please run database migrations.');
+        }
+        throw e;
+      }
     } catch (error) {
       console.error('Error creating feedback:', error);
       throw error;
@@ -1290,24 +1411,33 @@ export class DatabaseStorage implements IStorage {
 
   async getFeedback(): Promise<Feedback[]> {
     try {
-      return await db
-        .select({
-          id: feedback.id,
-          userId: feedback.userId,
-          content: feedback.content,
-          rating: feedback.rating,
-          category: feedback.category,
-          createdAt: feedback.createdAt,
-          user: {
-            username: users.username
-          }
-        })
-        .from(feedback)
-        .leftJoin(users, eq(feedback.userId, users.id))
-        .orderBy(desc(feedback.createdAt));
+      // This is a safer implementation that handles the case where the table might not exist yet
+      try {
+        return await db
+          .select({
+            id: feedback.id,
+            userId: feedback.userId,
+            content: feedback.content,
+            rating: feedback.rating,
+            category: feedback.category,
+            status: feedback.status,
+            createdAt: feedback.createdAt,
+            user: {
+              username: users.username
+            }
+          })
+          .from(feedback)
+          .leftJoin(users, eq(feedback.userId, users.id))
+          .orderBy(desc(feedback.createdAt));
+      } catch (e) {
+        // If table doesn't exist or any other error, return empty array
+        console.warn("Feedback table may not exist yet, returning empty array");
+        return [];
+      }
     } catch (error) {
       console.error('Error fetching feedback:', error);
-      throw error;
+      // Return empty array instead of throwing to prevent app crashes
+      return [];
     }
   }
   async getCurrentWeekQuestions(): Promise<Question[]> {
@@ -1332,15 +1462,58 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateQuestion(id: number, questionData: Partial<InsertQuestion>): Promise<Question> {
-    const [question] = await db
-      .update(questions)
-      .set({
-        ...questionData,
-        updatedAt: new Date()
-      })
-      .where(eq(questions.id, id))
-      .returning();
-    return question;
+    try {
+      // Make a copy of the question data to modify
+      const updatedData: Record<string, any> = { ...questionData };
+
+      // If weekOf is being updated, recalculate the availability dates
+      if (updatedData.weekOf) {
+        let weekOfDate: Date;
+        
+        if (typeof updatedData.weekOf === 'string') {
+          // Parse date string
+          weekOfDate = new Date(updatedData.weekOf);
+        } else {
+          weekOfDate = new Date(updatedData.weekOf);
+        }
+        
+        // Use our helper function to normalize the date to Monday of the week
+        weekOfDate = getWeekMonday(weekOfDate);
+        
+        // Format the date for PostgreSQL storage to prevent timezone issues
+        const formattedWeekOf = formatDateForPg(weekOfDate);
+        
+        // Get the week status for this date
+        const weekStatus = await this.getWeekStatus(weekOfDate);
+        
+        // Set availableFrom to the selected week's Monday (using UTC-safe approach)
+        const availableFrom = getWeekMonday(weekOfDate);
+        
+        // Set availableUntil to Sunday (using UTC-safe approach)
+        const availableUntil = getWeekSunday(weekOfDate);
+        
+        console.log(`Updating question to week of ${formattedWeekOf} (Monday) with status: ${weekStatus}`);
+        console.log(`Question will be available from ${formatDateForPg(availableFrom)} to ${formatDateForPg(availableUntil)}`);
+        
+        // Update the data with the normalized values
+        updatedData.weekOf = formattedWeekOf;
+        updatedData.weekStatus = weekStatus as 'past' | 'current' | 'future';
+        // Store as Date objects for timestamp columns
+        updatedData.availableFrom = availableFrom;
+        updatedData.availableUntil = availableUntil;
+      }
+      
+      const [question] = await db
+        .update(questions)
+        .set(updatedData)
+        .where(eq(questions.id, id))
+        .returning();
+        
+      return question;
+    } catch (error) {
+      console.error("Error updating question:", error);
+      throw new Error(`Failed to update question: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   async getCurrentWeek(): Promise<DimDate> {
@@ -1367,7 +1540,8 @@ export class DatabaseStorage implements IStorage {
   async getWeekStatus(date: Date): Promise<string> {
     try {
       // Format date as YYYY-MM-DD string for proper PostgreSQL date comparison
-      const formattedDate = date.toISOString().split('T')[0];
+      // using our UTC-based formatting to prevent timezone issues
+      const formattedDate = formatDateForPg(date);
       console.log(`Getting week status for date: ${formattedDate}`);
       
       const [week] = await db
@@ -1555,6 +1729,73 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(questions.availableUntil);
+  }
+
+  // App settings methods implementation
+  async getSetting(key: string): Promise<string | null> {
+    try {
+      const [setting] = await db
+        .select()
+        .from(appSettings)
+        .where(eq(appSettings.key, key));
+      
+      return setting ? setting.value : null;
+    } catch (error) {
+      console.error(`Error fetching setting [${key}]:`, error);
+      return null;
+    }
+  }
+  
+  async getAllSettings(): Promise<AppSettings[]> {
+    try {
+      return await db.select().from(appSettings);
+    } catch (error) {
+      console.error("Error fetching all settings:", error);
+      return [];
+    }
+  }
+  
+  async updateSetting(key: string, value: string, userId?: number): Promise<AppSettings> {
+    try {
+      // Check if setting exists
+      const existingSetting = await this.getSetting(key);
+      
+      if (existingSetting !== null) {
+        // Update existing setting
+        const [updatedSetting] = await db
+          .update(appSettings)
+          .set({ 
+            value, 
+            updatedAt: new Date(),
+            updatedBy: userId || null
+          })
+          .where(eq(appSettings.key, key))
+          .returning();
+          
+        return updatedSetting;
+      } else {
+        // Create new setting
+        const [newSetting] = await db
+          .insert(appSettings)
+          .values({
+            key,
+            value,
+            description: `Setting created on ${new Date().toISOString()}`,
+            updatedAt: new Date(),
+            updatedBy: userId || null
+          })
+          .returning();
+          
+        return newSetting;
+      }
+    } catch (error) {
+      console.error(`Error updating setting [${key}]:`, error);
+      throw new Error(`Failed to update setting: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  async getSelectedWeekFilter(): Promise<string | null> {
+    return this.getSetting('selected_week_filter');
   }
 }
 

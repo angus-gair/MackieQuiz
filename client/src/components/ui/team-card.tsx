@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { TeamLogo } from "@/components/ui/team-logo";
+import { Trophy, Medal, Award } from "lucide-react";
 
 // Define team types used by this component
 type TeamStats = {
@@ -11,14 +13,12 @@ type TeamStats = {
   weeklyCompletionPercentage: number;
 };
 
-// Map of team names to their SVG logo files
+// Map of team names to their PNG logo files
 const TEAM_LOGOS: Record<string, string> = {
-  "Pour Decisions": "/images/team-logos/pour_decisions.svg",
-  "Sip Happy": "/images/team-logos/sip_happy.svg",
-  "Grape Minds": "/images/team-logos/grape_minds.svg",
-  "Kingsford Corkers": "/images/team-logos/kingsford_corkers.svg",
-  // Fallback for other teams
-  "default": "/images/team-logos/pour_decisions.svg",
+  "Pour Decisions": "/images/pour_decisions.PNG",
+  "Sip Happens": "/images/sip_happends.PNG",
+  "Grape Minds": "/images/grape_minds.PNG",
+  "Kingsford Corkers": "/images/kingsford_corkers.png",
 };
 
 interface TeamCardProps {
@@ -29,7 +29,7 @@ interface TeamCardProps {
 
 export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
   // Get the correct logo for this team
-  const logoSrc = TEAM_LOGOS[team.teamName] || TEAM_LOGOS.default;
+  const logoSrc = TEAM_LOGOS[team.teamName];
   
   // Determine completion rate styling
   const completionRateColor = 
@@ -45,64 +45,70 @@ export function TeamCard({ team, index, isTopThree = false }: TeamCardProps) {
       )}
     >
       <CardContent className="p-0 flex">
-        {/* Left side - Team Logo */}
-        <div className="w-1/3 bg-slate-100 flex items-center justify-center p-4">
-          <img 
-            src={logoSrc} 
-            alt={`${team.teamName} logo`} 
-            className="w-full h-auto"
-          />
+        {/* Left side - Team Logo (larger size) */}
+        <div className="w-[30%] bg-slate-100 flex items-center justify-center pt-16 pb-6 px-3">
+          {logoSrc ? (
+            <img 
+              src={logoSrc} 
+              alt={`${team.teamName} logo`} 
+              className="w-full h-auto object-contain max-h-28"
+            />
+          ) : (
+            <div className="w-20 h-20">
+              <TeamLogo teamName={team.teamName} size="lg" />
+            </div>
+          )}
         </div>
         
-        {/* Right side - Team Info */}
-        <div className="w-2/3 p-4">
+        {/* Right side - Team Info (adjusted width) */}
+        <div className="w-[70%] p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-primary">
+            <h3 className="text-lg font-semibold text-primary">
               {team.teamName}
             </h3>
             
             {/* Ranking Trophy Icon */}
-            {index < 3 && (
-              <div className="h-6 w-6 text-muted-foreground">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-full">
-                  <path d="M8 21V15M16 8V21M12 21V12M4 3H20V7C20 7 17 10 12 10C7 10 4 7 4 7V3Z" 
-                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                    className={
-                      index === 0 ? "text-yellow-500" : 
-                      index === 1 ? "text-gray-400" : 
-                      "text-amber-600"
-                    }
-                  />
-                </svg>
+            {index < 4 && (
+              <div className={cn(
+                "h-8 w-8 rounded-full flex items-center justify-center",
+                index === 0 ? "bg-yellow-100" : 
+                index === 1 ? "bg-gray-100" : 
+                index === 2 ? "bg-amber-100" :
+                "bg-slate-100"
+              )}>
+                {index === 0 && <Trophy className="h-5 w-5 text-yellow-500" />}
+                {index === 1 && <Medal className="h-5 w-5 text-gray-400" />}
+                {index === 2 && <Award className="h-5 w-5 text-amber-600" />}
+                {index === 3 && <span className="text-xs font-semibold text-slate-500">4th</span>}
               </div>
             )}
           </div>
           
-          {/* Stats Grid */}
+          {/* Stats Grid - Larger text and better spacing */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gray-50 p-2 rounded">
-              <div className="text-xs text-gray-500">Total Score</div>
-              <div className="text-sm font-semibold text-primary">
+            <div className="bg-gray-50 p-2.5 rounded">
+              <div className="text-sm text-gray-500 font-medium">Total Score</div>
+              <div className="text-base font-semibold text-primary">
                 {team.totalScore}
               </div>
             </div>
-            <div className="bg-gray-50 p-2 rounded">
-              <div className="text-xs text-gray-500">Avg Score</div>
-              <div className="text-sm font-semibold text-primary">
+            <div className="bg-gray-50 p-2.5 rounded">
+              <div className="text-sm text-gray-500 font-medium">Avg Score</div>
+              <div className="text-base font-semibold text-primary">
                 {Math.round(team.averageScore)}
               </div>
             </div>
-            <div className="bg-gray-50 p-2 rounded">
-              <div className="text-xs text-gray-500">Members</div>
-              <div className="text-sm font-semibold text-primary">
+            <div className="bg-gray-50 p-2.5 rounded">
+              <div className="text-sm text-gray-500 font-medium">Members</div>
+              <div className="text-base font-semibold text-primary">
                 {team.members}
               </div>
             </div>
             
             {/* Completion Rate - Highlighted */}
-            <div className={cn("p-2 rounded", completionRateColor.split(" ")[0])}>
-              <div className="text-xs text-gray-600 font-medium">Completion</div>
-              <div className={cn("text-sm font-bold", completionRateColor.split(" ")[1])}>
+            <div className={cn("p-2.5 rounded", completionRateColor.split(" ")[0])}>
+              <div className="text-sm text-gray-600 font-medium">Completion</div>
+              <div className={cn("text-base font-bold", completionRateColor.split(" ")[1])}>
                 {Math.round(team.weeklyCompletionPercentage)}%
               </div>
             </div>

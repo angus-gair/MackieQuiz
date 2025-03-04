@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { User as UserType, Achievement, UserProfile } from "@shared/schema";
@@ -55,7 +56,7 @@ export default function LeaderboardPage() {
   } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
   });
-
+  
   // Fetch Teams
   const {
     data: teamStats,
@@ -64,7 +65,7 @@ export default function LeaderboardPage() {
   } = useQuery<TeamStats[]>({
     queryKey: ["/api/analytics/teams"],
   });
-
+  
   // Fetch Achievement Badges and User Profiles
   const {
     data: achievements,
@@ -72,26 +73,26 @@ export default function LeaderboardPage() {
   } = useQuery<Achievement[]>({
     queryKey: ["/api/achievements"],
   });
-
+  
   const {
     data: userProfiles,
     isLoading: isProfilesLoading,
   } = useQuery<UserProfile[]>({
     queryKey: ["/api/users/profiles"],
   });
-
+  
   // Helper to get user's profile
   const getUserProfile = (userId: number) => {
     if (!userProfiles) return null;
     return userProfiles.find(p => p.userId === userId);
   };
-
+  
   // Get user badges with proper null checks
   const getUserBadges = (userId: number) => {
     if (!achievements) return [];
     const profile = getUserProfile(userId);
     const userAchievements = achievements.filter(a => a.userId === userId);
-
+    
     if (profile?.showcaseAchievements?.length) {
       // Return user's selected showcase achievements with proper null checking
       return userAchievements
@@ -102,19 +103,19 @@ export default function LeaderboardPage() {
           return aIndex - bIndex;
         });
     }
-
+    
     // Default to highest tier badges if no showcase set
     return userAchievements
       .filter(a => a.isHighestTier)
       .slice(0, 3);
   };
-
+  
   // Helper to generate team avatar
   const getTeamAvatar = (teamName: string, userId: number) => {
     const profile = getUserProfile(userId);
     const preference = profile?.teamAvatarPreference || 'initials';
     const color = profile?.teamAvatarColor || 'bg-primary';
-
+    
     return (
       <Avatar className="h-8 w-8">
         <AvatarFallback className={color}>
@@ -126,23 +127,104 @@ export default function LeaderboardPage() {
       </Avatar>
     );
   };
-
+  
   // Sort individuals by weekly score (descending)
   const sortedUsers =
     users?.sort((a, b) => (b.weeklyScore || 0) - (a.weeklyScore || 0)) || [];
-
+  
   // Sort teams by weekly completion percentage (descending)
   const sortedTeams =
     teamStats?.sort(
       (a, b) => b.weeklyCompletionPercentage - a.weeklyCompletionPercentage
     ) || [];
-
+  
   // Determine if any data is still loading
   const isLoading = isUsersLoading || isTeamsLoading || isAchievementsLoading || isProfilesLoading;
-
+  
+  // For debugging purposes
+  const [activeTab, setActiveTab] = useState('individual');
+  const outerContainerRef = useRef<HTMLDivElement>(null);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
+  const individualContentRef = useRef<HTMLDivElement>(null);
+  const teamContentRef = useRef<HTMLDivElement>(null);
+  
+  // State for width measurements
+  const [measurements, setMeasurements] = useState({
+    outerWidth: 0,
+    mainWidth: 0,
+    individualContentWidth: 0,
+    teamContentWidth: 0,
+    windowWidth: 0
+  });
+  
+  // Update measurements on tab change
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    // Schedule measurement after animations complete
+    setTimeout(() => {
+      const windowWidth = window.innerWidth;
+      
+      setMeasurements({
+        outerWidth: outerContainerRef.current?.offsetWidth || 0,
+        mainWidth: mainContainerRef.current?.offsetWidth || 0,
+        individualContentWidth: individualContentRef.current?.offsetWidth || 0,
+        teamContentWidth: teamContentRef.current?.offsetWidth || 0,
+        windowWidth
+      });
+    }, 100);
+  };
+  
+  // Measure on mount and resize
+  useEffect(() => {
+    const measureWidths = () => {
+      const windowWidth = window.innerWidth;
+      
+      setMeasurements({
+        outerWidth: outerContainerRef.current?.offsetWidth || 0,
+        mainWidth: mainContainerRef.current?.offsetWidth || 0,
+        individualContentWidth: individualContentRef.current?.offsetWidth || 0,
+        teamContentWidth: teamContentRef.current?.offsetWidth || 0,
+        windowWidth
+      });
+    };
+    
+    // Initial measurement
+    measureWidths();
+    
+    // Add resize listener
+    window.addEventListener('resize', measureWidths);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', measureWidths);
+  }, []);
+  
   return (
-    <div className="min-h-screen pt-16 pb-20 bg-gradient-to-b from-background to-muted/10">
-      <div className="content-container">
+    <div ref={outerContainerRef} className="min-h-screen pt-16 pb-20 bg-gradient-to-b from-background to-muted/10">
+      {/* Debug width measurement display */}
+      <div className="fixed bottom-0 left-0 right-0 text-center text-xs text-white z-50 bg-black/80 py-1">
+        <div className="grid grid-cols-2 gap-2 px-4">
+          <div className="text-left">Window: {measurements.windowWidth}px</div>
+          <div className="text-right">Active Tab: {activeTab}</div>
+          
+          <div className="text-left">Main Container: {measurements.mainWidth}px</div>
+          <div className="text-right">Outer Container: {measurements.outerWidth}px</div>
+          
+          <div className="text-left">
+            <span className={activeTab === 'individual' ? 'text-green-400' : ''}>
+              Individual Content: {measurements.individualContentWidth}px
+            </span>
+          </div>
+          <div className="text-right">
+            <span className={activeTab === 'team' ? 'text-green-400' : ''}>
+              Team Content: {measurements.teamContentWidth}px
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Container - explicitly set fixed width for consistency */}
+      <div ref={mainContainerRef} className="mx-auto px-4" style={{ width: '672px', maxWidth: '100%' }}>
         {/* Page Header */}
         <div className="flex items-center mb-6">
           <div className="icon-circle-primary mr-3">
@@ -150,9 +232,9 @@ export default function LeaderboardPage() {
           </div>
           <h1 className="page-title mb-0">Weekly Leaderboard</h1>
         </div>
-
+        
         {/* Tabs / Toggle */}
-        <Tabs defaultValue="individual" className="w-full">
+        <Tabs defaultValue="individual" className="w-full" onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-2 mb-5 rounded-lg overflow-hidden h-10 bg-muted shadow-sm">
             <TabsTrigger
               value="individual"
@@ -169,7 +251,7 @@ export default function LeaderboardPage() {
               Team
             </TabsTrigger>
           </TabsList>
-
+          
           {/* Tab Descriptions */}
           <TabsContent value="individual">
             <p className="text-sm text-muted-foreground leading-tight text-center mb-6 page-subtitle">
@@ -183,7 +265,7 @@ export default function LeaderboardPage() {
               Teams are ranked by weekly quiz completion rate. See how your group compares!
             </p>
           </TabsContent>
-
+          
           {/* Top 3 Winners Section - Both Tabs */}
           <div className="mb-8">
             {!isLoading && (
@@ -211,15 +293,8 @@ export default function LeaderboardPage() {
                   {sortedTeams[1] && (
                     <Card className="text-center border-gray-200 hover:shadow-md transition-shadow h-full">
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
-                        <div className="flex items-center gap-1 mb-2">
-                          <img 
-                            src={`/images/team-logos/${sortedTeams[1]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
-                            alt={`${sortedTeams[1]?.teamName} logo`}
-                            className="h-10 w-10"
-                          />
-                          <div className="h-7 w-7 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
-                            <Medal className="h-4 w-4" />
-                          </div>
+                        <div className="h-10 w-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-2">
+                          <Medal className="h-6 w-6" />
                         </div>
                         <p className="font-semibold text-sm truncate w-full">
                           {sortedTeams[1]?.teamName}
@@ -231,7 +306,7 @@ export default function LeaderboardPage() {
                     </Card>
                   )}
                 </TabsContent>
-
+                
                 {/* First Place */}
                 <TabsContent value="individual" className="col-span-1">
                   {sortedUsers[0] && (
@@ -261,15 +336,8 @@ export default function LeaderboardPage() {
                         1st Place
                       </div>
                       <CardContent className="pt-6 pb-4 px-2 flex flex-col items-center">
-                        <div className="flex items-center gap-2 mb-2">
-                          <img 
-                            src={`/images/team-logos/${sortedTeams[0]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
-                            alt={`${sortedTeams[0]?.teamName} logo`}
-                            className="h-12 w-12"
-                          />
-                          <div className="h-8 w-8 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center">
-                            <Trophy className="h-5 w-5" />
-                          </div>
+                        <div className="h-14 w-14 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center mb-2">
+                          <Trophy className="h-8 w-8" />
                         </div>
                         <p className="font-bold text-primary truncate w-full mt-1">
                           {sortedTeams[0]?.teamName}
@@ -281,7 +349,7 @@ export default function LeaderboardPage() {
                     </Card>
                   )}
                 </TabsContent>
-
+                
                 {/* Third Place */}
                 <TabsContent value="individual" className="col-span-1">
                   {sortedUsers[2] && (
@@ -305,15 +373,8 @@ export default function LeaderboardPage() {
                   {sortedTeams[2] && (
                     <Card className="text-center border-amber-200 hover:shadow-md transition-shadow h-full">
                       <CardContent className="pt-5 pb-4 px-2 flex flex-col items-center">
-                        <div className="flex items-center gap-1 mb-2">
-                          <img 
-                            src={`/images/team-logos/${sortedTeams[2]?.teamName.toLowerCase().replace(/ /g, '_')}.svg`}
-                            alt={`${sortedTeams[2]?.teamName} logo`}
-                            className="h-10 w-10"
-                          />
-                          <div className="h-7 w-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
-                            <Award className="h-4 w-4" />
-                          </div>
+                        <div className="h-10 w-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
+                          <Award className="h-6 w-6" />
                         </div>
                         <p className="font-semibold text-sm truncate w-full">
                           {sortedTeams[2]?.teamName}
@@ -328,10 +389,10 @@ export default function LeaderboardPage() {
               </div>
             )}
           </div>
-
+          
           {/* Full Ranking List Header */}
           <h2 className="text-base font-semibold text-primary mb-3">Full Rankings</h2>
-
+          
           {/* Loading / Error / Empty States */}
           {isLoading && (
             <div className="space-y-3">
@@ -351,131 +412,145 @@ export default function LeaderboardPage() {
               ))}
             </div>
           )}
-
+          
           {/* Individual Tab Content */}
-          <TabsContent value="individual" className="space-y-3">
-            {isUsersError && (
-              <p className="text-center text-sm badge-danger p-2 rounded">
-                Error loading individual leaderboard. Please try again.
-              </p>
-            )}
-            
-            {!isUsersLoading && !isUsersError && sortedUsers.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground p-4 border rounded-lg">
-                No users found. Check back after some quizzes have been completed.
-              </p>
-            )}
-
-            {/* Individual Card List */}
-            {sortedUsers.map((user, index) => {
-              const Badge = BADGES[index]?.icon ?? null;
-              const color = BADGES[index]?.color ?? "text-muted-foreground";
-              const bgColor = BADGES[index]?.bgColor ?? "bg-gray-50";
-              const achievementBadges = getUserBadges(user.id);
-
-              return (
-                <Card
-                  key={user.id}
-                  className={cn(
-                    "overflow-hidden hover:shadow-md transition-shadow",
-                    index < 3 ? "border-primary/20" : "border-gray-200"
-                  )}
-                >
-                  <CardContent className="p-4">
-                    {/* Name / Score Row */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {Badge ? (
-                          <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", bgColor)}>
-                            <Badge className={cn("h-5 w-5", color)} />
-                          </div>
-                        ) : (
-                          <div className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-500">{index + 1}</span>
-                          </div>
-                        )}
-                        
-                        {/* Name and Achievement Badges */}
-                        <div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-base font-semibold text-primary">
-                              {user.username}
-                            </span>
-                            
-                            {/* Achievement Badges */}
-                            <TooltipProvider>
-                              {achievementBadges.map((achievement) => {
-                                const IconComponent = ACHIEVEMENT_ICONS[achievement.type as keyof typeof ACHIEVEMENT_ICONS] || Award;
-                                return (
-                                  <Tooltip key={achievement.id}>
-                                    <TooltipTrigger asChild>
-                                      <div className="cursor-help">
-                                        <IconComponent
-                                          className={`h-4 w-4 ${
-                                            achievement.tier === 'gold' ? 'text-yellow-500' :
-                                              achievement.tier === 'silver' ? 'text-gray-400' :
-                                                'text-amber-600'
-                                          }`}
-                                        />
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p className="text-sm font-semibold">{achievement.name}</p>
-                                      <p className="text-xs">{achievement.description}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                );
-                              })}
-                            </TooltipProvider>
-                          </div>
+          <TabsContent value="individual">
+            <div ref={individualContentRef} className="space-y-3">
+              {isUsersError && (
+                <p className="text-center text-sm badge-danger p-2 rounded">
+                  Error loading individual leaderboard. Please try again.
+                </p>
+              )}
+              
+              {!isUsersLoading && !isUsersError && sortedUsers.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground p-4 border rounded-lg">
+                  No users found. Check back after some quizzes have been completed.
+                </p>
+              )}
+              
+              {/* Individual Card List */}
+              {sortedUsers.map((user, index) => {
+                const Badge = BADGES[index]?.icon ?? null;
+                const color = BADGES[index]?.color ?? "text-muted-foreground";
+                const bgColor = BADGES[index]?.bgColor ?? "bg-gray-50";
+                const achievementBadges = getUserBadges(user.id);
+                
+                return (
+                  <Card
+                    key={user.id}
+                    className={cn(
+                      "overflow-hidden hover:shadow-md transition-shadow",
+                      index < 3 ? "border-primary/20" : "border-gray-200"
+                    )}
+                  >
+                    <CardContent className="p-4">
+                      {/* Name / Score Row */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {Badge ? (
+                            <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", bgColor)}>
+                              <Badge className={cn("h-5 w-5", color)} />
+                            </div>
+                          ) : (
+                            <div className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center">
+                              <span className="text-sm font-medium text-gray-500">{index + 1}</span>
+                            </div>
+                          )}
                           
-                          {/* Team Info */}
-                          <span className="text-xs text-muted-foreground">
-                            Team: <span className="font-medium text-gray-700">{user.team || "—"}</span>
-                          </span>
+                          {/* Name and Achievement Badges */}
+                          <div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-base font-semibold text-primary">
+                                {user.username}
+                              </span>
+                              
+                              {/* Achievement Badges */}
+                              <TooltipProvider>
+                                {achievementBadges.map((achievement) => {
+                                  const IconComponent = ACHIEVEMENT_ICONS[achievement.type as keyof typeof ACHIEVEMENT_ICONS] || Award;
+                                  return (
+                                    <Tooltip key={achievement.id}>
+                                      <TooltipTrigger asChild>
+                                        <div className="cursor-help">
+                                          <IconComponent
+                                            className={`h-4 w-4 ${
+                                              achievement.tier === 'gold' ? 'text-yellow-500' :
+                                                achievement.tier === 'silver' ? 'text-gray-400' :
+                                                  'text-amber-600'
+                                            }`}
+                                          />
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p className="text-sm font-semibold">{achievement.name}</p>
+                                        <p className="text-xs">{achievement.description}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  );
+                                })}
+                              </TooltipProvider>
+                            </div>
+                            
+                            {/* Team Info */}
+                            <span className="text-xs text-muted-foreground">
+                              Team: <span className="font-medium text-gray-700">{user.team || "—"}</span>
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Score and Quiz Count */}
+                        <div className="text-right">
+                          {index < 10 ? (
+                            <div className="badge-primary">{user.weeklyScore || 0} pts</div>
+                          ) : (
+                            <div className="badge-primary blur-sm select-none opacity-70">{user.weeklyScore || 0} pts</div>
+                          )}
+                          {index < 10 ? (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {user.weeklyQuizzes || 0} quizzes completed
+                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-500 mt-1 blur-sm select-none opacity-70">
+                              {user.weeklyQuizzes || 0} quizzes completed
+                            </div>
+                          )}
                         </div>
                       </div>
-                      
-                      {/* Score and Quiz Count */}
-                      <div className="text-right">
-                        <div className="badge-primary">{user.weeklyScore || 0} pts</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {user.weeklyQuizzes || 0} quizzes completed
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </TabsContent>
-
+          
           {/* Team Tab Content */}
-          <TabsContent value="team" className="space-y-3">
-            {isTeamsError && (
-              <p className="text-center text-sm badge-danger p-2 rounded">
-                Error loading team leaderboard. Please try again.
-              </p>
-            )}
-            
-            {!isTeamsLoading && !isTeamsError && sortedTeams.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground p-4 border rounded-lg">
-                No teams found. Check back after some teams have been created.
-              </p>
-            )}
-
-            {/* Team Card List - Using new TeamCard component */}
-            {sortedTeams.map((team, index) => (
-              <TeamCard 
-                key={team.teamName}
-                team={team}
-                index={index}
-                isTopThree={index < 3}
-              />
-            ))}
+          <TabsContent value="team">
+            <div ref={teamContentRef} className="space-y-3">
+              {isTeamsError && (
+                <p className="text-center text-sm badge-danger p-2 rounded">
+                  Error loading team leaderboard. Please try again.
+                </p>
+              )}
+              
+              {!isTeamsLoading && !isTeamsError && sortedTeams.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground p-4 border rounded-lg">
+                  No teams found. Check back after some teams have been created.
+                </p>
+              )}
+              
+              {/* Team Card List - Using TeamCard component */}
+              {sortedTeams.map((team, index) => (
+                <TeamCard 
+                  key={team.teamName}
+                  team={team}
+                  index={index}
+                  isTopThree={index < 3}
+                />
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
-
+        
         {/* Action Button */}
         <div className="mt-8 text-center">
           <Link href="/quiz">

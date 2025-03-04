@@ -141,8 +141,8 @@ export default function TeamAllocationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center px-4">
-      <div className="container max-w-5xl mx-auto flex justify-center">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center">
+      <div className="mx-auto px-4 flex justify-center" style={{ width: '672px', maxWidth: '100%' }}>
         <Card className="w-full max-w-[280px] sm:max-w-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg sm:text-xl">Team Assignment</CardTitle>

@@ -33,7 +33,7 @@ export default function AuthPage() {
   });
 
   if (user) {
-    return <Redirect to="/" />;
+    return <Redirect to="/welcome" />;
   }
 
   return (
@@ -136,23 +136,7 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={registerForm.control}
-                        name="isAdmin"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1 leading-none">
-                              <FormLabel className="text-xs">Register as admin</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
+
                       <Button 
                         type="submit" 
                         className="w-full h-9 text-sm"

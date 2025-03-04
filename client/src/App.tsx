@@ -28,10 +28,11 @@ const LeaderboardPage = lazy(() => import("@/pages/shared/leaderboard"));
 const QuizPage = lazy(() => import("@/pages/user/quiz"));
 const QuizCompletionPage = lazy(() => import("@/pages/user/quiz-completion"));
 const TeamAllocationPage = lazy(() => import("@/pages/team-allocation-page"));
+const DebugLogosPage = lazy(() => import("@/pages/debug-logos"));
 
 // Admin imports
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
-const AdminQuestions = lazy(() => import("@/pages/admin/questions"));
+const AdminQuestions = lazy(() => import("@/pages/admin/questions-new"));
 const AdminArchivedQuestions = lazy(() => import("@/pages/admin/archived-questions"));
 const AdminUsersTeams = lazy(() => import("@/pages/admin/users-teams"));
 const AdminAchievements = lazy(() => import("@/pages/admin/achievements"));
@@ -61,8 +62,8 @@ function Router() {
       <div className={`flex-1 ${contentClasses} max-w-5xl mx-auto`}>
         <Suspense fallback={<LoadingSpinner />}>
           <Switch>
-            <Route path="/auth" component={AuthPage as AnyComponent} />
-            <Route path="/" component={WelcomePage as AnyComponent} />
+            <Route path="/" component={AuthPage as AnyComponent} />
+            <Route path="/welcome" component={WelcomePage as AnyComponent} />
             
             {/* Protected Routes */}
             <ProtectedRoute path="/team-allocation" component={TeamAllocationPage as AnyComponent} />
@@ -72,6 +73,7 @@ function Router() {
             <ProtectedRoute path="/settings" component={SettingsPage as AnyComponent} />
             <ProtectedRoute path="/quiz" component={QuizPage as AnyComponent} />
             <ProtectedRoute path="/quiz-completion" component={QuizCompletionPage as AnyComponent} />
+            <ProtectedRoute path="/debug-logos" component={DebugLogosPage as AnyComponent} />
 
             {/* Admin Routes */}
             <AdminRoute path="/admin" component={AdminDashboard as AnyComponent} />

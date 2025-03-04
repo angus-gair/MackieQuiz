@@ -134,7 +134,24 @@ export function registerRoutes(app: Express): Server {
     try {
       // Archive past weeks' questions first
       await storage.archivePastWeeks();
-      // Then get current week's questions
+      
+      // Check if there are any selected questions
+      const selectedIdsStr = await storage.getSetting('selected_questions');
+      
+      if (selectedIdsStr) {
+        // Parse the stored comma-separated IDs
+        const selectedIds = selectedIdsStr.split(',').map(id => parseInt(id, 10));
+        
+        // Fetch all questions and filter by selected IDs
+        const allQuestions = await storage.getQuestions();
+        const selectedQuestions = allQuestions.filter(q => selectedIds.includes(q.id));
+        
+        if (selectedQuestions.length > 0) {
+          return res.json(selectedQuestions);
+        }
+      }
+      
+      // Fall back to current week questions if no selected questions
       const questions = await storage.getCurrentWeekQuestions();
       res.json(questions);
     } catch (error) {
@@ -199,7 +216,23 @@ export function registerRoutes(app: Express): Server {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     try {
-      // Get current week's questions for the user
+      // First check if there are any selected questions
+      const selectedIdsStr = await storage.getSetting('selected_questions');
+      
+      if (selectedIdsStr) {
+        // Parse the stored comma-separated IDs
+        const selectedIds = selectedIdsStr.split(',').map(id => parseInt(id, 10));
+        
+        // Fetch all questions and filter by selected IDs
+        const allQuestions = await storage.getQuestions();
+        const selectedQuestions = allQuestions.filter(q => selectedIds.includes(q.id));
+        
+        if (selectedQuestions.length > 0) {
+          return res.json(selectedQuestions);
+        }
+      }
+      
+      // Fall back to current week questions if no selected questions
       const questions = await storage.getCurrentWeekQuestions();
       res.json(questions);
     } catch (error) {
@@ -244,6 +277,21 @@ export function registerRoutes(app: Express): Server {
     await storage.archiveQuestion(id);
     res.sendStatus(200);
   });
+  
+  app.post("/api/questions/:id/toggle-inclusion", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    
+    try {
+      const questionId = parseInt(req.params.id);
+      console.log(`Toggle inclusion for question ${questionId} requested by user ${req.user.id}`);
+      const updatedQuestion = await storage.toggleQuestionInclusion(questionId);
+      console.log(`Question ${questionId} toggled. New inclusion status: ${updatedQuestion.includedInQuiz}`);
+      res.json(updatedQuestion);
+    } catch (error) {
+      console.error("Error toggling question inclusion:", error);
+      res.status(500).json({ error: "Failed to toggle question inclusion", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
 
   app.patch("/api/questions/:id", async (req, res) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
@@ -271,13 +319,50 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/answers", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
-    const answer = insertAnswerSchema.parse({
-      ...req.body,
-      userId: req.user.id
-    });
+    try {
+      // Parse and validate answer data
+      const answer = insertAnswerSchema.parse({
+        ...req.body,
+        userId: req.user.id
+      });
 
-    const result = await storage.submitAnswer(answer);
-    res.json(result);
+      // Submit the answer
+      const result = await storage.submitAnswer(answer);
+      
+      // Check for any earned achievements after submitting answer
+      // We need to check the number of answers to determine if a quiz was completed
+      const userAnswers = await storage.getUserAnswers(req.user.id);
+      
+      // If the user just completed a quiz (answers count is divisible by 3)
+      if (userAnswers.length % 3 === 0) {
+        // Check for achievements that should be awarded
+        const achievements = await storage.checkAndAwardAchievements(req.user.id);
+        
+        // Log how many achievements were earned
+        if (achievements.length > 0) {
+          console.log(`User ${req.user.id} earned ${achievements.length} achievements: ${achievements.map(a => a.name).join(', ')}`);
+        }
+        
+        // Add achievement information to the response
+        return res.json({
+          answer: result,
+          achievements: achievements,
+          quizCompleted: true
+        });
+      }
+      
+      // Return just the answer if quiz is not completed
+      res.json({
+        answer: result,
+        quizCompleted: false
+      });
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+      res.status(500).json({ 
+        error: "Failed to submit answer",
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   });
 
   app.get("/api/answers", async (req, res) => {
@@ -423,15 +508,40 @@ export function registerRoutes(app: Express): Server {
     
     // Filter for only recent achievements (earned in the last minute)
     const now = new Date();
-    const oneMinuteAgo = new Date(now.getTime() - 60 * 1000); // 1 minute ago
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes ago
     
-    const recentAchievements = achievements.filter(achievement => 
-      new Date(achievement.earnedAt) > oneMinuteAgo
-    );
+    // Add extra debug info for troubleshooting
+    console.log(`[Achievement Latest] User ${req.user.id} has ${achievements.length} total achievements.`);
+    console.log(`[Achievement Latest] Checking for achievements newer than ${fiveMinutesAgo.toISOString()}`);
     
-    // Return the most recent achievement if it exists and was earned recently
-    const latestAchievement = recentAchievements.length > 0 ? recentAchievements[0] : null;
-    res.json(latestAchievement);
+    const recentAchievements = achievements.filter(achievement => {
+      const earnedAt = new Date(achievement.earnedAt);
+      const isRecent = earnedAt > fiveMinutesAgo;
+      console.log(`[Achievement Filter] ${achievement.name} earned at ${earnedAt.toISOString()} - is recent: ${isRecent}`);
+      return isRecent;
+    });
+    
+    console.log(`[Achievement Latest] Found ${recentAchievements.length} recent achievements.`);
+    if (recentAchievements.length > 0) {
+      console.log(`[Achievement Latest] Types: ${recentAchievements.map(a => a.type).join(', ')}`);
+    }
+    
+    // Instead of returning just one achievement, return all recent ones
+    // This allows us to handle multiple achievements earned at once
+    res.json(recentAchievements);
+  });
+  
+  // New endpoint to get all achievements for a user
+  app.get("/api/achievements/user", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const achievements = await storage.getUserAchievements(req.user.id);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      res.status(500).json({ error: "Failed to fetch user achievements" });
+    }
   });
 
   // New endpoint to reset quiz data for new users
@@ -546,6 +656,102 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // App Settings routes
+  app.get("/api/settings", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+
+    try {
+      const settings = await storage.getAllSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      res.status(500).json({ error: 'Failed to fetch settings' });
+    }
+  });
+
+  app.get("/api/settings/:key", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const { key } = req.params;
+      const value = await storage.getSetting(key);
+      
+      if (value === null) {
+        return res.status(404).json({ error: 'Setting not found' });
+      }
+      
+      res.json({ key, value });
+    } catch (error) {
+      console.error(`Error fetching setting [${req.params.key}]:`, error);
+      res.status(500).json({ error: 'Failed to fetch setting' });
+    }
+  });
+
+  app.post("/api/settings", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    
+    try {
+      const { key, value } = req.body;
+      
+      if (!key || value === undefined) {
+        return res.status(400).json({ error: 'Key and value are required' });
+      }
+      
+      const updatedSetting = await storage.updateSetting(key, value, req.user.id);
+      res.json(updatedSetting);
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      res.status(500).json({ error: 'Failed to update setting' });
+    }
+  });
+
+  // Get selected quiz questions (for admin panel)
+  app.get("/api/quiz/selected-questions", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const selectedIdsStr = await storage.getSetting('selected_questions');
+      
+      if (!selectedIdsStr) {
+        return res.json([]);
+      }
+      
+      // Parse the stored comma-separated IDs
+      const selectedIds = selectedIdsStr.split(',').map(id => parseInt(id, 10));
+      
+      // Fetch all questions and filter by selected IDs
+      const allQuestions = await storage.getQuestions();
+      const selectedQuestions = allQuestions.filter(q => selectedIds.includes(q.id));
+      
+      res.json(selectedQuestions);
+    } catch (error) {
+      console.error('Error fetching selected questions:', error);
+      res.status(500).json({ error: 'Failed to fetch selected questions' });
+    }
+  });
+
+  // Update selected quiz questions
+  app.post("/api/quiz/selected-questions", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) return res.sendStatus(401);
+    
+    try {
+      const { questionIds } = req.body;
+      
+      if (!Array.isArray(questionIds)) {
+        return res.status(400).json({ error: 'Question IDs must be an array' });
+      }
+      
+      // Store the selected question IDs as a comma-separated string
+      const selectedIdsStr = questionIds.join(',');
+      
+      await storage.updateSetting('selected_questions', selectedIdsStr, req.user.id);
+      
+      res.json({ success: true, message: 'Selected questions updated successfully' });
+    } catch (error) {
+      console.error('Error updating selected questions:', error);
+      res.status(500).json({ error: 'Failed to update selected questions' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

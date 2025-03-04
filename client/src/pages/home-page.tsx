@@ -15,6 +15,7 @@ import confetti from 'canvas-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeaderNav } from "@/components/header-nav";
 import { FaGlassCheers } from "react-icons/fa";
+import { TeamCard } from "@/components/ui/team-card";
 
 // Team stats type
 type TeamStats = {
@@ -54,6 +55,11 @@ export default function HomePage() {
 
   const { data: answers } = useQuery<Answer[]>({
     queryKey: ["/api/answers"],
+  });
+  
+  // Fetch team stats
+  const { data: teamStats } = useQuery<TeamStats[]>({
+    queryKey: ["/api/analytics/teams"],
   });
 
   const answerMutation = useMutation({
@@ -230,6 +236,20 @@ export default function HomePage() {
               <p className="text-sm text-muted-foreground truncate">Team: {user?.team}</p>
             </CardContent>
           </Card>
+          
+          {/* User's Team Performance Card */}
+          {user?.team && teamStats && (
+            teamStats
+              .filter(team => team.teamName === user.team)
+              .map((teamData) => (
+                <TeamCard 
+                  key={teamData.teamName} 
+                  team={teamData} 
+                  index={teamStats.findIndex(t => t.teamName === teamData.teamName)}
+                  isTopThree={teamStats.findIndex(t => t.teamName === teamData.teamName) < 3}
+                />
+              ))
+          )}
 
           {!submitted && questions && (
             <Card className="quiz-card">

@@ -134,8 +134,8 @@ export const questions = pgTable("questions", {
   weekStatus: text("week_status", { enum: weekStatus }).notNull().default('future'),
   isBonus: boolean("is_bonus").notNull().default(false),
   bonusPoints: integer("bonus_points").notNull().default(10),
-  availableFrom: timestamp("available_from"),
-  availableUntil: timestamp("available_until"),
+  includedInQuiz: boolean("included_in_quiz").notNull().default(false),
+  // Removing availableFrom and availableUntil fields as they're no longer needed
 });
 
 // Define relations between questions and dim_date
@@ -191,6 +191,16 @@ export const authEvents = pgTable("auth_events", {
   failureReason: text("failure_reason"),
 });
 
+// Add a settings table to store application-wide settings
+export const appSettings = pgTable("app_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedBy: integer("updated_by"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -204,9 +214,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertQuestionSchema = createInsertSchema(questions).extend({
   isBonus: z.boolean().optional().default(false),
   bonusPoints: z.number().optional().default(10),
-  availableFrom: z.date().optional(),
-  availableUntil: z.date().optional(),
   weekStatus: z.enum(weekStatus).optional().default('future'),
+  includedInQuiz: z.boolean().optional().default(false),
 });
 
 export const insertAnswerSchema = createInsertSchema(answers);
@@ -217,6 +226,10 @@ export const insertFeedbackSchema = createInsertSchema(feedback).omit({
   id: true,
   createdAt: true,
   status: true
+});
+export const insertAppSettingsSchema = createInsertSchema(appSettings).omit({
+  id: true,
+  updatedAt: true
 });
 
 export const insertAchievementSchema = createInsertSchema(achievements).omit({
@@ -258,6 +271,8 @@ export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 export type InsertAuthEvent = z.infer<typeof insertAuthEventSchema>;
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type Feedback = typeof feedback.$inferSelect;
+export type InsertAppSettings = z.infer<typeof insertAppSettingsSchema>;
+export type AppSettings = typeof appSettings.$inferSelect;
 
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
